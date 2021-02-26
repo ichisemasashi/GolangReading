@@ -1,0 +1,1 @@
+./prog.go:9:14: cannot refer to unexported name math.pi
