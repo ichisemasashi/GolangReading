@@ -1,0 +1,18 @@
+スライスするときは、それらの既定値を代わりに使用することで上限または下限を省略することができます。
+
+既定値は下限が 0 で上限はスライスの長さです。
+
+以下の配列において
+
+\begin{lstlisting}[numbers=none]
+var a [10]int
+\end{lstlisting}
+
+これらのスライス式は等価です:
+
+\begin{lstlisting}[numbers=none]
+a[0:10]
+a[:10]
+a[0:]
+a[:]
+\end{lstlisting}

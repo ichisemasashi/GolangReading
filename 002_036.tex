@@ -1,0 +1,20 @@
+配列は固定長です。一方で、スライスは可変長です。
+より柔軟な配列と見なすこともできます。 実際には、
+スライスは配列よりもより一般的です。
+
+型 \texttt{[]T} は 型 \texttt{T} のスライスを表します。
+
+コロンで区切られた二つのインデックス low と high の
+境界を指定することによってスライスが形成されます:
+
+\begin{lstlisting}[numbers=none]
+a[low : high]
+\end{lstlisting}
+
+これは最初の要素は含むが、最後の要素は除いた半開区間を選択します。
+
+次の式は a の要素の内 1 から 3 を含むスライスを作ります。
+
+\begin{lstlisting}[numbers=none]
+a[1:4]
+\end{lstlisting}

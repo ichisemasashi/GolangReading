@@ -1,0 +1,2 @@
+./prog.go:22:21: constant 1267650600228229401496703205376
+ overflows int

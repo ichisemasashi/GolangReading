@@ -1,0 +1,3 @@
+./prog.go:10:32: cannot use x * x + y * y (type int) as type float64
+ in argument to math.Sqrt
+./prog.go:11:6: cannot use f (type float64) as type uint in assignment

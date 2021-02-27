@@ -1,0 +1,24 @@
+{\large 型変換}
+
+変数 \texttt{v} 、型 \texttt{T} があった場合、 \texttt{T(v)} は、
+変数 \texttt{v} を \texttt{T} 型へ変換します。
+
+いくつかの変換を見てみましょう:
+
+\begin{lstlisting}[numbers=none]
+var i int = 42
+var f float64 = float64(i)
+var u uint = uint(f)
+\end{lstlisting}
+
+よりシンプルに記述できます:
+
+\begin{lstlisting}[numbers=none]
+i := 42
+f := float64(i)
+u := uint(f)
+\end{lstlisting}
+
+C言語とは異なり、Goでの型変換は明示的な変換が必要です。
+例のコードで、 \texttt{float64} や \texttt{uint} の変換
+を削除し、何が起きるのか確認しましょう。
