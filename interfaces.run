@@ -1,0 +1,2 @@
+./prog.go:22:4: cannot use v (type Vertex) as type Abser in assignment:
+	Vertex does not implement Abser (Abs method has pointer receiver)

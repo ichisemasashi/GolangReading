@@ -1,0 +1,12 @@
+インデックスや値は、 " \_ "(アンダーバー) へ代入することで捨てることができます。
+
+\begin{lstlisting}[numbers=none]
+for i, _ := range pow
+for _, value := range pow
+\end{lstlisting}
+
+もしインデックスだけが必要なのであれば、2つ目の値を省略します。
+
+\begin{lstlisting}[numbers=none]
+for i := range pow
+\end{lstlisting}

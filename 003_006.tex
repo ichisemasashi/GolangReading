@@ -1,0 +1,24 @@
+下の2つの呼び出しを比べると、ポインタを引数に取る \texttt{ScaleFunc} 関数は、
+ポインタを渡す必要があることに気がつくでしょう:
+
+\begin{lstlisting}[numbers=none]
+var v Vertex
+ScaleFunc(v, 5)  // Compile error!
+ScaleFunc(&v, 5) // OK
+\end{lstlisting}
+
+メソッドがポインタレシーバである場合、呼び出し時に、変数、または、
+ポインタのいずれかのレシーバとして取ることができます:
+
+\begin{lstlisting}[numbers=none]
+var v Vertex
+v.Scale(5)  // OK
+p := &v
+p.Scale(10) // OK
+\end{lstlisting}
+
+\texttt{v.Scale(5)} のステートメントでは、 \texttt{v} は変数で
+あり、ポインタではありません。 メソッドでポインタレシーバが自動的に
+呼びだされます。 \texttt{Scale} メソッドはポインタレシーバを持つ
+場合、Goは利便性のため、 \texttt{v.Scale(5)} のステートメントを
+\texttt{(\&v).Scale(5)} として解釈します。

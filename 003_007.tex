@@ -1,0 +1,20 @@
+逆にも見てみましょう。
+
+変数の引数を取る関数は、特定の型の変数を取る必要があります:
+
+\begin{lstlisting}[numbers=none]
+var v Vertex
+fmt.Println(AbsFunc(v))  // OK
+fmt.Println(AbsFunc(&v)) // Compile error!
+\end{lstlisting}
+
+メソッドが変数レシーバである場合、呼び出し時に、変数、または、ポインタのいずれかのレシーバとして取ることができます:
+
+\begin{lstlisting}[numbers=none]
+var v Vertex
+fmt.Println(v.Abs()) // OK
+p := &v
+fmt.Println(p.Abs()) // OK
+\end{lstlisting}
+
+この場合、 \texttt{p.Abs()} は \texttt{(*p).Abs()} として解釈されます。

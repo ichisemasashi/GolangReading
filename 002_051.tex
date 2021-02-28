@@ -1,0 +1,39 @@
+map \texttt{m} の操作を見ていきましょう。
+
+\texttt{m} へ要素(elem)の挿入や更新:
+
+\begin{lstlisting}[numbers=none]
+m[key] = elem
+\end{lstlisting}
+
+要素の取得:
+
+\begin{lstlisting}[numbers=none]
+elem = m[key]
+\end{lstlisting}
+
+要素の削除:
+
+\begin{lstlisting}[numbers=none]
+delete(m, key)
+\end{lstlisting}
+
+キーに対する要素が存在するかどうかは、2つの目の値で確認します:
+
+\begin{lstlisting}[numbers=none]
+elem, ok = m[key]
+\end{lstlisting}
+
+もし、 \texttt{m} に \texttt{key} があれば、
+変数 \texttt{ok} は \texttt{true} となり、
+存在しなければ、 \texttt{ok} は \texttt{false} となります。
+
+なお、mapに \texttt{key} が存在しない場合、 
+\texttt{elem} はmapの要素の型のゼロ値となります。
+
+\textbf{Note}: もし \texttt{elem} や \texttt{ok} を
+まだ宣言していなければ、次のように \texttt{:=} で短く宣言できます:
+
+\begin{lstlisting}[numbers=none]
+elem, ok := m[key]
+\end{lstlisting}

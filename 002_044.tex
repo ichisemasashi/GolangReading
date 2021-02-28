@@ -1,0 +1,21 @@
+スライスへ新しい要素を追加するには、
+Goの組み込みの \texttt{append} を使います。 \texttt{append} に
+ついての詳細は documentation を参照してみてください。
+
+\begin{lstlisting}[numbers=none]
+func append(s []T, vs ...T) []T
+\end{lstlisting}
+
+上の定義を見てみましょう。 \texttt{append} への最初の
+パラメータ \texttt{s} は、追加元となる \texttt{T} 型の
+スライスです。 残りの \texttt{vs} は、追加する \texttt{T} 型の変数群です。
+
+\texttt{append} の戻り値は、追加元のスライスと
+追加する変数群を合わせたスライスとなります。
+
+もし、元の配列 \texttt{s} が、変数群を追加する際
+に容量が小さい場合は、より大きいサイズの配列を割り当て直します。
+その場合、戻り値となるスライスは、新しい割当先を示すようになります。
+
+(スライスについてより詳しく学ぶには、Slices: usage and internalsを
+読んでみてください)
