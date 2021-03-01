@@ -1,0 +1,12 @@
+もっともよく使われているinterfaceの一つに \texttt{fmt} パッケージ
+に定義されている \texttt{Stringer} があります:
+
+\begin{lstlisting}[numbers=none]
+type Stringer interface {
+    String() string
+}
+\end{lstlisting}
+
+\texttt{Stringer} インタフェースは、stringとして表現することができる型です。
+\texttt{fmt} パッケージ(と、多くのパッケージ)では、変数を文字列で出力するため
+にこのインタフェースがあることを確認します。

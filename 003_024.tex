@@ -1,0 +1,22 @@
+\texttt{image} パッケージは、以下の \texttt{Image} インタフェースを定義しています：
+
+\begin{lstlisting}[numbers=none]
+package image
+
+type Image interface {
+    ColorModel() color.Model
+    Bounds() Rectangle
+    At(x, y int) color.Color
+}
+\end{lstlisting}
+\textbf{Note}: \texttt{Bounds} メソッドの戻り値である
+\texttt{Rectangle} は、 \texttt{image} パッケージの
+\texttt{image.Rectangle} に定義があります。
+
+(詳細は、 このドキュメント(\texttt{https:\//\//golang.org\//pkg\//image\//\#Image}) を参照してください。)
+
+\texttt{color.Color} と \texttt{color.Model} は共に
+インタフェースですが、定義済みの \texttt{color.RGBA} と
+\texttt{color.RGBAModel} を使うことで、このインタフェース
+を無視できます。 これらのインタフェースは、\texttt{image/color}
+パッケージで定義されています。

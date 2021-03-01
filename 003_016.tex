@@ -1,0 +1,28 @@
+型switch はいくつかの型アサーションを直列に使用できる構造です。
+
+型switchは通常のswitch文と似ていますが、
+型switchのcaseは型(値ではない)を指定し、
+それらの値は指定されたインターフェースの値
+が保持する値の型と比較されます。
+
+\begin{lstlisting}[numbers=none]
+switch v := i.(type) {
+case T:
+    // here v has type T
+case S:
+    // here v has type S
+default:
+    // no match; here v has the same type as i
+}
+\end{lstlisting}
+
+型switchの宣言は、型アサーション \texttt{i.(T)} と同じ構文を
+持ちますが、特定の型 \texttt{T} はキーワード \texttt{type} に
+置き換えられます。
+
+このswitch文は、インターフェースの値 \texttt{i} が 型 \texttt{T} 
+または \texttt{S} の値を保持するかどうかをテストします。 \texttt{T}
+および \texttt{S} の各caseにおいて、変数 \texttt{v} はそれぞれ 
+型 \texttt{T} または \texttt{S} であり、 \texttt{i} によって保持
+される値を保持します。 defaultの場合(一致するものがない場合)、変数 \texttt{v}
+は同じインターフェース型で値は \texttt{i} となります。

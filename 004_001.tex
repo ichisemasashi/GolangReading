@@ -1,0 +1,18 @@
+\textbf{goroutine} (ゴルーチン)は、Goのランタイムに管理される軽量なスレッドです。
+
+\begin{lstlisting}[numbers=none]
+go f(x, y, z)
+\end{lstlisting}
+と書けば、新しいgoroutineが実行されます。
+
+\begin{lstlisting}[numbers=none]
+f(x, y, z)
+\end{lstlisting}
+\texttt{f} , \texttt{x} , \texttt{y} , \texttt{z} の
+評価は、実行元(current)のgoroutineで実行され、 
+\texttt{f} の実行は、新しいgoroutineで実行されます。
+
+goroutineは、同じアドレス空間で実行されるため、共有メモリへのアクセス
+は必ず同期する必要があります。 \texttt{sync} パッケージは同期する際
+に役に立つ方法を提供していますが、別の方法があるためそれほど必要ありま
+せん。 (次のスライドで説明します)

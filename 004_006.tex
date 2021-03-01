@@ -1,0 +1,13 @@
+どの \texttt{case} も準備ができていないのであれば、
+\texttt{select} の中の \texttt{default} が実行されます。
+
+ブロックせずに送受信するなら、 \texttt{default} の \texttt{case} を使ってください:
+
+\begin{lstlisting}[numbers=none]
+select {
+case i := <-c:
+    // use i
+default:
+    // receiving from c would block
+}
+\end{lstlisting}

@@ -1,0 +1,4 @@
+(<nil>, *main.T)
+<nil>
+(&{hello}, *main.T)
+hello

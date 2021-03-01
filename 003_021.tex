@@ -1,0 +1,18 @@
+\texttt{io} パッケージは、データストリームを読むこと
+を表現する \texttt{io.Reader} インタフェースを規定しています。
+
+Goの標準ライブラリには、ファイル、ネットワーク接続、圧縮、
+暗号化などで、このインタフェースの 多くの実装 があります。
+
+\texttt{io.Reader} インタフェースは \texttt{Read} メソッドを持ちます:
+
+\begin{lstlisting}[numbers=none]
+func (T) Read(b []byte) (n int, err error)
+\end{lstlisting}
+
+\texttt{Read} は、データを与えられたバイトスライスへ入れ、
+入れたバイトのサイズとエラーの値を返します。 ストリームの終端
+は、 \texttt{io.EOF} のエラーで返します。
+
+例のコードは、 \texttt{strings.Reader} を作成し、
+8 byte毎に読み出しています。

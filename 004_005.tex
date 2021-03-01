@@ -1,0 +1,6 @@
+\texttt{select} ステートメントは、goroutineを複数の通信操作で待たせます。
+
+\texttt{select} は、複数ある \texttt{case} のいずれかが
+準備できるようになるまでブロックし、準備ができた \texttt{case} を
+実行します。 もし、複数の \texttt{case} の準備ができている場合、
+\texttt{case} はランダムに選択されます。

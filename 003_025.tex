@@ -1,0 +1,16 @@
+前に解いた、 画像ジェネレーター　を覚えていますか？
+今回は、データのスライスの代わりに \texttt{image.Image}
+インタフェースの実装を返すようにしてみましょう。
+
+自分の \texttt{Image} 型を定義し、 インタフェースを
+満たすのに必要なメソッド を実装し、 \texttt{pic.ShowImage}
+を呼び出してみてください。
+
+\texttt{Bounds} は、 \texttt{image.Rect(0, 0, w, h)} の
+ようにして \texttt{image.Rectangle} を返すようにします。
+
+\texttt{ColorModel} は、 \texttt{color.RGBAModel} を返すようにします。
+
+\texttt{At} は、ひとつの色を返します。 生成する画像の色の
+値 \texttt{v} を \texttt{color.RGBA\{v, v, 255, 255\}} を
+利用して返すようにします。

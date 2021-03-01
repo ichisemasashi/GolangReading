@@ -1,0 +1,28 @@
+\texttt{Sqrt} 関数を 以前の演習 からコピーし、 \texttt{error} の値
+を返すように修正してみてください。
+
+\texttt{Sqrt} は、複素数をサポートしていないので、負の値が与え
+られたとき、nil以外のエラー値を返す必要があります。
+
+新しい型:
+
+\begin{lstlisting}[numbers=none]
+type ErrNegativeSqrt float64
+\end{lstlisting}
+を作成してください。
+
+そして、 \texttt{ErrNegativeSqrt(-2).Error()} で、
+\texttt{"cannot Sqrt negative number: -2"} を返すような:
+
+\begin{lstlisting}[numbers=none]
+func (e ErrNegativeSqrt) Error() string
+\end{lstlisting}
+メソッドを実装し、 \texttt{error} インタフェースを満たすようにします。
+
+\textbf{注意}: \texttt{Error} メソッドの中で、 \texttt{fmt.Sprint(e)}
+を呼び出すことは、無限ループのプログラムになることでしょう。 最初に
+\texttt{fmt.Sprint(float64(e))} として \texttt{e} を変換
+しておくことで、これを避けることができます。 なぜでしょうか？
+
+負の値が与えられたとき、 \texttt{ErrNegativeSqrt} の値を
+返すように \texttt{Sqrt} 関数を修正してみてください。

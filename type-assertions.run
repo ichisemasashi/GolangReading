@@ -1,0 +1,8 @@
+hello
+hello true
+0 false
+panic: interface conversion: interface {} is string, not float64
+
+goroutine 1 [running]:
+main.main()
+	/tmp/sandbox675234941/prog.go:17 +0x1fe

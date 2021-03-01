@@ -1,0 +1,18 @@
+チャネルが、goroutine間で通信するための素晴らしい方法であることを見てきました。
+
+しかし、通信が必要ない場合はどうでしょう？ コンフリクトを避けるために、
+一度に1つのgoroutineだけが変数にアクセスできるようにしたい場合はどうでしょうか？
+
+このコンセプトは、排他制御( mutual exclusion )と呼ばれ、
+このデータ構造を指す一般的な名前は mutex (ミューテックス)です。
+
+Goの標準ライブラリは、排他制御を\texttt{sync.Mutex}と次の二つのメソッドで提供します:
+\begin{description}
+\item \texttt{Lock}
+\item \texttt{Unlock}
+\end{description}
+\texttt{Inc} メソッドにあるように、 \texttt{Lock} と \texttt{Unlock} で
+囲むことで排他制御で実行するコードを定義できます。
+
+\texttt{Value} メソッドのように、mutexがUnlockされることを保証するために
+\texttt{defer} を使うこともできます。

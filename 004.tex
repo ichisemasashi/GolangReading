@@ -5,3 +5,50 @@ Go は言語のコア機能の一部として並行処理機能を提供しま�
 ここでは goroutine と channel の概要とそれらを使って
 さまざまな並行処理を実装する方法について説明します。
 
+\subsection{Goroutines}
+\input{004_001.tex}
+\lstinputlisting[caption = goroutines.go]{goroutines.go}
+\lstinputlisting[caption = goroutines.run,numbers=none]{goroutines.run}
+
+\subsection{Channels}
+\input{004_002.tex}
+\lstinputlisting[caption = channels.go]{channels.go}
+\lstinputlisting[caption = channels.run,numbers=none]{channels.run}
+
+\subsection{Buffered Channels}
+\input{004_003.tex}
+\lstinputlisting[caption = buffered-channels.go]{buffered-channels.go}
+\lstinputlisting[caption = buffered-channels.run,numbers=none]{buffered-channels.run}
+
+\subsection{Range and Close}
+\input{004_004.tex}
+\lstinputlisting[caption = range-and-close.go]{range-and-close.go}
+\lstinputlisting[caption = range-and-close.run,numbers=none]{range-and-close.run}
+
+\subsection{Select}
+\input{004_005.tex}
+\lstinputlisting[caption = select.go]{select.go}
+\lstinputlisting[caption = select.run,numbers=none]{select.run}
+
+\subsection{Default Selection}
+\input{004_006.tex}
+\lstinputlisting[caption = default-selection.go]{default-selection.go}
+\lstinputlisting[caption = default-selection.run,numbers=none]{default-selection.run}
+
+\subsection{Exercise: Equivalent Binary Trees}
+\input{004_007.tex}
+\lstinputlisting[caption = exercise-equivalent-binary-trees.go]{exercise-equivalent-binary-trees.go}
+% \lstinputlisting[caption = exercise-equivalent-binary-trees.run,numbers=none]{exercise-equivalent-binary-trees.run}
+
+\subsection{sync.Mutex}
+\input{004_008.tex}
+\lstinputlisting[caption = mutex-counter.go]{mutex-counter.go}
+\lstinputlisting[caption = mutex-counter.run,numbers=none]{mutex-counter.run}
+
+\subsection{Exercise: Web Crawler}
+\input{004_009.tex}
+\lstinputlisting[caption = exercise-web-crawler.go]{exercise-web-crawler.go}
+% \lstinputlisting[caption = exercise-web-crawler.run,numbers=none]{exercise-web-crawler.run}
+
+\subsection{Where to Go from here...}
+\input{004_010.tex}

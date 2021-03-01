@@ -1,0 +1,14 @@
+よくあるパターンは、別の \texttt{io.Reader} をラップし、
+ストリームの内容を何らかの方法で変換する\texttt{io.Reader}です。
+
+例えば、 \texttt{gzip.NewReader} は、 \texttt{io.Reader}
+(gzipされたデータストリーム)を引数で受け取り、 \texttt{*gzip.Reader}
+を返します。 その \texttt{*gzip.Reader} は、 \texttt{io.Reader}
+(展開したデータストリーム)を実装しています。
+
+\texttt{io.Reader} を実装し、 \texttt{io.Reader} でROT13 換字式
+暗号( substitution cipher )をすべてのアルファベットの文字に適用して
+読み出すように \texttt{rot13Reader} を実装してみてください。
+
+\texttt{rot13Reader} 型は提供済みです。 この \texttt{Read}
+メソッドを実装することで \texttt{io.Reader} インタフェースを満たしてください。

@@ -1,0 +1,25 @@
+チャネル( Channel )型は、チャネルオペレータの \texttt{<-} を
+用いて値の送受信ができる通り道です。
+
+\begin{lstlisting}[numbers=none]
+ch <- v    // (1)
+v := <-ch  // (2)
+\end{lstlisting}
+(データは、矢印の方向に流れます)
+\begin{description}
+\item[(1)] \texttt{v} をチャネル \texttt{ch} へ送信する
+\item[(2)] \texttt{ch} から受信した変数を \texttt{v} へ割り当てる
+\end{description}
+
+マップとスライスのように、チャネルは使う前に以下のように生成します:
+
+\begin{lstlisting}[numbers=none]
+ch := make(chan int)
+\end{lstlisting}
+
+通常、片方が準備できるまで送受信はブロックされます。これにより、
+明確なロックや条件変数がなくても、goroutineの同期を可能にします。
+
+サンプルコードは、スライス内の数値を合算し、2つのgoroutine間で
+作業を分配します。 両方のgoroutineで計算が完了すると、最終結果
+が計算されます。

@@ -1,0 +1,26 @@
+Goのプログラムは、エラーの状態を \texttt{error} 値で表現します。
+
+\texttt{error} 型は \texttt{fmt.Stringer} に似た組み込みのインタフェースです:
+
+\begin{lstlisting}[numbers=none]
+type error interface {
+    Error() string
+}
+\end{lstlisting}
+
+( \texttt{fmt.Stringer} と同様に、 \texttt{fmt} パッケージは、
+変数を文字列で出力する際に \texttt{error} インタフェースを確認します。 )
+
+よく、関数は \texttt{error} 変数を返します。そして、呼び出し元は
+エラーが \texttt{nil} かどうかを確認することでエラーをハンドル(取り扱い)します。
+
+\begin{lstlisting}[numbers=none]
+i, err := strconv.Atoi("42")
+if err != nil {
+    fmt.Printf("couldn't convert number: %v\n", err)
+    return
+}
+fmt.Println("Converted integer:", i)
+\end{lstlisting}
+
+nil の \texttt{error} は成功したことを示し、 nilではない \texttt{error} は失敗したことを示します。

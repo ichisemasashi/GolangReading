@@ -1,0 +1,25 @@
+型アサーション は、インターフェースの値の基になる具体的な値を利用する手段を提供します。
+
+\begin{lstlisting}[numbers=none]
+t := i.(T)
+\end{lstlisting}
+この文は、インターフェースの値 \texttt{i} が具体的な型 \texttt{T} を保持し、
+基になる \texttt{T} の値を変数 \texttt{t} に代入することを主張します。
+
+\texttt{i} が \texttt{T} を保持していない場合、この文は panic を引き起こします。
+
+インターフェースの値が特定の型を保持しているかどうかを テスト
+するために、型アサーションは2つの値(基になる値とアサーションが
+成功したかどうかを報告するブール値)を返すことができます。
+
+\begin{lstlisting}[numbers=none]
+t, ok := i.(T)
+\end{lstlisting}
+
+\texttt{i} が \texttt{T} を保持していれば、 \texttt{t} は
+基になる値になり、 \texttt{ok} は真(true)になります。
+
+そうでなければ、 \texttt{ok} は偽(false)になり、 
+\texttt{t} は型 \texttt{T} のゼロ値になり panic は起きません。
+
+この構文と map から読み取る構文との類似点に注意してください。
