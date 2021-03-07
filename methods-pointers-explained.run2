@@ -1,0 +1,2 @@
+./prog.go:23:8: cannot use &v (type *Vertex) as type Vertex in
+ argument to Scale
