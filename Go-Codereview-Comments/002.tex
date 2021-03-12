@@ -1,3 +1,18 @@
-\section{}
+\section{Comment Sentences}
 
 \texttt{}
+
+
+http:\//\//golang.org\//doc\//effective\_go.html\#commentary を読みましょう。 \texttt{func} や \texttt{struct} などのドキュメントのためのコメントは多少冗長であっても完全な文章でなくてはいけません。 このアプローチは \texttt{godoc} ドキュメントにするときにより効果を発揮します。 コメントは以下の例のように対象の名前で始まって、ピリオドで終わらなければいけません。
+
+
+\begin{lstlisting}[]
+// Request represents a request to run a command.
+type Request struct { ...
+
+// Encode writes the JSON encoding of req to w.
+func Encode(w io.Writer, req *Request) { ...
+\end{lstlisting}
+
+
+また、コメントが正しい文章の終わりの印であるピリオドで終わらない場合に注意してください。 github.com\//mailru\//easyjson や github.com\//golang\//lint など多くのツールで型やメソッドの情報をマークするためにコメントを使っています。

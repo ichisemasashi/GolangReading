@@ -1,0 +1,3 @@
+\section{Error Strings}
+
+エラー文字列は頭文字を大文字にしたり、句読点で終わってはいけません。 なぜならこの文字列は他のコンテキストで使われるケースがあるからです。 つまり、\texttt{log.Print("Reading \%s: \%v", filename, err)} が途中で大文字を出力することがないように \texttt{fmt.Errorf("Something bad")} ではなく、 \texttt{fmt.Errorf("something bad")} を使いましょう。 これはロギングのような暗黙的な行指向や、他のメッセージと組み合わせないものには適用されません。

@@ -1,0 +1,24 @@
+\section{Declaring Empty Slices}
+
+スライスの宣言の時は
+
+\begin{lstlisting}[]
+t := []string{}
+\end{lstlisting}
+
+よりも
+
+\begin{lstlisting}[]
+var t []string
+\end{lstlisting}
+
+を使うようにしましょう。
+
+前者は長さ0のスライスを生成しますが、後者は nil のスライスを宣言します。
+
+JSON オブジェクトをエンコードする際など、限られた状況で nil ではなく長さ0のスライスのほうが好まれる状況があります。 \texttt{nil} スライスは \texttt{null} に変換されますが、\texttt{[]string\{\}} は \texttt{[]} に変換されます。
+
+インターフェースを設計するときは、nil のスライスと長さ0のスライスを区別しないようにしましょう。なぜなら分かりづらいミスを引き起こすことがあるからです。
+
+より詳しい議論は Francesc Campoy の Understanding Nil(https:\//\//www.youtube.com\//watch?v=ynoY2xz-F8s) という発表を参照してください
+
