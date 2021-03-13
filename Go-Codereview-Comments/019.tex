@@ -1,0 +1,53 @@
+\section{Interfaces}
+
+Go のインターフェースは大抵パッケージに含まれており、パッケージに実装されている値を使うのではなく、インターフェース型を使います。(訳微妙) パッケージを実装する際には(ポインタや構造体のような)具体的な型を返さなければいけません。 この方法だと使う側の修正なしに、新しいメソッドを追加することができます。
+
+モックのためにAPIの実装側にインターフェースを定義してはいけません。替わりに実際に実装された公開APIからテストできるようなAPIを設計しましょう。
+
+使われる前にインターフェースを定義してはいけません。現実的な使い方のサンプルがなければ、そのどんなメソッドを含めるかはもちろん、そのインターフェースが必要かどうかわかりません。
+
+\begin{lstlisting}[]
+package consumer  // consumer.go
+
+type Thinger interface { Thing() bool }
+
+func Foo(t Thinger) string { ... }
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[]
+package consumer // consumer_test.go
+
+type fakeThinger struct{ ... }
+func (t fakeThinger) Thing() bool { ... }
+...
+if Foo(fakeThinger{...}) == "x" { ... }
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[]
+// DO NOT DO IT!!!
+package producer
+
+type Thinger interface { Thing() bool }
+
+type defaultThinger struct{ ... }
+func (t defaultThinger) Thing() bool { ... }
+
+func NewThinger() Thinger { return defaultThinger{ ... } }
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[]
+package producer
+
+type Thinger struct{ ... }
+func (t Thinger) Thing() bool { ... }
+
+func NewThinger() Thinger { return Thinger{ ... } }
+\end{lstlisting}
+
+

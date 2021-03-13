@@ -1,0 +1,44 @@
+\section{In-Band Errors}
+
+C言語などでは、一般的なテクニックとして -1 や null を返すことでエラーや結果を発見できなかったことを表現する場合があります。
+
+\begin{lstlisting}[]
+// Lookup returns the value for key or "" if there is no mapping
+// for key.
+func Lookup(key string) string
+
+// Failing to check a for an in-band error value can lead to bugs:
+Parse(Lookup(key))  // returns "parse failure for value" instead of
+                    // "no value for key"
+\end{lstlisting}
+
+Go は複数の値を返すことができるので、よりよい解決方法を使うことができます。 関数はクライアントに戻り値がエラーを表現しているか調べることを求めるのではなく、他の値が正しく取得できたか示す値を追加して返すべきです。 この値は Error 型かもしれませんし、説明不要な場合は bool 値でもいいでしょう。そしてこれは戻り値のなかで最後に位置しているべきです。
+
+\begin{lstlisting}[]
+// Lookup returns the value for key or ok=false if there is no
+// mapping for key.
+func Lookup(key string) (value string, ok bool)
+\end{lstlisting}
+
+この方法で呼び出し側に正しくない値が渡るのを防ぐことができます。
+
+\begin{lstlisting}[]
+Parse(Lookup(key))  // compile-time error
+\end{lstlisting}
+
+そして堅牢で、読みやすいコードを書きやすくなります。
+
+\begin{lstlisting}[]
+value, ok := Lookup(key)
+if !ok  {
+    return fmt.Errorf("no value for %q", key)
+}
+return Parse(value)
+\end{lstlisting}
+
+この方法は外向けの func だけではなく、内部で使われているものにも適用できます。
+
+nil, “”, 0, や -1 のような値を返すことは、その値が正しいときや、他の値と別に処理する必要が無い場合は良い選択肢です。
+
+strings などいくつかの標準ライブラリでは in-band エラーを返すことがあります。 これによって文字列を操作するためのコードが大幅に削減され、プログラマが真面目に処理する必要が無いようにしています。 一般的には Go のコードはエラーのための値を返すべきです。
+

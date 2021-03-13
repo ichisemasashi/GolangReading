@@ -1,0 +1,57 @@
+\section{Package Comments}
+
+Godocで読める全てのコメントと同じようにパッケージのコメントはパッケージ節の前に空行無しで書かなければいけません。
+
+\begin{lstlisting}[]
+// Package math provides basic constants and mathematical functions.
+package math
+\end{lstlisting}
+
+\begin{lstlisting}[]
+/*
+Package template implements data-driven templates for generating
+textual output such as HTML.
+....
+*/
+package template
+\end{lstlisting}
+
+main パッケージのコメントは、他のスタイルとして main の替わりにバイナリ名を使っても良いでしょう。(文頭に来る場合はもちろん大文字になります。) \texttt{seegen} というコマンドの main パッケージのコメントは次のようになります。
+
+
+
+\begin{lstlisting}[]
+// Binary seedgen ...
+package main
+\end{lstlisting}
+
+\begin{lstlisting}[]
+// Command seedgen ...
+package main
+\end{lstlisting}
+
+\begin{lstlisting}[]
+// Program seedgen ...
+package main
+\end{lstlisting}
+
+\begin{lstlisting}[]
+// The seedgen command ...
+package main
+\end{lstlisting}
+
+\begin{lstlisting}[]
+// The seedgen program ...
+package main
+\end{lstlisting}
+
+\begin{lstlisting}[]
+// Seedgen ..
+package main
+\end{lstlisting}
+
+これらは例であり、状況によって変化しても大丈夫です。
+
+ですがこれらのコメントは公開されるものなので、正しい英語で書かなければいけません。先頭の文字を小文字で始めたりすることはできません。 バイナリ名が最初の単語に来た場合、コマンドライン実行時と異なったとしても大文字で書きましょう。
+
+http:\//\//golang.org\//doc\//effective\_go.html\#commentary を読むとより詳細なコメントに関するアドバイスがあります。

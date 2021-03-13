@@ -9,3 +9,25 @@
 
 \lstinputlisting[caption = ]{}
 
+% ・
+\begin{itemize}
+  \item item1
+  \item item2
+  \item ...
+  \item itemN
+\end{itemize}
+
+% 番号付き箇条書き
+\begin{enumerate}
+  \item item1
+  \item item2
+  \item ...
+  \item itemN
+\end{enumerate}
+
+% 見出し付き箇条書き
+\begin{description}
+  \item[日付] 2009年5月30日
+  \item[会場] 居酒屋Snoopy
+  \item[予算] 4,500円
+\end{description}

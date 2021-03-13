@@ -1,0 +1,32 @@
+\section{Useful Test Failures}
+
+テストが失敗した時には、以下の事柄を伝える有効なメッセージを出力しましょう。
+
+\begin{itemize}
+  \item なにが悪かったのか
+  \item どんな入力があったか
+  \item 実際にどんな値が来たのか
+  \item どんな値が来ることを期待していたのか
+\end{itemize}
+
+\texttt{AssertFoo} ヘルパーの束をを書くことは魅力的ですが、あなたのヘルパーはもっと役に立つメッセージを出力できるはずです。 あなたの失敗したテストをデバッグする人はあなたや、あなたのチームではないことを前提にしています。 Goの典型的なテスト失敗時のコードはこのようなものです。
+
+\begin{lstlisting}[]
+if got != tt.want {
+  t.Errorf("Foo(\%q) = \%d; want \%d", tt.in, got, tt.want)
+  // or Fatalf, if test can't test anything more past this point
+}
+\end{lstlisting}
+
+\texttt{actual != order} の順で並んでいて、メッセージでも同じ順番で出力していることに注目してください。 幾つかのテストフレームワークでは \texttt{0 != x, "expected 0, got x"} のように、この順を逆にして書くことを推奨していますが、Goではそうではありません。
+
+もしこのやり方で大量にタイプしなければいけないようなら、Table-Driven-Testが欲しくなるかもしれません。
+
+もう1つのテスト失敗時の曖昧さをなくすためのテクニックとして、入力ごとに \texttt{TestFoo} をラップした異なるテスト関数を作る小方法があります。この場合関数の名前と共に失敗します。
+
+\begin{lstlisting}[]
+func TestSingleValue(t *testing.T) { testHelper(t, []int{80}) }
+func TestNoValues(t *testing.T)    { testHelper(t, []int{}) }
+\end{lstlisting}
+
+いずれにせよ、将来あなたのコードをデバッグする人に有効なメッセージを届ける責任はあなたにあります。

@@ -1,0 +1,3 @@
+\section{Package Names}
+
+パッケージから公開されている全ての識別子への参照はパッケージ名を通して行われるので、識別子にパッケージ名を使っている場合は外すべきです。 例えば、chubbyというパッケージの中ではChubbyFileという名前を作っては、呼び出すときにchubby.ChubbyFileとなってしまうので、避けましょう。 その代わりにFileという名前にして、使う側がchubby.Fileとできるのでよりよいでしょう。 http:\//\//golang.org\//doc\//effective\_go.html\#package-names にはより多くの情報があります。

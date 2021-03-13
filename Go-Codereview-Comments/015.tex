@@ -1,0 +1,14 @@
+\section{Import Dot}
+
+. を使ったインポートは循環参照によってパッケージの一部がテストできない時などに役立ちます。
+
+\begin{lstlisting}[]
+package foo_test
+
+import (
+    "bar/testutil" // also imports "foo"
+    . "foo"
+)
+\end{lstlisting}
+
+このケースでは、テストファイルはfooをインポートしているbar/testutilを使っていて、循環参照になってしまうのでpackage fooに置くことができません。 なので \texttt{import .} を使ってpackage fooの一部のように見せかけます。 このケースを除いて、\texttt{import .} をあなたのプログラムで使うべきではありません。 Quuxのような名前が今のパッケージの識別子なのかインポートされたものなのかが非常にわかりにくくなって、可読性が極端に落ちるからです。

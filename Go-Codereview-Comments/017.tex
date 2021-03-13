@@ -1,0 +1,45 @@
+\section{Indent Error Flow}
+
+初めにコード、特にエラーハンドリングの分岐を最小になるように努めましょう。 通常通るコードを簡単に追うことができるので、可読性が上がります。
+
+例えば、こうするのではなく、
+
+\begin{lstlisting}[]
+if err != nil {
+    // error handling
+} else {
+    // normal code
+}
+\end{lstlisting}
+
+こう書くべきです。
+
+\begin{lstlisting}[]
+if err != nil {
+    // error handling
+    return // or continue, etc.
+}
+// normal code
+\end{lstlisting}
+
+もし初期化のコードでこのようなコードがあるなら
+
+\begin{lstlisting}[]
+if x, err := f(); err != nil {
+    // error handling
+    return
+} else {
+    // use x
+}
+\end{lstlisting}
+
+変数宣言の行を個別にしてこうするべきです。
+
+\begin{lstlisting}[]
+x, err := f()
+if err != nil {
+    // error handling
+    return
+}
+// use x
+\end{lstlisting}

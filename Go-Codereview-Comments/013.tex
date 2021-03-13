@@ -1,0 +1,24 @@
+\section{Imports}
+
+名前の衝突を回避するために package をリネームするのはやめましょう。 いい package はリネームする必要がないものです。 もし衝突した場合はローカルやプロジェクト固有の package 名を変更することをおすすめします。
+
+import を空行で幾つかのグループに分けましょう。 標準パッケージは最初にグループにしましょう。
+
+\begin{lstlisting}[]
+package main
+
+import (
+    "fmt"
+    "hash/adler32"
+    "os"
+
+    "appengine/foo"
+    "appengine/user"
+
+    "github.com/foo/bar"
+    "rsc.io/goversion/version"
+)
+\end{lstlisting}
+
+
+\texttt{goimports} がこれは自動で行ってくれます。

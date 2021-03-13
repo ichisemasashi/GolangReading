@@ -1,0 +1,37 @@
+\section{Named Result Parameters}
+
+
+このような名前付き戻り値がGodocではどのように見えるか考えてみましょう
+
+\begin{lstlisting}[]
+func (n *Node) Parent1() (node *Node)
+func (n *Node) Parent2() (node *Node, err error)
+\end{lstlisting}
+
+なにかぎこちない感じになります。こちらのほうがよいでしょう。
+
+\begin{lstlisting}[]
+func (n *Node) Parent1() *Node
+func (n *Node) Parent2() (*Node, error)
+\end{lstlisting}
+
+一方で関数が同じ型の返り値を複数返したり、結果が文脈からはっきりとわかりにくい場合、名前付き戻り値は有効です。 関数内で戻り値のための変数を宣言するのを省略したいがために名前付き戻り値を使うのはやめましょう。 APIが冗長になる上に、実装の簡潔さも失われます。
+
+この例よりも
+
+\begin{lstlisting}[]
+func (f *Foo) Location() (float64, float64, error)
+\end{lstlisting}
+
+こちらのほうが、よりわかりやすいでしょう。
+
+\begin{lstlisting}[]
+// Location returns f's latitude and longitude.
+// Negative values mean south and west, respectively.
+func (f *Foo) Location() (lat, long float64, err error)
+\end{lstlisting}
+
+ただの \texttt{return} は数行の関数なら大丈夫ですが、ある程度の大きさの関数になると、返す変数を明確にしたほうがよいでしょう。 当然ですが、ただの \texttt{return} が使えるというだけでは名前付き戻り値を使う理由にはなりません。 明快なドキュメントを書くことはたかが１〜２行を節約するよりも何倍も価値があります。
+
+最後に、幾つかのケースでは遅延クロージャで値を変更するために名前付き戻り値を指定する必要があります。 その場合は問題ありません。
+

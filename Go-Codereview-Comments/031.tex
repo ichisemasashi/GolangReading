@@ -1,0 +1,12 @@
+\section{Variable Names}
+
+Goでの変数名はより短くあるべきです。 特に限定されたスコープで使われるローカル変数は短くあるべきです。 \texttt{lineCount} よりも \texttt{c} ですし、 \texttt{lineIndex} よりも \texttt{i} です。
+
+基本的なルール
+
+\begin{itemize}
+  \item 宣言された箇所よりも離れた場所でその変数が使われるなら、より説明的な名前にするべきです。
+  \item メソッドレシーバは1〜2文字で十分です
+  \item ループの添字や読み込みのリーダーのような一般的な変数は(\texttt{i} や \texttt{r} のように)1文字でよいでしょう。
+  \item より珍しい物や、パッケージ外で使われるものの名前はより説明的にしましょう。
+\end{itemize}
