@@ -1,0 +1,21 @@
+このコマンドを実行すると、ソースコードディレクトリ以下の\texttt{*\_test.go}ファイルが自動的にロードされ、テスト用の実行可能ファイルが生成/実行されます。出力される情報は以下のようなものになります
+
+
+\begin{lstlisting}[numbers=none]
+ok   archive/tar   0.011s
+FAIL archive/zip   0.022s
+ok   compress/gzip 0.033s
+...
+\end{lstlisting}
+
+ デフォルトの状態で、オプションを追加する必要はありません。自動的にあなたのソースコードパッケージ以下のすべてのtestファイルがテストされます。もちろんオプションを追加しても構いません。詳細は\texttt{go help testflag}を確認してください。
+
+ここでは良く使われるオプションについてご紹介します：
+
+\begin{description}
+  \item[-bench regexp] 指定したbenchmarksを実行します。例えば \texttt{-bench=.}
+  \item[-cover] テストカバー率を起動します。
+  \item[-run regexp] regexpにマッチする関数だけを実行します。例えば \texttt{-run=Array} とすることで名前がArrayから始まる関数だけを実行します。
+  \item[-v] テストの詳細なコマンドを表示します。
+\end{description}
+

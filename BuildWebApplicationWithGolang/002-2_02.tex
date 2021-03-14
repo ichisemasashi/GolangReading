@@ -1,0 +1,20 @@
+いわゆる定数というのは、プログラムがコンパイルされる段階で値が決定されます。そのため、プログラムが実行される時には値の変更は許されません。定数には数値、bool値または文字列等の型を定義することができます。
+
+この文法は以下の通りです：
+
+\begin{lstlisting}[numbers=none]
+const constantName = value
+//もし必要であれば、定数の型を明示することもできます：
+const Pi float32 = 3.1415926
+\end{lstlisting}
+
+ここでは定数の宣言の例を示します：
+
+\begin{lstlisting}[numbers=none]
+const Pi = 3.1415926
+const i = 10000
+const MaxThread = 10
+const prefix = "astaxie_"
+\end{lstlisting}
+
+Go の定数は一般的なプログラミング言語と異なり、かなり多くの小数点以下の桁を指定することができます(たとえば200桁など)、 float32に自動的な32bitへの短縮を指定したり、float64に自動的な64bitへの短縮を指定するにはリンク(http:\//\//golang.org\//ref\//spec\#Constants)をご参照ください。

@@ -1,0 +1,21 @@
+このコマンドは動的にリモートコードパッケージを取得するために用いられます。現在BitBucket、GitHub、Google CodeとLaunchpadをサポートしています。このコマンドは内部で実際には2ステップの操作に分かれます：第1ステップはソースコードパッケージのダウンロード、第2ステップは\texttt{go install}の実行です。ソースコードパッケージのダウンロードを行うgoツールは異なるドメインにしたがって自動的に異なるコードツールを用います。対応関係は以下の通りです：
+
+\begin{lstlisting}[numbers=none]
+BitBucket (Mercurial Git)
+GitHub (Git)
+Google Code Project Hosting (Git, Mercurial, Subversion)
+Launchpad (Bazaar)
+\end{lstlisting}
+
+ そのため、\texttt{go get}を正常に動作させるためには、あらかじめ適切なソースコード管理ツールがインストールされていると同時にこれらのコマンドがあなたのPATHに入っていなければなりません。実は\texttt{go get}はカスタムドメインの機能をサポートしています。具体的な内容は\texttt{go help remote}を参照ください。
+
+引数紹介：
+
+\begin{description}
+  \item[-d] ダウンロードするだけでインストールしません。
+  \item[-f] \texttt{-u}オプションを与えた時だけ有効になります。\texttt{-u}オプションはimportの中の各パッケージが既に取得されているかを検証しなくなります。ローカルにforkしたパッケージに対して特に便利です。
+  \item[-fix] ソースコードをダウンロードするとまずfixを実行してから他の事を行うようになります。
+  \item[-t] テストを実行する為に必要となるパッケージも同時にダウンロードします。
+  \item[-u] パッケージとその依存パッケージをネットワークから強制的に更新します。
+  \item[-v] 実行しているコマンドを表示します。
+\end{description}

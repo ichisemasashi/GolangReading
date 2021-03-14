@@ -1,0 +1,12 @@
+Goではbool値の型は\texttt{bool}です。値は\texttt{true}もしくは\texttt{false}です。デフォルト値は\texttt{false}です。
+
+\begin{lstlisting}[numbers=none]
+// コード例
+var isActive bool  // グローバル変数の宣言
+var enabled, disabled = true, false  // 型を省略した宣言
+func test() {
+    var available bool  // 通常の宣言
+    valid := false      // 短縮宣言
+    available = true    // 代入操作
+}
+\end{lstlisting}

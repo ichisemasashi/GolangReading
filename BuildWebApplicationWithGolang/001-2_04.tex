@@ -1,0 +1,38 @@
+go言語はリモートパッケージを取得するツール\texttt{go get}を持っています。現在go getは多数のオープンソースリポジトリをサポートしています（github、googlecode、bitbucket、Launchpad）
+
+\begin{lstlisting}[numbers=none]
+go get github.com/astaxie/beedb
+\end{lstlisting}
+
+\begin{quote}
+go get -u オプションはパッケージの自動更新を行います。また、go get時に自動的に当該のパッケージの依存する他のサードパーティパッケージを取得します。
+\end{quote}
+
+このコマンドでふさわしいコードを取得し、対応するオープンソースプラットホームに対し異なるソースコントロールツールを利用します。例えばgithubではgit、googlecodeではhg。そのためこれらのコードを取得したい場合は、先に対応するソースコードコントロールツールをインストールしておく必要があります。
+
+上述の方法で取得したコードはローカルの以下の場所に配置されます。
+
+\begin{lstlisting}[numbers=none]
+$GOPATH
+  src
+   |--github.com
+          |-astaxie
+              |-beedb
+   pkg
+    |--対応プラットフォーム
+         |-github.com
+               |--astaxie
+                    |beedb.a
+\end{lstlisting}
+
+go getは以下のような手順を踏みます。まずはじめにソースコードツールでコードをsrcの下にcloneします。その後\texttt{go install}を実行します。
+
+コードの中でリモートパッケージが使用される場合、単純にローカルのパッケージと同じように頭のimportに対応するパスを添えるだけです。
+
+
+
+\begin{lstlisting}[numbers=none]
+import "github.com/astaxie/beedb"
+\end{lstlisting}
+
+

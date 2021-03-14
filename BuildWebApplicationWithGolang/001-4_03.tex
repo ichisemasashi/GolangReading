@@ -1,0 +1,59 @@
+\begin{itemize}
+  \item LiteIDEインストール
+    \begin{itemize}
+    \item ダウンロード http:\//\//sourceforge.net\//projects\//liteide\//files\//
+    \item ソースコード https:\//\//github.com\//visualfc\//liteide
+    \end{itemize}
+  \item コンパイル環境設定
+\begin{lstlisting}[numbers=none]
+  自身のシステムの要求にしたがってLiteIDEが現在使用している
+  環境変数を切り替えまたは設定します。
+
+  Windowsオペレーティングシステムの64bitGo言語の場合、
+  ツール欄の環境設定のなかでwin64を選択し、`編集環境`をクリック
+  してLiteIDEからwin64.envファイルを編集します。
+
+  GOROOT=c:\go
+  GOBIN=
+  GOARCH=amd64
+  GOOS=windows
+  CGO_ENABLED=1
+
+  PATH=%GOBIN%;%GOROOT%\bin;%PATH%
+  。。。
+
+  この中の`GOROOT=c:\go`を現在のGoのインストールパスに修正し、
+  保存するだけです。もしMinGW64があれば、`c:\MinGW64\bin`を
+  PATHの中に入れて、goによるgccのコールでCGOコンパイラのサポートを
+  利用することができます。
+
+  Linuxオペレーティングシステムで64bitGo言語の場合、
+  ツール欄の環境設定の中からlinux64を選び、`編集環境`をクリックし
+  LiteIDEからlinux64.envファイルを編集します。
+
+  GOROOT=$HOME/go
+  GOBIN=
+  GOARCH=amd64
+  GOOS=linux
+  CGO_ENABLED=1
+
+  PATH=$GOBIN:$GOROOT/bin:$PATH    
+  。。。
+
+  この中の`GOROOT=$HOME/go`を現在のGoのインストールパスに
+  修正して保存します。
+\end{lstlisting}
+  \item GOPATH設定
+\begin{lstlisting}[numbers=none]
+  Go言語のツールキーはGOPATH設定を使用します。Go言語開発の
+  プロジェクトのパスリストです。コマンドライン(LiteIDEでは
+  `Ctrl+,`を直接入力できます)で`go help gopath`を入力する
+  とGOPATHドキュメントを素早く確認できます。
+
+  LiteIDEでは簡単に確認でき、GOPATHを設定することができます。
+  `メニュー-確認-GOPATH`設定を通じて、システム中に存在する
+  GOPATHリストを確認することができます。
+  同時に必要な追加項目にそってカスタムのGOPATHリストに追加
+  することができます。
+\end{lstlisting}
+\end{itemize}

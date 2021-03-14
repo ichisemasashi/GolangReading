@@ -1,0 +1,64 @@
+前の章で述べた通り、Goの文字列はすべて\texttt{UTF-8}コードが採用されています。文字列は一対のダブルクォーテーション(\texttt{""})またはバッククォート（\texttt{` `} ）で括られることで定義されます。この型は\texttt{string}です。
+
+\begin{lstlisting}[numbers=none]
+//コード例
+var frenchHello string  // 文字列変数の宣言の一般的な方法
+var emptyString string = ""
+// 文字列変数を一つ宣言し、空文字列で初期化する。
+func test() {
+    no, yes, maybe := "no", "yes", "maybe"
+    // 短縮宣言、同時に複数の変数を宣言
+    japaneseHello := "Konichiwa"  // 同上
+    frenchHello = "Bonjour"  // 通常の代入
+}
+\end{lstlisting}
+
+Goの文字列は変更することができません。例えば下のコードはコンパイル時にエラーが発生します。：cannot assign to s[0]
+
+\begin{lstlisting}[numbers=none]
+var s string = "hello"
+s[0] = 'c'
+\end{lstlisting}
+
+ただし、本当に変更したくなったらどうしましょうか？ここでは以下のコードで実現します：
+
+\begin{lstlisting}[numbers=none]
+s := "hello"
+c := []byte(s)  // 文字列 s を []byte 型にキャスト
+c[0] = 'c'
+s2 := string(c)  // もう一度 string 型にキャストし直す
+fmt.Printf("%s\n", s2)
+\end{lstlisting}
+
+Goでは+演算子を使って文字列を連結することができます：
+
+\begin{lstlisting}[numbers=none]
+s := "hello,"
+m := " world"
+a := s + m
+fmt.Printf("%s\n", a)
+\end{lstlisting}
+
+文字列の修正もこのように書けます：
+
+\begin{lstlisting}[numbers=none]
+s := "hello"
+s = "c" + s[1:] // 文字列を変更することはできませんが
+                // スライスは行えます。
+fmt.Printf("%s\n", s)
+\end{lstlisting}
+
+もし複数行の文字列を宣言したくなったらどうしましょうか？この場合\texttt{` }で宣言することができます：
+
+\begin{lstlisting}[numbers=none]
+m := `hello
+    world`
+\end{lstlisting}
+
+\texttt{`} で括られた文字列はRaw文字列です。すなわち、文字列はコード内の形式がそのままプリント時の形式になります。文字列の変更はありません。改行はそのまま出力されます。例えばこの例では以下のように出力されます：
+
+\begin{lstlisting}[numbers=none]
+hello
+    world
+\end{lstlisting}
+

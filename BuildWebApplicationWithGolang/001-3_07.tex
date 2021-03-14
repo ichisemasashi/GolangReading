@@ -1,0 +1,7 @@
+\texttt{go tool}にはいくつものコマンドがあります。ここでは２つだけご紹介します。fixと vetです。
+
+
+\begin{itemize}
+  \item \texttt{go tool fix .} は以前の古いバージョンを新しいバージョンに修復します。例えば、go1以前の古いバージョンのコードをgo1に焼き直したり、APIを変化させるといったことです。
+  \item \texttt{go tool vet directory|files} はカレントディレクトリのコードが正しいコードであるか分析するために使用されます。例えばfmt.Printfをコールする際のオプションが正しくなかったり、関数の途中でreturnされたことによって到達不可能なコードが残っていないかといった事です。
+\end{itemize}

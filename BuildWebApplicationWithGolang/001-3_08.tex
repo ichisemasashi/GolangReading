@@ -1,0 +1,27 @@
+このコマンドはGo1.4になって初めてデザインされました。コンパイル前にある種のコードを自動で生成する目的に使用されます。\texttt{go generate}と\texttt{go build}は全く異なるコマンドです。ソースコード中の特殊なコメントをを分析することで、対応するコマンドを実行します。これらのコマンドは明確に何の依存も存在しません。この機能を使用する場合には必ず次の事を念頭に置いてください。\texttt{go generate}はあなたの為に存在します。あなたのパッケージを使用する誰かの為のものではありません。これはある一定のコードを生成するためにあります。
+
+簡単な例をご紹介します。例えば我々が度々\texttt{yacc}を使ってコードを生成していたとしましょう。その場合以下のようなコマンドをいつも使用することになります：
+
+
+\begin{lstlisting}[numbers=none]
+go tool yacc -o gopher.go -p parser gopher.y
+\end{lstlisting}
+
+-o は出力するファイル名を指定します。-pはパッケージ名を指定します。これは単独のコマンドであり、もし\texttt{go generate}によってこのコマンドを実行する場合は当然ディレクトリの任意の\texttt{xxx.go}ファイルの任意の位置に以下のコメントを一行追加します。
+
+\begin{lstlisting}[numbers=none]
+//go:generate go tool yacc -o gopher.go -p parser gopher.y
+\end{lstlisting}
+
+注意すべきは、\texttt{\//\//go:generate}に空白が含まれていない点です。これは固定のフォーマットで、ソースファイルを舐める時はこのフォーマットに従って判断されます。
+
+これにより以下のようなコマンドによって、生成・コンパイル・テストを行うことができます。もし\texttt{gopher.y}ファイルに修正が発生した場合は、再度\texttt{go generate}を実行することでファイルを上書きすればよいことになります。
+
+\begin{lstlisting}[numbers=none]
+$ go generate
+$ go build
+$ go test
+\end{lstlisting}
+
+
+

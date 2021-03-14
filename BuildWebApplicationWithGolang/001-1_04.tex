@@ -1,0 +1,19 @@
+Goのインストールにはオペレーティングシステムのbit数を判断する必要があるので、この章では先に自分のシステムの種類を確認しましょう。
+
+WindowsのユーザはWin+Rを押してcmdを実行してください。\texttt{systeminfo}と入力してエンターキーを押します。しばらくするとシステムの情報が表示されます。"システムの種類"の一行に"x64-based PC"と表示されていれば64bitシステムです。もし"X86-based PC"とあれば、32bitシステムです。
+
+Macユーザは直接64bit版を使用することをおすすめします。GoがサポートしているMac OS Xのバージョンは、すでに32bitプロセッサをサポートしていないためです。
+
+LinuxユーザはTerminalで\texttt{arch}(すなわち、\texttt{uname -a})を実行することでシステムの情報を確かめることができます。
+
+64bitシステムであれば以下のように表示されます。
+
+\begin{lstlisting}[numbers=none]
+x86_64
+\end{lstlisting}
+
+32bitシステムの場合は以下のように表示されます。
+
+\begin{lstlisting}[numbers=none]
+i386
+\end{lstlisting}

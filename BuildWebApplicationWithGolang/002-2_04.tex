@@ -1,0 +1,23 @@
+整数型には符号付きと符号無しの２つがあります。Goはまた\texttt{int}と\texttt{uint}をサポートしています。この２つの型の長さは同じですが、実際の長さは異なるコンパイラによって決定されます。Goでは直接bit数を指定できる型もあります：\texttt{rune}, \texttt{int8}, \texttt{int16}, \texttt{int32}, \texttt{int64}と\texttt{byte}, \texttt{uint8}, \texttt{uint16}, \texttt{uint32}, \texttt{uint64}です。この中で\texttt{rune}は\texttt{int32}のエイリアスです。\texttt{byte}は\texttt{uint8}のエイリアスです。
+
+\begin{quote}
+注意しなければならないのは、これらの型の変数間は相互に代入または操作を行うことができないということです。コンパイル時にコンパイラはエラーを発生させます。
+
+下のコードはエラーが発生します。：invalid operation: a + b (mismatched types int8 and int32)
+\begin{lstlisting}[numbers=none]
+    var a int8
+    var b int32
+    c:=a + b
+\end{lstlisting}
+また、intの長さは32bitですが、intとint32もお互いに利用することはできません。
+\end{quote}
+
+浮動小数点の型には\texttt{float32}と\texttt{float64}の二種類があります（\texttt{float}型はありません。）。デフォルトは\texttt{float64}です。
+
+これで全てですか？No! Goは複素数もサポートしています。このデフォルト型は\texttt{complex128}（64bit実数+64bit虚数）です。もしもう少し小さいのが必要であれば、\texttt{complex64}（32bit実数+32bit虚数）もあります。複素数の形式は\texttt{RE + IMi}です。この中で\texttt{RE}が実数部分、\texttt{IM}が虚数部分になります。最後の\texttt{i}は虚数単位です。以下に複素数の使用例を示します：
+
+\begin{lstlisting}[numbers=none]
+var c complex64 = 5+5i
+//output: (5+5i)
+fmt.Printf("Value is: %v", c)
+\end{lstlisting}

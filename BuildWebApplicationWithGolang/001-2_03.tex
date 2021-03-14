@@ -1,0 +1,62 @@
+上のとおり、我々はすでに自分のアプリケーションパッケージを作成しましたが、どのようにコンパイル/インストールすべきでしょうか？２種類の方法が存在します。
+
+\begin{enumerate}
+  \item 対応するアプリケーションパッケージディレクトリに入り、\texttt{go install}を実行すればインストールできます。
+  \item 任意のディレクトリで以下のコード\texttt{go install mymath}を実行します。
+\end{enumerate}
+
+インストールが終われば、以下のディレクトリに入り
+
+\begin{lstlisting}[numbers=none]
+cd $GOPATH/src
+mkdir mathapp
+cd mathapp
+vim main.go
+\end{lstlisting}
+
+\$GOPATH\//src\//mathapp\//main.goコード：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+      "mymath"
+      "fmt"
+)
+
+func main() {
+      fmt.Printf("Hello, world.  Sqrt(2) = %v\n", mymath.Sqrt(2))
+}
+\end{lstlisting}
+
+このパッケージは\texttt{main}であることが分かると思います。importにおいてコールするパッケージは\texttt{mymath}であり、これが\texttt{\$GOPATH\//src}のパスに対応します。もしネストしたディレクトリであれば、importの中でネストしたディレクトリをインポートします。例えばいくつものGOPATHがあった場合も同じで、Goは自動的に複数の\texttt{\$GOPATH\//src}の中から探し出します。
+
+さて、どのようにプログラムをコンパイルするのでしょうか？このアプリケーションディレクトリに入り、\texttt{go build}を実行すれば、このディレクトリの下にmathappの実行可能ファイルが生成されます。
+
+\begin{lstlisting}[numbers=none]
+./mathapp
+\end{lstlisting}
+
+以下のように出力されます。
+
+\begin{lstlisting}[numbers=none]
+Hello, world.  Sqrt(2) = 1.414213562373095
+\end{lstlisting}
+
+どのようにアプリケーションをインストールするのでしょうか。このディレクトリに入り、\texttt{go install}を実行すると、\$GOPATH\//bin\//の下に実行可能ファイルmathappが作成されます。\texttt{\$GOPATH\//bin}が我々のPATHに追加されていることを思い出して下さい、コマンドラインから以下のように入力することで実行することができます。
+
+\begin{lstlisting}[numbers=none]
+mathapp
+\end{lstlisting}
+
+この場合も以下のように出力されます。
+
+\begin{lstlisting}[numbers=none]
+Hello, world.  Sqrt(2) = 1.414213562373095
+\end{lstlisting}
+
+ここではどのように実行可能アプリケーションをコンパイル/インストールし、ディレクトリ構造を設計するかについてご紹介しました。
+
+
+
+

@@ -1,0 +1,31 @@
+このコマンドは主にソースコードのコンパイルに用いられます。パッケージのコンパイル作業中、もし必要であれば、同時に関連パッケージもコンパイルすることができます。
+
+\begin{itemize}
+  \item もし普通のパッケージであれば、我々が1.2章で書いた\texttt{mypath}パッケージのように、\texttt{go build}を実行したあと、何のファイルも生成しません。もし\texttt{\$GOPATH\//pkg}の下に対応するファイルを生成する必要があれば、\texttt{go install}を実行してください。
+  \item もしそれが\texttt{main}パッケージであれば、\texttt{go build}を実行したあと、カレントディレクトリの下に実行可能ファイルが生成されます。もし\texttt{\$GOPATH\//bin}の下に対応するファイルを生成する必要があれば、\texttt{go install}を実行するか、\texttt{go build -o パス\//a.exe}を実行してください。
+  \item もしあるプロジェクトディレクトリに複数のファイルがある場合で、単一のファイルのみコンパイルしたい場合は、\texttt{go build}を実行する際にファイル名を追加することができます。例えば\texttt{go build a.go}です。\texttt{go build}コマンドはデフォルトでカレントディレクトリにある全てのgoファイルをコンパイルしようと試みます。
+  \item コンパイル後に出力されるファイル名を指定することもできます。1.2章の\texttt{mathapp}アプリケーションでは\texttt{go build -o astaxie.exe}と指定できます。デフォルトはpackage名（mainパッケージではない）になるか、ソースファイルのファイル名（mainパッケージ）になります。\\（注：実際はpackage名はGo言語の規格においてコード中の"package"に続く名前になります。この名前はファイル名と異なっていても構いません。デフォルトで生成される実行可能ファイル名はディレクトリ名。
+  \item go buildはディレクトリ内の"\_"または"."ではじまるgoファイルを無視します。
+  \item もしあなたのソースコードが異なるオペレーティングシステムに対応する場合は異なる処理が必要となります。ですので異なるオペレーティングシステムの名称にもとづいてファイルを命名することができます。例えば配列を読み込むプログラムがあったとして、異なるオペレーティングシステムに対して以下のようなソースファイルがあるかもしれません。\\array\_linux.go array\_darwin.go array\_windows.go array\_freebsd.go\\go buildの際、システム名の末尾のファイルから選択的にコンパイルすることができます（Linux、Darwin、Windows、Freebsd）
+\end{itemize}
+
+引数の紹介
+
+\begin{description}
+  \item[-o] 出力するファイル名を指定します。パスが含まれていても構いません。例えば \texttt{go build -o a\//b\//c}
+  \item[-i] パッケージをインストールします。コンパイル+\texttt{go install}
+  \item[-a] すでに最新であるパッケージを全て更新します。ただし標準パッケージには適用されません。
+  \item[-n] 実行が必要なコンパイルコマンドを出力します。ただし、実行はされません。これにより低レイヤーで一体何が実行されているのかを簡単に知る事ができます。
+  \item[-p n] マルチプロセスで実行可能なコンパイル数を指定します。デフォルトはCPU数です。
+  \item[-race] コンパイルを行う際にレースコンディションの自動検出を行います。64bitマシンでのみ対応しています。
+  \item[-v] 現在コンパイル中のパッケージ名を出力します。
+  \item[-work] コンパイル時の一時ディレクトリ名を出力し、すでに存在する場合は削除しなくなります。
+  \item[-x] 実行しているコマンドを出力します。\texttt{-n}の結果とよく似ていますが、この場合は実行します。
+  \item[-ccflags 'arg list'] オプションを5c, 6c, 8cに渡してコールします。
+  \item[-compiler name] コンパイラを指定します。gccgoか、またはgcです。
+  \item[-gccgoflags 'arg list'] オプションをgccgoリンカに渡してコールします。
+  \item[-gcflags 'arg list'] オプションを5g, 6g, 8gに渡してコールします
+  \item[-installsuffix suffix] デフォルトのインストールパッケージと区別するため、このサフィックスを利用して依存するパッケージをインストールします。\texttt{-race}をオプションに指定した場合はデフォルトで\texttt{-installsuffix race}が有効になっています。\texttt{-n}コマンドで確かめることができますよ。
+  \item[-ldflags 'flag list'] オプションを5l, 6l, 8lに渡してコールします。
+  \item[-tags 'tag list'] コンパイル時にこれらのtagをつけることができます。tagの詳細な制限事項に関しては Build Constraints(http:\//\//golang.org\//pkg\//go\//build\//) を参考にして下さい。
+\end{description}

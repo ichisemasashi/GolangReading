@@ -1,0 +1,27 @@
+上記で作成したローカルのmygoのディレクトリ構造は以下のようになっています。
+
+
+\begin{lstlisting}[numbers=none]
+bin/
+    mathapp
+pkg/
+    プラットフォーム名/ 例：darwin_amd64、linux_amd64
+         mymath.a
+         github.com/
+              astaxie/
+                   beedb.a
+src/
+    mathapp
+          main.go
+      mymath/
+          sqrt.go
+      github.com/
+           astaxie/
+                beedb/
+                    beedb.go
+                    util.go
+\end{lstlisting}
+
+
+上述の構成から明確に判断できるのは、binディレクトリの下にコンパイル後の実行可能ファイルが保存され、pkgの下に関数パッケージが保存され、srcの下にアプリケーションのソースコードが保存されているということです。
+

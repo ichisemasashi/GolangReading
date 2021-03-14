@@ -1,0 +1,10 @@
+Goはさまざまなプラットホームでインストールパッケージを提供しています、これらのパッケージはデフォルトで以下のディレクトリにインストールします：\//usr\//local\//go（Windows：c:$\backslash$ Go）。当然これらのインストール場所を変更することもできます、ただし変更後はあなたの環境変数を以下のように設定する必要があります：
+
+\begin{lstlisting}[numbers=none]
+export GOROOT=$HOME/go
+export GOPATH=$HOME/gopath
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+\end{lstlisting}
+
+
+これらのコマンドはMacやUnixユーザであれば\texttt{.bashrc}や\texttt{.zshrc}ファイルに入れておくべきでしょう。Windowsユーザであれば当然環境変数に入れておきます。

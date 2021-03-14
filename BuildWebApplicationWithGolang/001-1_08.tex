@@ -1,0 +1,17 @@
+gvmはサードパーティが開発したGoのバージョン管理ツールです。rubyのrvmツールに似ています。相当使い勝手がいいです。gvmをインストールするには以下のコマンド実行します：
+
+\begin{lstlisting}[numbers=none]
+bash < <(curl -s -S -L https://raw.github.com/moovweb
+/gvm/master/binscripts/gvm-installer)
+\end{lstlisting}
+
+インストールが完了したあと、goをインストールすることができます：
+
+\begin{lstlisting}[numbers=none]
+gvm install go1.4.2
+gvm use go1.4.2
+\end{lstlisting}
+
+下のコマンドで、毎回gvm useをコールする手間を省くことができます： gvm use go1.4.2 --default
+
+上のコマンドを実行したあと、GOPATH、GOROOTなどの環境変数が自動的に設定されます。これで、直接利用することができます。

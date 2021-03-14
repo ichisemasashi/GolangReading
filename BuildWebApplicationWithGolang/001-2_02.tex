@@ -1,0 +1,30 @@
+GOPATH内のsrcディレクトリはこれから開発するプログラムにとってメインとなるディレクトリです。全てのソースコードはこのディレクトリに置くことになります。一般的な方法では一つのプロジェクトが一つのディレクトリが割り当てられます、例えば：\$GOPATH\//src\//mymath はmymathというアプリケーションパッケージか実行アプリケーションになります。これはpackageがmainかそうでないかによって決定します。mainであれば実行可能アプリケーションで、そうでなければアプリケーションパッケージになります。これに関してはpackageを後ほどご紹介する予定です。
+
+新しくアプリケーションやソースパッケージを作成するときは、srcディレクトリの中にディレクトリを作るところから始めます。ディレクトリ名は一般的にソースパッケージ名になります。もちろんネストしたディレクトリも可能です。例えばsrcの中に\$GOPATH\//src\//github.com\//astaxie\//beedbというディレクトリを作ったとすると、このパッケージパスは"github.com\//astaxie\//beedb"になり、パッケージ名は最後のディレクトリであるbeedbになります。
+
+以下ではmymathを例にどのようにアプリケーションパッケージをコーディングするかご説明します。以下のコードを実行します。
+
+
+\begin{lstlisting}[numbers=none]
+cd $GOPATH/src
+mkdir mymath
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[numbers=none]
+// $GOPATH/src/mymath/sqrt.goコードは以下の通り：
+package mymath
+
+func Sqrt(x float64) float64 {
+    z := 0.0
+    for i := 0; i < 1000; i++ {
+        z -= (z*z - x) / (2 * x)
+    }
+    return z
+}
+\end{lstlisting}
+
+
+このように私のアプリケーションパッケージディレクトリとコードが作成されました。注意：一般的にpackageの名前とディレクトリ名は一致させるべきです。
+

@@ -1,0 +1,31 @@
+ go コマンドは、ある重要な環境変数に依存しています：\$GOPATH
+
+Windowsシステムにおいて環境変数の形式は\texttt{\%GOPATH\%}です。この本の中では主にUnix形式を使用します。Windowsユーザは適時置き換えてください。
+
+（注：これはGoのインストールディレクトリではありません。以下では筆者のワーキングディレクトリで説明します。もし異なるディレクトリを使用する場合はGOPATHをあなたのワーキングディレクトリに置き換えてください。）
+
+Unix に似た環境であれば大体以下のような設定になります：
+
+\begin{lstlisting}[numbers=none]
+export GOPATH=/home/apple/mygo
+\end{lstlisting}
+
+ 上のディレクトリを新たに作成し、上の一行を\texttt{.bashrc}または\texttt{.zshrc}もしくは自分のshの設定ファイルに加えます。
+
+ Windows では以下のように設定します。新しくGOPATHと呼ばれる環境変数を作成します：
+
+\begin{lstlisting}[numbers=none]
+  GOPATH=c:\mygo
+\end{lstlisting}
+
+GOPATHは複数のディレクトリを許容します。複数のディレクトリがある場合、デリミタに気をつけてください。複数のディレクトリがある場合Windowsはセミコロン、Linuxはコロンを使います。複数のGOPATHがある場合は、デフォルトでgo getの内容が第一ディレクトリとされます。
+
+上の \$GOPATH ディレクトリには３つのディレクトリがあります：
+
+\begin{itemize}
+  \item src にはソースコードを保存します（例えば：.go .c .h .s等）
+  \item pkg にはコンパイル後に生成されるファイル（例えば：.a）
+  \item bin にはコンパイル後に生成される実行可能ファイル（このまま \$PATH 変数に加えてもかまいません。もしいくつもgopathがある場合は、\texttt{\$\{GOPATH\//\//:\//\//bin:\}\//bin}を使って全てのbinディレクトリを追加してください）
+\end{itemize}
+
+以降私はすべての例でmygoを私のgopathディレクトリとします。

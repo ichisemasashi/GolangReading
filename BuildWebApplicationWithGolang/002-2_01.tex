@@ -1,0 +1,77 @@
+Go言語では変数は数多くの方法で定義されます。
+
+\texttt{var}キーワードを使用することはGoの最も基本的な変数の定義方法です。C言語と異なり、Goでは変数の型を変数の後に置きます。
+
+
+\begin{lstlisting}[numbers=none]
+//"variableName"という名前で定義します。型は"type"です。
+var variableName type
+\end{lstlisting}
+
+複数の変数を定義します。
+
+\begin{lstlisting}[numbers=none]
+//すべて"type"型の3つの変数を定義します。
+var vname1, vname2, vname3 type
+\end{lstlisting}
+
+変数を定義し、初期化します。
+
+\begin{lstlisting}[numbers=none]
+//"variableName"の変数を"value"で初期化します。型は"type"です。
+var variableName type = value
+\end{lstlisting}
+
+複数の変数を同時に初期化します。
+
+\begin{lstlisting}[numbers=none]
+/*
+  すべてが"type"型となる変数をそれぞれ定義し、個別に初期化を行います。
+  vname1はv1，vname2はv2，vname3はv3
+*/
+var vname1, vname2, vname3 type= v1, v2, v3
+\end{lstlisting}
+
+あなたは上述の定義が面倒だと思いますか？大丈夫、Go言語の設計者もわかっています。少し簡単に書くこともできます。直接型の宣言を無視することができるので、上のコードはこのようにも書けます：
+
+\begin{lstlisting}[numbers=none]
+/*
+   3つの変数を定義し、それぞれ個別に初期化する。
+   vname1はv1，vname2はv2，vname3はv3
+   このあとGoは代入される値の肩に従ってそれぞれ初期化を行います。
+*/
+var vname1, vname2, vname3 = v1, v2, v3
+\end{lstlisting}
+
+これでもまだ面倒ですか？ええ、私もそう思います。更に簡単にしてみましょう。
+
+\begin{lstlisting}[numbers=none]
+/*
+   3つの変数を定義し、それぞれ個別に初期化します。
+   vname1はv1，vname2はv2，vname3はv3
+   コンパイラは初期化する値に従って自動的にふさわしい型を導き出します。
+*/
+vname1, vname2, vname3 := v1, v2, v3
+\end{lstlisting}
+
+これなら非常に簡潔になったでしょう？\texttt{:=}の記号は\texttt{var}と\texttt{type}に直接取って代わるものです。これらの形式を短縮宣言と呼びます。ただしこれにはひとつ制限があります。これらは関数の内部でしか使用できません。関数の外で使用するとコンパイルが通らなくなります。そのため、一般的には\texttt{var}方式でグローバル変数が定義されます。
+
+\texttt{\_}（アンダースコア）は特別な変数名です。どのような値もすべて捨てられてしまいます。この例では\texttt{35}という値を\texttt{b}に与えますが、同時に\texttt{34}は失われてしまいます。
+
+\begin{lstlisting}[numbers=none]
+_, b := 34, 35
+\end{lstlisting}
+
+Goはすでに宣言されている未使用の変数をコンパイル時にエラーとして出力します。例えば下のコードはエラーを一つ生成します。\texttt{i}は宣言されましたが使用されていません。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+func main() {
+    var i int
+}
+\end{lstlisting}
+
+
+
+

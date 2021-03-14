@@ -1,0 +1,34 @@
+ このコマンドは現在のソースコードパッケージと関連するソースパッケージのなかでコンパイラが生成したファイルを取り除く操作を行います。これらのファイルはすなわち：
+
+
+\begin{lstlisting}[numbers=none]
+_obj/            旧objectディレクトリ、MakeFilesが作成する。
+_test/           旧testディレクトリ，Makefilesが作成する。
+_testmain.go     旧gotestファイル，Makefilesが作成する。
+test.out         旧testログ，Makefilesが作成する。
+build.out        旧testログ，Makefilesが作成する。
+*.[568ao]        objectファイル，Makefilesが作成する。
+
+DIR(.exe)        go buildが作成する。
+DIR.test(.exe)   go test -cが作成する。
+MAINFILE(.exe)   go build MAINFILE.goが作成する。
+*.so             SWIG によって生成される。
+\end{lstlisting}
+
+私は基本的にこのコマンドを使ってコンパイルファイルを掃除します。ローカルでテストを行う場合これらのコンパイルファイルはシステムと関係があるだけで、コードの管理には必要ありません。
+
+\begin{lstlisting}[numbers=none]
+$ go clean -i -n
+cd /Users/astaxie/develop/gopath/src/mathapp
+rm -f mathapp mathapp.exe mathapp.test mathapp.test.exe app app.exe
+rm -f /Users/astaxie/develop/gopath/bin/mathapp
+\end{lstlisting}
+
+引数紹介
+
+\begin{description}
+  \item[-i] go installがインストールするファイル等の、関係するインストールパッケージと実行可能ファイルを取り除きます。
+  \item[-n] 実行する必要のある削除コマンドを出力します。ただし実行はされません。これにより低レイヤで何が実行されているのかを簡単に知ることができます。
+  \item[-r] importによってインポートされたパッケージを再帰的に削除します。
+  \item[-x] 実行される詳細なコマンドを出力します。\texttt{-n}出力の実行版です。
+\end{description}
