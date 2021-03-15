@@ -1,0 +1,39 @@
+Go言語では、複数の定数・変数を宣言する場合、または複数のパッケージをインポートする場合、グループ化による方法で宣言することができます。
+
+例えば以下のコード：
+
+\begin{lstlisting}[numbers=none]
+import "fmt"
+import "os"
+
+const i = 100
+const pi = 3.1415
+const prefix = "Go_"
+
+var i int
+var pi float32
+var prefix string
+\end{lstlisting}
+
+グループ化によって以下のような形式になります：
+
+\begin{lstlisting}[numbers=none]
+import(
+    "fmt"
+    "os"
+)
+
+const(
+    i = 100
+    pi = 3.1415
+    prefix = "Go_"
+)
+
+var(
+    i int
+    pi float32
+    prefix string
+)
+\end{lstlisting}
+
+

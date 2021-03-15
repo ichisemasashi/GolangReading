@@ -1,0 +1,16 @@
+"ゼロ値"というのは何も空の値ではありません。これは一種の"変数が埋めらる前"のデフォルト値であり、通常は0です。 それぞれの型のゼロ値は以下の通りです
+
+
+\begin{lstlisting}[numbers=none]
+int     0
+int8    0
+int32   0
+int64   0
+uint    0x0
+rune    0 //runeの実際の型は int32 です。
+byte    0x0 // byteの実際の型は uint8 です。
+float32 0 //長さは 4 byte
+float64 0 //長さは 8 byte
+bool    false
+string  ""
+\end{lstlisting}

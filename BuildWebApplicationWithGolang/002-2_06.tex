@@ -1,0 +1,9 @@
+Goにはビルトインの\texttt{error}型があります。専らエラー情報の処理に使用されます。Goの\texttt{package}の中にはエラー処理を行う\texttt{errors}というパッケージがあります。
+
+
+\begin{lstlisting}[numbers=none]
+err := errors.New("emit macho dwarf: elf header corrupted")
+if err != nil {
+    fmt.Print(err)
+}
+\end{lstlisting}

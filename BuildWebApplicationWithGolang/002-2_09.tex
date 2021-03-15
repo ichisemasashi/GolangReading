@@ -1,0 +1,28 @@
+Goでは\texttt{iota}というキーワードがあります。このキーワードは\texttt{enum}を宣言する際に使用されます。このデフォルト値は0からはじまり、順次1が追加されます：
+
+
+
+\begin{lstlisting}[numbers=none]
+const(
+    x = iota  // x == 0
+    y = iota  // y == 1
+    z = iota  // z == 2
+    w  // 定数の宣言で値を省略した場合、デフォルト値は
+       // 前の値と同じになります。ここではw = iotaと
+       // 宣言していることと同じになりますので、
+       // w == 3となります。実は上のyとzでも
+       // この"= iota"は省略することができます。
+)
+
+ const v = iota // constキーワードが出現する度に、
+          // iotaは置き直されます。ここではv == 0です。
+
+const ( 
+  e, f, g = iota, iota, iota //e=0,f=0,g=0 iotaの同一行は同じです
+  )
+\end{lstlisting}
+
+\begin{quote}
+他の値や\texttt{iota}に設定されているものを除いて、各\texttt{const}グループのはじめの定数はデフォルトで0となります。二番目以降の定数は前の定数の値がデフォルト値となります。もし前の定数の値が\texttt{iota}であれば、直後の値も\texttt{iota}になります。
+\end{quote}
+

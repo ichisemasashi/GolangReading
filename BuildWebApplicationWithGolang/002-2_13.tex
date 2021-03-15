@@ -1,0 +1,66 @@
+\texttt{map}の概念もPythonのディクショナリです。この形式は\texttt{map[keyType]valueType}です。
+
+下のコードをご覧ください。\texttt{map}の読み込みと代入は\texttt{slice}と似ています。\texttt{key}を通して操作します。ただ、\texttt{slice}の\texttt{index}は\texttt{int}型のみになります。\texttt{map}には多くの型があります。\texttt{int}でもかまいませんし、\texttt{string}や\texttt{==}と\texttt{!=}演算子が定義されている全ての型でもかまいません。
+
+\begin{lstlisting}[numbers=none]
+  // keyを文字列で宣言します。値はintとなるディクショナリです。
+  // この方法は使用される前にmakeで初期化される必要があります。
+var numbers map[string]int
+// もうひとつのmapの宣言方法
+numbers := make(map[string]int)
+numbers["one"] = 1  //代入
+numbers["ten"] = 10 //代入
+numbers["three"] = 3
+
+fmt.Println("３つ目の数字は: ", numbers["three"]) // データの取得
+// "３つ目の数字は： 3"という風に出力されます。
+\end{lstlisting}
+
+この\texttt{map}は我々が普段目にする表と同じです。左の列に\texttt{key}、右の列に値があります。
+
+mapを使う段階で注意しなければならないことがいくつかあります：
+
+\begin{itemize}
+\item \texttt{map}は順序がありません。毎回\texttt{map}の出力は違ったものになるかもしれません。\texttt{index}で値を取得することはできず、かならず\texttt{key}を使うことになります。
+\item \texttt{map}の長さは固定ではありません。\texttt{slice}と同じで、参照型の一種です。
+\item ビルトインの\texttt{len}関数を\texttt{map}に適用すると、\texttt{map}がもつ\texttt{key}の個数を返します。
+\item \texttt{map}の値は簡単に修正することができます。\texttt{numbers["one"]=11}というようにkeyが\texttt{one}のディクショナリの値を\texttt{11}に変えることができます。
+\item \texttt{map}は他の基本型と異なり、thread-safeではありません。複数のgo-routineを扱う際には必ずmutex lockメカニズムを使用する必要があります。
+\end{itemize}
+
+\texttt{map}の初期化では\texttt{key:val}の方法で初期値を与えることができます。また同時に\texttt{map}には標準で\texttt{key}が存在するか確認する方法が存在します。
+
+\texttt{delete}で\texttt{map}の要素を削除します：
+
+\begin{lstlisting}[numbers=none]
+// ディクショナリを初期化します。
+rating := map[string]float32{"C":5, "Go":4.5,
+                             "Python":4.5, "C++":2 }
+// mapは２つの戻り値があります。２つ目の戻り値では、
+// もしkeyが存在しなければ、okはfalseに、存在すれ
+// ばokはtrueになります。
+csharpRating, ok := rating["C#"]
+if ok {
+fmt.Println("C# is in the map and its rating is ",
+            csharpRating)
+} else {
+fmt.Println("We have no rating associated
+             with C# in the map")
+}
+
+delete(rating, "C")  // keyがCの要素を削除します。
+\end{lstlisting}
+
+上述の通り、\texttt{map}は参照型の一種ですので、もし２つの\texttt{map}が同時に同じポインタを指している場合、一つの変更で、もう一つにも変更が行われます。
+
+\begin{lstlisting}[numbers=none]
+m := make(map[string]string)
+m["Hello"] = "Bonjour"
+m1 := m
+m1["Hello"] = "Salut" // この時、m["hello"]の
+                // 値もすでにSalutになっています。
+\end{lstlisting}
+
+
+
+
