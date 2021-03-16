@@ -1,0 +1,55 @@
+Goでは関数も変数の一種です。\texttt{type}を通して定義します。これは全て同じ引数と同じ戻り値を持つ一つの型です。
+
+
+\begin{lstlisting}[numbers=none]
+type typeName func(input1 inputType1 ,
+                   input2 inputType2 [, ...])
+                     (result1 resultType1 [, ...])
+\end{lstlisting}
+
+関数を型として扱うことにメリットはあるのでしょうか？ではこの型の関数を値として渡してみましょう。以下の例をご覧ください。
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+type testInt func(int) bool // 関数の型を宣言します。
+
+func isOdd(integer int) bool {
+    if integer%2 == 0 {
+        return false
+    }
+    return true
+}
+
+func isEven(integer int) bool {
+    if integer%2 == 0 {
+        return true
+    }
+    return false
+}
+
+// ここでは宣言する関数の型を引数のひとつとみなします。
+
+func filter(slice []int, f testInt) []int {
+    var result []int
+    for _, value := range slice {
+        if f(value) {
+            result = append(result, value)
+        }
+    }
+    return result
+}
+
+func main(){
+    slice := []int {1, 2, 3, 4, 5, 7}
+    fmt.Println("slice = ", slice)
+    odd := filter(slice, isOdd)    // 関数の値渡し
+    fmt.Println("Odd elements of slice are: ", odd)
+    even := filter(slice, isEven)  // 関数の値渡し
+    fmt.Println("Even elements of slice are: ", even)
+}
+\end{lstlisting}
+
+共有のインターフェースを書くときに関数を値と型にみなすのは非常に便利です。上の例で\texttt{testInt}という型は関数の型の一つでした。ふたつの\texttt{filter}関数の引数と戻り値は\texttt{testInt}の型と同じですが、より多くのロジックを実現することができます。このように我々のプログラムをより優れたものにすることができます。
+

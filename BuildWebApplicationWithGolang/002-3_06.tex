@@ -1,0 +1,54 @@
+関数はGoの中心的な設計です。キーワード\texttt{func}によって宣言します。形式は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+func funcName(input1 type1, input2 type2)
+                (output1 type1, output2 type2) {
+    //ここはロジック処理のコードです。
+    //複数の値を戻り値とします。
+    return value1, value2
+}
+\end{lstlisting}
+
+上のコードから次のようなことが分かります
+
+\begin{itemize}
+\item キーワード\texttt{func}で\texttt{funcName}という名前の関数を宣言します。
+\item 関数はひとつまたは複数の引数をとることができ、各引数の後には型が続きます。\texttt{,}をデリミタとします。
+\item 関数は複数の戻り値を持ってかまいません。
+\item 上の戻り値は２つの変数\texttt{output1}と\texttt{output2}であると宣言されています。もしあなたが宣言したくないというのであればそれでもかみません。直接２つの型です。
+\item もしひとつの戻り値しか存在せず、また戻り値の変数が宣言されていなかった場合、戻り値の括弧を省略することができます。
+\item もし戻り値が無ければ、最後の戻り値の情報も省略することができます。
+\item もし戻り値があれば、関数の中でreturn文を追加する必要があります。
+\end{itemize}
+
+以下では実際に関数の例を応用しています（Maxの値を計算します）
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+// a、bの中から最大値を返します。
+func max(a, b int) int {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+func main() {
+    x := 3
+    y := 4
+    z := 5
+
+    max_xy := max(x, y) //関数max(x, y)をコール
+    max_xz := max(x, z) //関数max(x, z)をコール
+
+    fmt.Printf("max(%d, %d) = %d\n", x, y, max_xy)
+    fmt.Printf("max(%d, %d) = %d\n", x, z, max_xz)
+    fmt.Printf("max(%d, %d) = %d\n", y, z, max(y,z))
+                   // 直接コールしてもかまいません。
+}
+\end{lstlisting}
+
+上では\texttt{max}関数に２つの引数があることがわかります。この型はどれも\texttt{int}です。第一引数の型は省略することができます（つまり、a,b int,でありa int, b intではありません）、デフォルトは直近の型です。２つ以上の同じ型の変数または戻り値も同じです。同時に戻り値がひとつであることに注意してください。これは省略記法です。
+

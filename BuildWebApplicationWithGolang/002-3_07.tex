@@ -1,0 +1,34 @@
+Go言語はCに比べ先進的な特徴を持っています。関数が複数の戻り値を持てるのもその一つです。
+
+コードの例を見てみましょう
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+//A+B と A*B を返します
+func SumAndProduct(A, B int) (int, int) {
+    return A+B, A*B
+}
+
+func main() {
+    x := 3
+    y := 4
+
+    xPLUSy, xTIMESy := SumAndProduct(x, y)
+
+    fmt.Printf("%d + %d = %d\n", x, y, xPLUSy)
+    fmt.Printf("%d * %d = %d\n", x, y, xTIMESy)
+}
+\end{lstlisting}
+
+上の例では直接２つの引数を返しました。当然引数を返す変数に命名してもかまいません。この例では２つの型のみ使っていますが、下のように定義することもできます。値が返る際は変数名を付けなくてかまいません。なぜなら関数の中で直接初期化されているからです。しかしもしあなたの関数がエクスポートされるのであれば（大文字からはじまります）オフィシャルではなるべく戻り値に名前をつけるようお勧めしています。なぜなら名前のわからない戻り値はコードをより簡潔なものにしますが、生成されるドキュメントの可読性がひどくなるからです。
+
+\begin{lstlisting}[numbers=none]
+func SumAndProduct(A, B int) (add int, Multiplied int) {
+    add = A+B
+    Multiplied = A*B
+    return
+}
+\end{lstlisting}
+

@@ -1,0 +1,41 @@
+GoにはJavaのような例外処理はありません。例外を投げないのです。その代わり、\texttt{panic}と\texttt{recover}を使用します。ぜひ覚えておいてください、これは最後の手段として使うことを。つまり、あなたのコードにあってはなりません。もしくは\texttt{panic}を極力減らしてください。これは非常に強力なツールです。賢く使ってください。では、どのように使うのでしょうか？
+
+
+Panic
+\begin{quote}
+ビルトイン関数です。オリジナルの処理フローを中断させることができます。パニックが発生するフローの中に入って関数\texttt{F}が\texttt{panic}をコールします。このプロセスは継続して実行されます。一旦\texttt{panic}の\texttt{goroutine}が発生すると、コールされた関数がすべて返ります。この時プログラムを抜けます。パニックは直接\texttt{panic}をコールします。実行時にエラーを発生させてもかまいません。例えば配列の境界を超えてアクセスする、などです。
+\end{quote}
+
+
+Recover
+\begin{quote}
+ビルトイン関数です。パニックを発生させるフローの\texttt{goroutine}を復元することができます。\texttt{recover}は遅延関数の中でのみ有効です。通常の実行中、\texttt{recover}をコールすると\texttt{nil}が返ります。他には何の効果もありません。もし現在の\texttt{goroutine}がパニックに陥ったら\texttt{recover}をコールして、\texttt{panic}の入力値を補足し、正常な実行に復元することができます。
+\end{quote}
+
+下の関数のフローの中でどのように\texttt{panic}を使うかご覧ください
+
+\begin{lstlisting}[numbers=none]
+var user = os.Getenv("USER")
+
+func init() {
+    if user == "" {
+        panic("no value for $USER")
+    }
+}
+\end{lstlisting}
+
+この関数は引数となっている関数が実行時に\texttt{panic}を発生するか検査します：
+
+\begin{lstlisting}[numbers=none]
+func throwsPanic(f func()) (b bool) {
+    defer func() {
+        if x := recover(); x != nil {
+            b = true
+        }
+    }()
+    f() // 関数fを実行します。もしfの中でpanicが出現したら、
+        // 復元を行うことができます。
+    return
+}
+\end{lstlisting}
+

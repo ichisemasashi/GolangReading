@@ -1,0 +1,65 @@
+時々たくさんの\texttt{if-else}を書くことでロジック処理を行いたくなるかもしれません。コードは非常に醜く冗長になります。またメンテナンスも容易ではなくなるので、\texttt{switch}を使って解決することができます。この文法は以下のようなものです
+
+\begin{lstlisting}[numbers=none]
+switch sExpr {
+case expr1:
+    some instructions
+case expr2:
+    some other instructions
+case expr3:
+    some other instructions
+default:
+    other code
+}
+\end{lstlisting}
+
+\texttt{sExpr}と\texttt{expr1}、\texttt{expr2}、\texttt{expr3}の型は一致させる必要があります。Goの\texttt{switch}は非常に使い勝手がよく、式は必ずしも定数や整数である必要はありません。実行のプロセスは上から下まで、マッチする項目が見つかるまで行われます。もし\texttt{switch}に式がなければ、\texttt{true}とマッチします。
+
+\begin{lstlisting}[]
+i := 10
+switch i {
+case 1:
+    fmt.Println("i is equal to 1")
+case 2, 3, 4:
+    fmt.Println("i is equal to 2, 3 or 4")
+case 10:
+    fmt.Println("i is equal to 10")
+default:
+    fmt.Println("All I know is that i is an integer")
+}
+\end{lstlisting}
+
+5行目で、いくつもの値を\texttt{case}の中に集めています。また同時に、Goの\texttt{switch}はデフォルトで\texttt{case}の最後に\texttt{break}があることになっているので、マッチに成功した後は他のcaseが実行されることはなく、\texttt{switch}全体から抜け出します。ただし、\texttt{fallthrough}を使用することであとに続くcaseコードを強制的に実行させることができます。
+
+\begin{lstlisting}[numbers=none]
+integer := 6
+switch integer {
+    case 4:
+    fmt.Println("The integer was <= 4")
+    fallthrough
+    case 5:
+    fmt.Println("The integer was <= 5")
+    fallthrough
+    case 6:
+    fmt.Println("The integer was <= 6")
+    fallthrough
+    case 7:
+    fmt.Println("The integer was <= 7")
+    fallthrough
+    case 8:
+    fmt.Println("The integer was <= 8")
+    fallthrough
+    default:
+    fmt.Println("default case")
+}
+\end{lstlisting}
+
+上のプログラムは以下のように出力します
+
+\begin{lstlisting}[numbers=none]
+The integer was <= 6
+The integer was <= 7
+The integer was <= 8
+default case
+\end{lstlisting}
+

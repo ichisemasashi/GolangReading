@@ -1,0 +1,17 @@
+Goには\texttt{goto}句があります- - ぜひ賢く使ってください。\texttt{goto}は必ず事前に関数内で定義したタグにジャンプします。例えばこのようなループがあったと仮定します：
+
+\begin{lstlisting}[numbers=none]
+func myFunc() {
+    i := 0
+Here:   //この行の最初の単語はコロンを
+        // 最後に持ってくることでタグとなります。
+    println(i)
+    i++
+    goto Here   //Hereにジャンプします。
+}
+\end{lstlisting}
+
+\begin{quote}
+タグの名前は大文字小文字を区別します。
+\end{quote}
+

@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020/Debian) (preloaded format=platex 2021.3.12)  14 MAR 2021 18:11
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020/Debian) (preloaded format=platex 2021.3.12)  16 MAR 2021 20:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -371,9 +371,40 @@ Overfull \hbox (11.20241pt too wide) in paragraph at lines 52--53
  []
 
 [41]) (./002-2_02.tex) (./002-2_03.tex [42]) (./002-2_04.tex) (./002-2_05.tex
-[43])
+[43]) (./002-2_06.tex) (./002-2_07.tex
+File: 2.2.basic.png Graphic file (type bmp)
+<2.2.basic.png>
+) [44] (./002-2_08.tex [45])
+(./002-2_09.tex) (./002-2_10.tex [46]) (./002-2_11.tex [47]
+File: 2.2.array.png Graphic file (type bmp)
+<2.2.array.png>
+) (./002-2_12.tex
+[48]
+File: 2.2.slice.png Graphic file (type bmp)
+<2.2.slice.png>
+ [49]
+File: 2.2.slice2.png Graphic file (type bmp)
+<2.2.slice2.png>
+ [50]) (./002-2_13.tex [51] [52]) (./002-2_14.tex
+File: 2.2.makenew.png Graphic file (type bmp)
+<2.2.makenew.png>
+) [53]
+(./002-2_15.tex [54])) (./002-3.tex (./002-3_00.tex) (./002-3_01.tex)
+(./002-3_02.tex [55]) (./002-3_03.tex) (./002-3_04.tex [56]) (./002-3_05.tex
+[57] [58]) (./002-3_06.tex [59]
+Overfull \hbox (105.70222pt too wide) in paragraph at lines 48--49
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][
+][][][][][][][][][][][][][][] 
+ []
 
-! LaTeX Error: File `002-2_06.tex' not found.
+) (./002-3_07.tex [60]) (./002-3_08.tex) (./002-3_09.tex [61]) (./002-3_10.tex
+[62]) (./002-3_11.tex [63]) [64] (./002-3_12.tex) (./002-3_13.tex [65]
+File: 2.3.init.png Graphic file (type bmp)
+<2.3.init.png>
+)
+(./002-3_14.tex [66]))
+
+! LaTeX Error: File `002-4.tex' not found.
 
 Type X to quit or <RETURN> to proceed,
 or enter new name. (Default extension: tex)
@@ -382,17 +413,17 @@ Enter file name:
 ! Emergency stop.
 <read *> 
          
-l.14 \input{002-2_06.tex}
-                         ^^M
+l.28 \input{002-4.tex}
+                      ^^M
 End of file on the terminal!
 
  
 Here is how much of TeX's memory you used:
- 3086 strings out of 482516
- 42205 string characters out of 5949363
- 315338 words of memory out of 5000000
- 18554 multiletter control sequences out of 15000+600000
+ 3225 strings out of 482516
+ 44034 string characters out of 5949363
+ 315403 words of memory out of 5000000
+ 18603 multiletter control sequences out of 15000+600000
  547423 words of font info for 86 fonts, out of 8000000 for 9000
  269 hyphenation exceptions out of 8191
  36i,6n,36p,1053b,2223s stack positions out of 5000i,500n,10000p,200000b,80000s
-Output written on main.dvi (43 pages, 169172 bytes).
+Output written on main.dvi (66 pages, 293956 bytes).

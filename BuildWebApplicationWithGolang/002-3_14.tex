@@ -1,0 +1,51 @@
+Goのコードを書いている時は、importコマンドによってパッケージファイルをインポートすることがよくあります。私達が通常使う方法は以下を参考にしてください：
+
+
+\begin{lstlisting}[numbers=none]
+import(
+    "fmt"
+)
+\end{lstlisting}
+
+その後コードの中では以下のような方法でコールすることができます。
+
+\begin{lstlisting}[numbers=none]
+fmt.Println("hello world")
+\end{lstlisting}
+
+上のfmtはGo言語の標準ライブラリです。実は\texttt{GOROOT}環境変数で指定されたディレクトリの下にこのモジュールが加えられています。当然Goのインポートは以下のような２つの方法で自分の書いたモジュールを追加することができます：
+
+\begin{enumerate}
+  \item 相対パス\\ import "./model" //カレントファイルと同じディレクトリにあるmodelディレクトリ、ただし、この方法によるimportはおすすめしません。
+  \item 絶対パス\\ import "shorturl/model" //gopath/src/shorturl/modelモジュールを追加します。
+\end{enumerate}
+
+ここではimportの通常のいくつかの方法をご説明しました。ただ他にも特殊なimportがあります。新人を悩ませる方法ですが、ここでは一つ一つ一体何がどうなっているのかご説明しましょう
+
+\begin{enumerate}
+  \item ドット操作\\ 時々、以下のようなパッケージのインポート方法を見ることがあります
+    \begin{lstlisting}[numbers=none]
+import(
+    . "fmt"
+)
+    \end{lstlisting}
+ このドット操作の意味はこのパッケージがインポートされた後このパッケージの関数をコールする際、パッケージ名を省略することができます。つまり、前であなたがコールしたようなfmt.Println("hello world")はPrintln("hello world")というように省略することができます。
+  \item エイリアス操作\\ エイリアス操作はその名の通りパッケージ名に他の覚えやすい名前をつけることができます。
+    \begin{lstlisting}[numbers=none]
+import(
+    f "fmt"
+)
+    \end{lstlisting}
+エイリアス操作の場合パッケージ関数をコールする際プレフィックスが自分たちのものになります。すなわち、f.Println("hello world")
+  \item \_操作\\ この操作は通常とても理解しづらい方法です。以下のimportをご覧ください。
+    \begin{lstlisting}[numbers=none]
+import (
+    "database/sql"
+    _ "github.com/ziutek/mymysql/godrv"
+)
+    \end{lstlisting}
+\_操作はこのパッケージをインポートするだけでパッケージの中の関数を直接使うわけではなく、このパッケージの中にあるinit関数をコールします。
+\end{enumerate}
+
+
+

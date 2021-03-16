@@ -1,0 +1,45 @@
+Go言語のすばらしいデザインの中に、遅延(defer)文法があります。関数の中でdefer文を複数追加することができます。関数が最後まで実行された時、このdefer文が逆順に実行されます。最後にこの関数が返ります。特に、リソースをオープンする操作を行なっているようなとき、エラーの発生に対してロールバックし、必要なリソースをクローズする必要があるかと思います。さもなければとても簡単にリソースのリークといった問題を引き起こすことになります。我々はリソースを開く際は一般的に以下のようにします：
+
+\begin{lstlisting}[numbers=none]
+func ReadWrite() bool {
+    file.Open("file")
+// 何かを行う
+    if failureX {
+        file.Close()
+        return false
+    }
+
+    if failureY {
+        file.Close()
+        return false
+    }
+
+    file.Close()
+    return true
+}
+\end{lstlisting}
+
+上のコードはとても多くの重複がみられます。Goの\texttt{defer}はこの問題を解決します。これを使用した後、コードは減るばかりでなく、プログラムもよりエレガントになります。\texttt{defer}の後に指定された関数が関数を抜ける前にコールされます。
+
+\begin{lstlisting}[numbers=none]
+func ReadWrite() bool {
+    file.Open("file")
+    defer file.Close()
+    if failureX {
+        return false
+    }
+    if failureY {
+        return false
+    }
+    return true
+}
+\end{lstlisting}
+
+もし\texttt{defer}を多用する場合は、\texttt{defer}はLIFOモードが採用されます。そのため、以下のコードは\texttt{4 3 2 1 0}を出力します。
+
+\begin{lstlisting}[numbers=none]
+for i := 0; i < 5; i++ {
+    defer fmt.Printf("%d ", i)
+}
+\end{lstlisting}
+

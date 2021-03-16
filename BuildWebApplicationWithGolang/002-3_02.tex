@@ -1,0 +1,40 @@
+\texttt{if}はあらゆるプログラミング言語の中で最もよく見かけるものかもしれません。この文法は大雑把に言えば：もし条件を満足しなければ何々を行い、そうでなければまたもう一つ別のことをやるということです。
+
+Goの中では\texttt{if}分岐の文法の中は括弧で括る必要はありません。以下のコードをご覧ください。
+
+\begin{lstlisting}[numbers=none]
+if x > 10 {
+    fmt.Println("x is greater than 10")
+} else {
+    fmt.Println("x is less than 10")
+}
+\end{lstlisting}
+
+Goの\texttt{if}はすごいことに、条件分岐の中で変数を宣言できます。この変数のスコープはこの条件ロジックブロック内のみ存在し、他の場所では作用しません。以下に示します
+
+\begin{lstlisting}[numbers=none]
+// 取得値xを計算し、xの大きさを返します。
+// 10以上かどうかを判断します。
+if x := computedValue(); x > 10 {
+    fmt.Println("x is greater than 10")
+} else {
+    fmt.Println("x is less than 10")
+}
+
+/ /ここではもしこのようにコールしてしまうとコンパイルエラー
+// となります。xは条件の中の変数だからです。
+fmt.Println(x)
+\end{lstlisting}
+
+この条件の時は以下のようになります：
+
+\begin{lstlisting}[numbers=none]
+if integer == 3 {
+    fmt.Println("The integer is equal to 3")
+} else if integer < 3 {
+    fmt.Println("The integer is less than 3")
+} else {
+    fmt.Println("The integer is greater than 3")
+}
+\end{lstlisting}
+

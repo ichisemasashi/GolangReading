@@ -1,0 +1,14 @@
+Goの関数は可変長引数をサポートしています。可変長引数を受け付ける関数は不特定多数の引数があります。これを実現するために、関数が可変長引数を受け取れるよう定義する必要があります：
+
+\begin{lstlisting}[numbers=none]
+func myfunc(arg ...int) {}
+\end{lstlisting}
+
+\texttt{arg ...int}はGoにこの関数が不特定多数の引数を受け付けることを伝えます。ご注意ください。この引数の型はすべて\texttt{int}です。関数ブロックの中で変数\texttt{arg}は\texttt{int}の\texttt{slice}となります。
+
+\begin{lstlisting}[numbers=none]
+for _, n := range arg {
+    fmt.Printf("And the number is: %d\n", n)
+}
+\end{lstlisting}
+

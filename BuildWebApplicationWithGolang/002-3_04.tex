@@ -1,0 +1,81 @@
+Goにで最も強力なロジックコントロールといえば、\texttt{for}です。これはループでデータを読むのに使えます。\texttt{while}でロジックをコントロールしても構いません。イテレーション操作も行えます。文法は以下の通りです：
+
+\begin{lstlisting}[numbers=none]
+for expression1; expression2; expression3 {
+    //...
+}
+\end{lstlisting}
+
+\texttt{expression1}、\texttt{expression2}と\texttt{expression3}はどれも式です。この中で\texttt{expression1}と\texttt{expression3}は変数宣言または関数のコールの戻り値のようなものです。\texttt{expression2}は条件判断に用いられます。\texttt{expression1}はループの開始前にコールされます。\texttt{expression3}は毎回ループする際の終了時にコールされます。
+
+だらだら喋るよりも例を見たほうが早いでしょう。以下に例を示します：
+
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+func main(){
+    sum := 0;
+    for index:=0; index < 10 ; index++ {
+        sum += index
+    }
+    fmt.Println("sum is equal to ", sum)
+}
+// 出力：sum is equal to 45
+\end{lstlisting}
+
+時々複数の代入操作を行いたい時があります。Goのなかには\texttt{,}という演算子はないので、平行して代入することができます。\texttt{i, j = i+1, j-1}
+
+時々\texttt{expression1}と\texttt{expression3}を省略します：
+
+
+\begin{lstlisting}[numbers=none]
+sum := 1
+for ; sum < 1000;  {
+    sum += sum
+}
+\end{lstlisting}
+
+この中で\texttt{;}は省略することができます。ですので下のようなコードになります。どこかで見た覚えはありませんか？そう、これは\texttt{while}の機能です。
+
+\begin{lstlisting}[numbers=none]
+sum := 1
+for sum < 1000 {
+    sum += sum
+}
+\end{lstlisting}
+
+ループの中では\texttt{break}と\texttt{continue}という２つのキーとなる操作があります。\texttt{break}操作は現在のループから抜け出します。\texttt{continue}は次のループに飛び越えます。ネストが深い場合、\texttt{break}はタグと組み合わせて使用することができます。つまり、タグが指定する位置までジャンプすることになります。詳細は以下の例をご覧ください。
+
+\begin{lstlisting}[numbers=none]
+for index := 10; index>0; index-- {
+    if index == 5{
+        break // またはcontinue
+    }
+    fmt.Println(index)
+}
+// breakであれば10、9、8、7、6が出力されます。
+// continueの場合は10、9、8、7、6、4、3、2、1が出力されます。
+\end{lstlisting}
+
+\texttt{break}と\texttt{continue}はタグを添えることができます。複数ネストしたループで外側のループからジャンプする際に使用されます。
+
+\texttt{for}は\texttt{range}と組み合わせて\texttt{array}、\texttt{slice}、\texttt{map}、\texttt{string}のデータを読み込むことができます：
+
+\begin{lstlisting}[numbers=none]
+for k,v:=range map {
+    fmt.Println("map's key:",k)
+    fmt.Println("map's val:",v)
+}
+\end{lstlisting}
+
+Goは"複数の戻り値"をサポートしていますが、"宣言して使用されていない"変数に対してコンパイラはエラーを出力します。このような状況では\texttt{\_}を使って必要のない戻り値を捨てる事ができます。 例えば
+
+\begin{lstlisting}[numbers=none]
+for _, v := range map{
+    fmt.Println("map's val:", v)
+}
+\end{lstlisting}
+
+
