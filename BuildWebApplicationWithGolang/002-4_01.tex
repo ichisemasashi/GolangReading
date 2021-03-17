@@ -1,0 +1,89 @@
+Go言語では、Cや他の言語と同じように、他の型の属性やフィールドのコンテナとして新しい型を宣言することができます。例えば、一個人のエンティティを表している\texttt{person}型を作成することができます。このエンティティは属性を持っています：性別と年齢です。このような型は\texttt{struct}と呼ばれます。以下にコードを示します：
+
+\begin{lstlisting}[numbers=none]
+type person struct {
+    name string
+    age int
+}
+\end{lstlisting}
+
+お分かりいただけましたでしょうか？structの宣言はこのように簡単です。上の型は２つのフィールドを持っています。
+
+\begin{itemize}
+  \item string型のフィールドnameはユーザの名前を保存するプロパティです。
+  \item int型のフィールドageはユーザの年齢を保存するプロパティです。
+\end{itemize}
+
+どのようにstructは使用されるのでしょうか？下のコードをご覧ください。
+
+\begin{lstlisting}[numbers=none]
+type person struct {
+    name string
+    age int
+}
+
+var P person  // Pは現在person型の変数です。
+
+P.name = "Astaxie"
+// "Astaxie"を変数Pのnameプロパティに代入します。
+P.age = 25  // "25"を変数Pのageプロパティに代入します。
+fmt.Printf("The person's name is %s", P.name)
+// Pのnameプロパティにアクセスします。
+\end{lstlisting}
+
+上のようなPの宣言以外に他にもいくつかの宣言方法があります。
+
+\begin{enumerate}
+  \item 順序にしたがって初期化する。\\ P := person\{"Tom", 25\}
+  \item \texttt{field:value}の方法によって初期化します。この場合は順序は任意でかまいません。\\ P := person\{age:24, name:"Tom"\}
+  \item もちろん\texttt{new}関数を通してポインタを作ることもできます。このPの型は*personです。\\ P := new(person)
+\end{enumerate}
+
+以下ではひと通りのstructの使用例をご説明します。
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+// 新しい型を宣言します。
+type person struct {
+    name string
+    age int
+}
+
+// 二人の年齢を比較します。
+// 年齢が大きい方の人を返し、また年齢差も返します。
+// structも値渡しです。
+func Older(p1, p2 person) (person, int) {
+    if p1.age>p2.age {  // p1とp2の二人の年齢を比較します。
+        return p1, p1.age-p2.age
+    }
+    return p2, p2.age-p1.age
+}
+
+func main() {
+    var tom person
+
+    // 初期値を代入します。
+    tom.name, tom.age = "Tom", 18
+
+    // ２つのフィールドを明確に初期化します。
+    bob := person{age:25, name:"Bob"}
+
+    // structの定義の順番に従って初期化します。
+    paul := person{"Paul", 43}
+
+    tb_Older, tb_diff := Older(tom, bob)
+    tp_Older, tp_diff := Older(tom, paul)
+    bp_Older, bp_diff := Older(bob, paul)
+
+    fmt.Printf("Of %s and %s, %s is older by %d years\n",
+        tom.name, bob.name, tb_Older.name, tb_diff)
+
+    fmt.Printf("Of %s and %s, %s is older by %d years\n",
+        tom.name, paul.name, tp_Older.name, tp_diff)
+
+    fmt.Printf("Of %s and %s, %s is older by %d years\n",
+        bob.name, paul.name, bp_Older.name, bp_diff)
+}
+\end{lstlisting}
