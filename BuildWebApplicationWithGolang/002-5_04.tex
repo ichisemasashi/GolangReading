@@ -1,0 +1,50 @@
+上の例で、もしEmployeeにSayHiを実現したい場合はどうすればよいでしょうか？簡単です。匿名フィールドの衝突と同じ道理で、Employee上でもメソッドを定義することができます。匿名フィールドを書き直す方法は下の例をご確認ください。
+
+\begin{lstlisting}[numbers=none]
+package main
+import "fmt"
+
+type Human struct {
+    name string
+    age int
+    phone string
+}
+
+type Student struct {
+    Human //匿名フィールド
+    school string
+}
+
+type Employee struct {
+    Human //匿名フィールド
+    company string
+}
+
+//Humanでmethodを定義
+func (h *Human) SayHi() {
+    fmt.Printf("Hi, I am %s you can call me on %s\n",
+               h.name, h.phone)
+}
+
+//EmployeeのmethodでHumanのmethodを書き直す。
+func (e *Employee) SayHi() {
+  fmt.Printf("Hi, I am %s, I work at %s. Call me on %s\n",
+             e.name, e.company, e.phone)
+            //Yes you can split into 2 lines here.
+}
+
+func main() {
+    mark := Student{Human{"Mark", 25, "222-222-YYYY"},
+                   "MIT"}
+    sam := Employee{Human{"Sam", 45, "111-888-XXXX"},
+                  "Golang Inc"}
+
+    mark.SayHi()
+    sam.SayHi()
+}
+\end{lstlisting}
+
+上のコードのデザインはこのように絶妙です。Goのデザインに驚くことでしょう。
+
+このように、基本的なオブジェクト指向のプログラムを設計することができます。ですが、Goのオブジェクト指向はこのように簡単です。プライベートやパブリックといったキーワードは出てきません。大文字と小文字によって実現しているのです（大文字で始まるものはパブリック、小文字で始まるものはプライベートです）、メソッドにも同じルールが適用されます。
+

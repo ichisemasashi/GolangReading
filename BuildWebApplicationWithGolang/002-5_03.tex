@@ -1,0 +1,39 @@
+前の章でフィールドの継承を学びました。するとあなたはGoの不思議なところに気がついたかもしれません。methodも継承できるのです。もし匿名フィールドが一つのメソッドを実現している場合、この匿名フィールドを含むsturctもこのメソッドをコールすることができるのです。例をお見せします。
+
+
+\begin{lstlisting}[numbers=none]
+  package main
+  import "fmt"
+
+  type Human struct {
+    name string
+    age int
+    phone string
+  }
+
+  type Student struct {
+    Human //匿名フィールド
+    school string
+  }
+
+  type Employee struct {
+    Human //匿名フィールド
+    company string
+  }
+
+  //human上でメソッドを定義
+  func (h *Human) SayHi() {
+    fmt.Printf("Hi, I am %s you can call me on %s\n",
+               h.name, h.phone)
+  }
+
+  func main() {
+    mark := Student{Human{"Mark", 25, "222-222-YYYY"},
+                    "MIT"}
+    sam := Employee{Human{"Sam", 45, "111-888-XXXX"},
+                    "Golang Inc"}
+
+    mark.SayHi()
+    sam.SayHi()
+  }
+\end{lstlisting}
