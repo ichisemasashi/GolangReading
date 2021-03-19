@@ -1,0 +1,52 @@
+Goはリフレクションを実装しています。リフレクションはプログラムの実行時の状態を検査することができます。私達が一般的に使用しているパッケージはreflectパッケージです。どのようにreflectパッケージを使うかはオフィシャルのドキュメントに詳細な原理が説明されています。laws of reflection(http:\//\//golang.org\//doc\//articles\//laws\_of\_reflection.html)
+
+reflectを使うには３つのステップに分けられます。下で簡単にご説明します：リフレクションは型の値（これらの値はすべて空のインターフェースを実装しています。）。まずこれをreflectオブジェクトに変換する必要があります（reflect.Typeまたはreflect.Valueです。異なる状況によって異なる関数をコールします。）この２つを取得する方法は：
+
+\begin{lstlisting}[numbers=none]
+t := reflect.TypeOf(i)
+//元データを取得します。tを通して型定義の中の
+//すべての要素を取得することができます。
+v := reflect.ValueOf(i)
+//実際の値を取得します。vを通して保存されている
+//中の値を取得することができます。値を変更することもできます。
+\end{lstlisting}
+
+reflectオブジェクトに変換した後、何かしらの操作を行うことができます。つまり、reflectオブジェクトを対応する値に変換するのです。例えば
+
+\begin{lstlisting}[numbers=none]
+tag := t.Elem().Field(0).Tag
+//structの中で定義されているタグを取得する。
+name := v.Elem().Field(0).String()
+//はじめのフィールドに保存されている値を取得する。
+\end{lstlisting}
+
+reflectの値を取得することで対応する型と数値を返すことができます。
+
+\begin{lstlisting}[numbers=none]
+var x float64 = 3.4
+v := reflect.ValueOf(x)
+fmt.Println("type:", v.Type())
+fmt.Println("kind is float64:", v.Kind() == reflect.Float64)
+fmt.Println("value:", v.Float())
+\end{lstlisting}
+
+最後にリフレクションを行ったフィールドは修正できる必要があります。前で学んだ値渡しと参照渡しも同じ道理です。リフレクションのフィールドが必ず読み書きできるということは、以下のように書いた場合、エラーが発生するということです。
+
+
+
+\begin{lstlisting}[numbers=none]
+var x float64 = 3.4
+v := reflect.ValueOf(x)
+v.SetFloat(7.1)
+\end{lstlisting}
+
+もし対応する値を変更したい場合、このように書かなければなりません。
+
+\begin{lstlisting}[numbers=none]
+var x float64 = 3.4
+p := reflect.ValueOf(&x)
+v := p.Elem()
+v.SetFloat(7.1)
+\end{lstlisting}
+
+上はリフレクションに対する簡単なご説明ではありますが、より深い理解には実際のプログラミングで実践していく他ありません。

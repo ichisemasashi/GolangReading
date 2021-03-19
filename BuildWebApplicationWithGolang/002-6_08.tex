@@ -1,0 +1,39 @@
+Goが本当に魅力的なのはビルトインのロジック文法です。Structを学んだ際の匿名フィールドはあんなにもエレガントでした。では同じようなロジックをinterfaceに導入すればより完璧になります。もしinterface1がinterface2の組み込みフィールドであれば、interface2は暗黙的にinterface1のメソッドを含むことになります。
+
+ソースパッケージのcontainer/heapの中にこのような定義があるのを確認できると思います。
+
+\begin{lstlisting}[numbers=none]
+type Interface interface {
+    sort.Interface
+    //組み込みフィールドsort.Interface
+    Push(x interface{})
+    //a Push method to push elements into the heap
+    Pop() interface{}
+    //a Pop elements that pops elements from the heap
+}
+\end{lstlisting}
+
+sort.Interfaceは実は組み込みフィールドです。sort.Interfaceのすべてのメソッドを暗黙的に含んでいます。つまり以下の３つのメソッドです。
+
+\begin{lstlisting}[numbers=none]
+type Interface interface {
+    // Len is the number of elements in the collection.
+    Len() int
+    // Less returns whether the element with index i should sort
+    // before the element with index j.
+    Less(i, j int) bool
+    // Swap swaps the elements with indexes i and j.
+    Swap(i, j int)
+}
+\end{lstlisting}
+
+もう一つの例はioパッケージの中にある io.ReadWriterです。この中にはioパッケージのReaderとWriterの２つのinterfaceを含んでいます：
+
+\begin{lstlisting}[numbers=none]
+// io.ReadWriter
+type ReadWriter interface {
+    Reader
+    Writer
+}
+\end{lstlisting}
+

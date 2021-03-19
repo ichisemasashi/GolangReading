@@ -1,0 +1,79 @@
+interface型ではメソッドのセットを定義します。もしあるオブジェクトがインターフェースとなるすべてのメソッドを実装するとしたら、このオブジェクトはこのインターフェースを実装することになります。細かい文法は下の例を参考にしてください。
+
+\begin{lstlisting}[numbers=none]
+type Human struct {
+    name string
+    age int
+    phone string
+}
+
+type Student struct {
+    Human //匿名フィールドHuman
+    school string
+    loan float32
+}
+
+type Employee struct {
+    Human //匿名フィールドHuman
+    company string
+    money float32
+}
+
+//HumanオブジェクトにSayHiメソッドを実装します。
+func (h *Human) SayHi() {
+    fmt.Printf("Hi, I am %s you can call me on %s\n",
+               h.name, h.phone)
+}
+
+// HumanオブジェクトにSingメソッドを実装します。
+func (h *Human) Sing(lyrics string) {
+    fmt.Println("La la, la la la, la la la la la...",
+                lyrics)
+}
+
+//HumanメソッドにGuzzleメソッドを実装します。
+func (h *Human) Guzzle(beerStein string) {
+    fmt.Println("Guzzle Guzzle Guzzle...", beerStein)
+}
+
+// EmployeeはHumanのSayHiメソッドをオーバーロードします。
+func (e *Employee) SayHi() {
+    fmt.Printf("Hi, I am %s, I work at %s. Call me on %s\n",
+               e.name, e.company, e.phone)
+              //この行は複数に渡ってもかまいません。
+}
+
+//StudentはBorrowMoneyメソッドを実装します。
+func (s *Student) BorrowMoney(amount float32) {
+    s.loan += amount // (again and again and...)
+}
+
+//EmployeeはSpendSalaryメソッドを実装します。
+func (e *Employee) SpendSalary(amount float32) {
+    e.money -= amount
+    // More vodka please!!! Get me through the day!
+}
+
+// interfaceを定義します。
+type Men interface {
+    SayHi()
+    Sing(lyrics string)
+    Guzzle(beerStein string)
+}
+
+type YoungChap interface {
+    SayHi()
+    Sing(song string)
+    BorrowMoney(amount float32)
+}
+
+type ElderlyGent interface {
+    SayHi()
+    Sing(song string)
+    SpendSalary(amount float32)
+}
+\end{lstlisting}
+
+上のコードを通して、interfaceは任意のオブジェクトで実装できることがわかるかと思います。上のMen interfaceはHuman、Student及びEmployeeによって実装されます。例えばStudentはMenとYoungChapの２つのinterfaceを実装することになります。
+
+最後に、任意の型は空のinterface（ここではinterface\{\}と定義しましょう）を実装しています。これには0個のメソッドが含まれるinterfaceです。

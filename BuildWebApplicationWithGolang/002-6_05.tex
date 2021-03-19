@@ -1,0 +1,13 @@
+空のinterface(interface\{\})にはなんのメソッドも含まれていません。この通り、すべての型は空のinterfaceを実装しています。空のinterfaceはそれ自体はなんの意味もありません（何のメソッドも含まれていませんから）が、任意の型の数値を保存する際にはかなり役にたちます。これはあらゆる型の数値を保存することができるため、C言語のvoid*型に似ています。
+
+\begin{lstlisting}[numbers=none]
+// aを空のインターフェースとして定義
+var a interface{}
+var i int = 5
+s := "Hello world"
+// aは任意の型の数値を保存できます。
+a = i
+a = s
+\end{lstlisting}
+
+ある関数がinterface\{\}を引数にとると、任意の型の値を引数にとることができます。もし関数がinterface\{\}を返せば、任意の型の値を返すことができるのです。とても便利ですね！

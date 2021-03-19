@@ -1,0 +1,10 @@
+簡単にいえば、interfaceはmethodの組み合わせです。interfaceを通してオブジェクトの振る舞いを定義することができます。
+
+前の章の最後の例でStudentとEmployeeはどちらもSayHiを持っていました。彼らの内部処理は異なりますが、それは重要ではありません。重要なのは彼らがどちらも\texttt{say hi}と言えることです。
+
+続けてさらに拡張していきましょう。StudentとEmployeeで他のメソッド\texttt{Sing}を実現します。その後StudentはBorrowMoneyメソッドを追加してEmployeeはSpendSalaryを追加しましょう。
+
+Studentには３つのメソッドがあることになります：SayHi、Sing、BorrowMoneyです。EmployeeはSayHi、Sing、SpendSalaryです。
+
+このようなメソッドの組み合わせはinterfaceと呼ばれます。そして、それらはStudentとEmployeeで実装されます。StudentとEmployeeはinterfaceのSayHiとSingを実装します。同時にEmployeeはBorrowMoneyを実装しません。そして、StudentはSpendSalaryを実装しません。なぜなら、EmployeeはBorrowMoneyメソッドを持っていません。また、StudentはSpendSalaryメソッドを持っていないからです。
+

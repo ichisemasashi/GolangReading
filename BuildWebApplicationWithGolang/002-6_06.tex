@@ -1,0 +1,49 @@
+interfaceの変数はこのinterface型のオブジェクトを持つことができます。これにより、関数（メソッドを含む）を書く場合思いもよらない思考を与えてくれます。interface引数を定義することで、関数にあらゆる型の引数を受けさせることができるです。
+
+例をあげましょう：fmt.Printlnは私達がもっともよく使う関数です。ですが、任意の型のデータを受けることができる点に気づきましたか。fmtのソースファイルを開くとこのような定義が書かれています：
+
+
+\begin{lstlisting}[numbers=none]
+type Stringer interface {
+     String() string
+}
+\end{lstlisting}
+
+つまり、Stringメソッドを持つ全ての型がfmt.Printlnによってコールされることができるのです。ためしてみましょう。
+
+\begin{lstlisting}[numbers=none]
+package main
+import (
+    "fmt"
+    "strconv"
+)
+
+type Human struct {
+    name string
+    age int
+    phone string
+}
+
+// このメソッドを使ってHumanにfmt.Stringerを実装します。
+func (h Human) String() string {
+    return "<"+h.name+" - "+strconv.Itoa(h.age)+
+           " years -  Tel:" +h.phone+">"
+}
+
+func main() {
+    Bob := Human{"Bob", 39, "000-7777-XXX"}
+    fmt.Println("This Human is : ", Bob)
+}
+\end{lstlisting}
+
+前のBoxの例を思い出してみましょう。Color構造体もメソッドを一つ定義しています：String。実はこれもfmt.Stringerというinterfaceを実装しているのです。つまり、もしある型をfmtパッケージで特殊な形式で出力させようとした場合Stringerインターフェースを実装する必要があります。もしこのインターフェースを実装していなければ、fmtはデフォルトの方法で出力を行います。
+
+\begin{lstlisting}[numbers=none]
+//同じ機能を実装します。
+fmt.Println("The biggest one is",
+            boxes.BiggestsColor().String())
+fmt.Println("The biggest one is",
+            boxes.BiggestsColor())
+\end{lstlisting}
+
+注：errorインターフェースのオブジェクト（Error() stringのオブジェクトを実装）を実装します。fmtを使って出力を行う場合、Error()メソッドがコールされます。そのため、String()メソッドを再定義する必要はありません。
