@@ -1,0 +1,16 @@
+GoではMySQLをサポートしたドライバが現在比較的多く、以下のようにいくつかが存在します。あるものはdatabase/sql標準をサポートしており、またあるものは独自でインターフェースの実装を採用しているものもあります。よく使われるものは以下のいくつかです：
+
+\begin{description}
+  \item[https://github.com/go-sql-driver/mysql] database/sqlをサポートしており、すべてgoで書かれています。
+  \item[https://github.com/ziutek/mymysql] database/sqlをサポートしており、独自に定義されたインターフェースもサポートしています。すべてgoで書かれています。
+  \item[https://github.com/Philio/GoMySQL] database/sqlをサポートしていません。独自のインターフェースで、すべてgoで書かれています。
+\end{description}
+
+以降の例では私ははじめのドライバを使ってまいります。（現在の項目でもこのドライバを使います）、またこのドライバの利用をみなさんにお勧めします。理由は：
+
+\begin{itemize}
+  \item このドライバは比較的新しく、メンテナンスも良いほうです。
+  \item 完全にdatabase/sqlインターフェースをサポートします。
+  \item keepaliveをサポートしています。継続した接続を保持しています。星星(http://www.mikespook.com/)がforkしたmymysqlもkeepaliveをサポートしているとはいえ、スレッドセーフではありません。これは低いレイヤーからkeepaliveをサポートしています。
+\end{itemize}
+

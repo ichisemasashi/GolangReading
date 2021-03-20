@@ -1,0 +1,15 @@
+ValueConverterインターフェースはどのように普通の値をdriver.Valueのインターフェースの変換するか定義されています。
+
+\begin{lstlisting}[numbers=none]
+  type ValueConverter interface {
+    ConvertValue(v interface{}) (Value, error)
+  }
+\end{lstlisting}
+
+開発しているデータベースドライバパッケージではこのインターフェースの関数が多くの場所で利用されています。このValueConverterにはメリットがたくさんあります：
+
+\begin{itemize}
+\item driver.valueはデータベース表の対応するフィールドに特化されています。たとえばint64のデータがどのようにデータベース表のunit16フィールドに変換されるかといったことです。
+\item データベースの検索結果をdriver.Value値に変換します。
+\item scan関数ではどのようにしてdriver.Valueの値をユーザが定義した値に変換するか
+\end{itemize}

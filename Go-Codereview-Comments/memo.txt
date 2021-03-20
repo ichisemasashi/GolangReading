@@ -40,3 +40,6 @@
    \caption{}
 \end{figure}
 
+\begin{quote}
+\end{quote}
+

@@ -1,0 +1,27 @@
+この章では主にGo言語のいくつかの文法をご紹介しました。文法を通してGoがいかに簡単かご覧いただけたかと思います。たった２５個のキーワードです。もう一度これらキーワードが何に使われるのか見てみることにしましょう。
+
+\begin{lstlisting}[numbers=none]
+break    default      func    interface    select
+case     defer        go      map          struct
+chan     else         goto    package      switch
+const    fallthrough  if      range        type
+continue for          import  return       var
+\end{lstlisting}
+
+
+\begin{itemize}
+  \item varとconstは2.2のGo言語の基礎に出てくる変数と定数の宣言を参考にしてください。
+  \item packageとimportにはすでに少し触れました。
+  \item func は関数とメソッドの定義に用いられます。
+  \item return は関数から返るために用いられます。
+  \item defer はデストラクタのようなものです。
+  \item go はマルチスレッドに用いられます。
+  \item select は異なる型の通信を選択するために用いられます。
+  \item interface はインターフェースを定義するために用いられます。2.6章をご参考ください。
+  \item struct は抽象データ型の定義に用いられます。2.5章をご参考ください。
+  \item break、case、continue、for、fallthrough、else、if、switch、goto、defaultは2.3のフロー紹介をご参考ください。
+  \item chanはchannel通信に用いられます。
+  \item typeはカスタム定義型の宣言に用いられます。
+  \item mapはmap型のデータの宣言に用いられます。
+  \item rangeはslice、map、channelデータの読み込みに用いられます。
+\end{itemize}

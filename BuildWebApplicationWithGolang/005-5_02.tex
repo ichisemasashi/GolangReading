@@ -1,0 +1,58 @@
+まず対応するデータベースドライバパッケージをimportする必要があります。database/sql標準インターフェースパッケージおよびbeedbパッケージです：
+
+\begin{lstlisting}[numbers=none]
+import (
+    "database/sql"
+    "github.com/astaxie/beedb"
+    _ "github.com/ziutek/mymysql/godrv"
+)
+\end{lstlisting}
+
+必要なパッケージをインポートした後、データベースへの接続を開く必要があります。その後beedbオブジェクト（たとえばMySQLとします）を作成します
+
+
+\begin{lstlisting}[numbers=none]
+db, err := sql.Open("mymysql", "test/xiemengjun/123456")
+if err != nil {
+    panic(err)
+}
+orm := beedb.New(db)
+\end{lstlisting}
+
+beedbのNew関数は２つの引数を必要とします。一つ目の引数は標準インターフェースのdbで、二つ目の引数は利用するデータベースエンジンです。もしあなたが使用するデータベースエンジンがMySQL/Sqliteだった場合、二つ目の引数は省略してもかまいません。
+
+もしSQLServerをお使いであれば、このように初期化する必要があります：
+
+\begin{lstlisting}[numbers=none]
+orm = beedb.New(db, "mssql")
+\end{lstlisting}
+
+もしPostgreSQLをお使いであれば、初期化は以下のようになります：
+
+\begin{lstlisting}[numbers=none]
+orm = beedb.New(db, "pg")
+\end{lstlisting}
+
+現在beedbはプリントデバッグをサポートしていますので、下のコードでデバッグを行うことができます。
+
+\begin{lstlisting}[numbers=none]
+beedb.OnDebug=true
+\end{lstlisting}
+
+以降の例では前のデータベースのテーブルUserinfoを採用します。まず目的のstructを作成します。
+
+\begin{lstlisting}[numbers=none]
+type Userinfo struct {
+    Uid     int `PK` //もしテーブルのプライマリキーがidで
+                     //なければ、pkコメントを追加する必要が
+                     //あります。このフィールドがプライマリ
+                     //キーであることを明示します。
+    Username    string
+    Departname  string
+    Created     time.Time
+}
+\end{lstlisting}
+
+\begin{quote}
+ご注意ください。beedbはキャメルケースの命名規則を自動でスネークケースのフィールドに変換します。たとえば\texttt{UserInfo}という名前のStructを定義した場合、低レイヤで実装される際に\texttt{user\_info}と変換されます。フィールドの命名もこのルールに従います。
+\end{quote}

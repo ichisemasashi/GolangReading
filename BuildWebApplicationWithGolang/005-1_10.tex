@@ -1,0 +1,16 @@
+Valueは実は空のインターフェースです。どのようなデータも格納することができます。
+
+\begin{lstlisting}[numbers=none]
+type Value interface{}
+\end{lstlisting}
+
+driveのValueはドライバが必ず操作できるValueです。Valueがnilでなければ、下のいずれかとなります
+
+\begin{lstlisting}[numbers=none]
+int64
+float64
+bool
+[]byte
+string   [*]Rows.Nextが返すものを除いてstringではありません。
+time.Time
+\end{lstlisting}

@@ -1,0 +1,46 @@
+ここではひとつだけのchannelがある状況についてご紹介しました。では複数のchannelが存在した場合、どのように操作すべきでしょうか。Goではキーワード\texttt{select}を提供しています。\texttt{select}を通して、channel上のデータを監視することができます。
+
+\texttt{select}はデフォルトでブロックされます。channelの中でやりとりされるデータを監視する時のみ実行します。複数のchannelの準備が整った時に、selectはランダムにひとつ選択し、実行します。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import "fmt"
+
+func fibonacci(c, quit chan int) {
+    x, y := 1, 1
+    for {
+        select {
+        case c <- x:
+            x, y = y, x + y
+        case <-quit:
+            fmt.Println("quit")
+            return
+        }
+    }
+}
+
+func main() {
+    c := make(chan int)
+    quit := make(chan int)
+    go func() {
+        for i := 0; i < 10; i++ {
+            fmt.Println(<-c)
+        }
+        quit <- 0
+    }()
+    fibonacci(c, quit)
+}
+\end{lstlisting}
+
+\texttt{select}の中にもdefault文があります。\texttt{select}は実はswitchの機能によくにています。defaultは監視しているchannelがどれも準備が整っていない時に、デフォルトで実行されます。（selectはchannelを待ってブロックしません。）
+
+\begin{lstlisting}[numbers=none]
+select {
+case i := <-c:
+    // use i
+default:
+    // cがブロックされた時にここが実行されます。
+}
+\end{lstlisting}
+

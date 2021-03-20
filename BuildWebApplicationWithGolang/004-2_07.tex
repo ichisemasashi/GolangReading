@@ -1,0 +1,26 @@
+フォームの中の\texttt{<select>}要素が生成するプルダウンメニューにおいて、ハッカーは時々このプルダウンメニューに無い項目を偽造してあなたに送りつけるかもしれません。このような場合値がもともと設定されたものであることを判断するにはどうすればよいでしょうか？
+
+selectには以下の要素があるとします：
+
+
+\begin{lstlisting}[numbers=none]
+<select name="fruit">
+<option value="apple">apple</option>
+<option value="pear">pear</option>
+<option value="banane">banane</option>
+</select>
+\end{lstlisting}
+
+この場合は以下のように検証することができます
+
+\begin{lstlisting}[numbers=none]
+slice:=[]string{"apple","pear","banane"}
+
+for _, v := range slice {
+    if v == r.Form.Get("fruit") {
+        return true
+    }
+}
+return false
+\end{lstlisting}
+

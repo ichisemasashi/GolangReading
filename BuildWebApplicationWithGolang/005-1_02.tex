@@ -1,0 +1,23 @@
+Driverはデータベースドライバのインターフェースです。methodがひとつ定義されています： Open(name string)、このメソッドはデータベースのConnインターフェースを一つ返します。
+
+\begin{lstlisting}[numbers=none]
+type Driver interface {
+    Open(name string) (Conn, error)
+}
+\end{lstlisting}
+
+返されるConnは一回のgoroutineの操作を行う事ができるだけです。このConnをGoの複数のgoroutineの中に使うことはできません。以下のコードはエラーが発生します。
+
+\begin{lstlisting}[numbers=none]
+...
+go goroutineA (Conn)  //検索操作の実行
+go goroutineB (Conn)  //挿入操作の実行
+...
+
+\end{lstlisting}
+
+上のようなコードではGoにとってどのような操作がどのgoroutineによって行われたのか知り得ませんのでデータの混乱を招きます。たとえばgoroutineAで実行された検索操作の結果をgoroutineBに返す場合Bはこの結果を自分が実行した挿入データだと誤解してしまいます。
+
+サードパーティドライバはすべてこの関数を定義しています。これはname引数を解析することによって目的のデータベースの接続情報を得ることができます。解析が終わると、この情報を使って、ひとつのConnを初期化し、それを返します。
+
+

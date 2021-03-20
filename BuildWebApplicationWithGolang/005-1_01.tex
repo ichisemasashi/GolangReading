@@ -1,0 +1,42 @@
+database/sqlに存在する関数はデータベースドライバを登録するためにあります。サードパーティの開発者がデータベースドライバを開発する時は、すべてinit関数を実装します。init関数ではこの\texttt{Register(name string, driver driver.Driver)}をコールすることでこのドライバの登録を完了させます。
+
+mymysql、sqlite3のドライバではどのようにコールしているのか見てみることにしましょう：
+
+\begin{lstlisting}[numbers=none]
+//https://github.com/mattn/go-sqlite3ドライバ
+func init() {
+    sql.Register("sqlite3", &SQLiteDriver{})
+}
+
+//https://github.com/mikespook/mymysqlドライバ
+// Driver automatically registered in database/sql
+var d = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
+func init() {
+    Register("SET NAMES utf8")
+    sql.Register("mymysql", &d)
+}
+\end{lstlisting}
+
+サードパーティのデータベースドライバはすべてこの関数をコールすることで自分のデータベースドライバの名前と目的のdriverを登録することがお分かりいただけたかと思います。database/sqlの内部ではひとつのmapを通してユーザが定義した目的のドライバを保存します。
+
+\begin{lstlisting}[numbers=none]
+var drivers = make(map[string]driver.Driver)
+
+drivers[name] = driver
+\end{lstlisting}
+
+なぜならdatabase/sqlによって関数を登録できると同時に複数のデータベースドライバを登録することができるからです。重複させなければよいだけです。
+
+
+\begin{quote}
+database/sqlインターフェースとサードパーティライブラリを使用する時、よく以下のようになります：
+\begin{lstlisting}[numbers=none]
+import (
+    "database/sql"
+     _ "github.com/mattn/go-sqlite3"
+)
+\end{lstlisting}
+新人はこの\texttt{\_}にとても戸惑いがちです。実はこれはGoの絶妙な設計なのです。変数に値を代入する際、よくこの記号が現れます。これは変数を代入する時のプレースホルダの省略です。パッケージのインポートにこの記号を使っても同じような作用があります。ここで使用した\texttt{\_}はインポートした後のパッケージ名で、このパッケージに定義されている関数、変数などのリソースを直接使用しない事を意味しています。
+
+2.3節のフローと関数の章においてinit関数の初期化プロセスをご紹介しました。パッケージがインポートされる際はパッケージのinit関数が自動的にコールされ、このパッケージに対する初期化が完了します。そのため、上のデータベースドライバパッケージをインポートするとinit関数が自動的にコールされます。つぎに、init関数でこのデータベースドライバを登録し、以降のコードの中で直接このデータベースドライバを直接使用することができます。
+\end{quote}

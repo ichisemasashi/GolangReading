@@ -1,0 +1,74 @@
+beedbの検索インターフェースは使いやすく、具体的な使用方法は下の例をご覧ください。
+
+例1、プライマリキーによってデータを取得：
+
+\begin{lstlisting}[numbers=none]
+var user Userinfo
+//Whereは2つの引数を受け取ります。int型の引数をサポートします。
+orm.Where("uid=?", 27).Find(&user)
+\end{lstlisting}
+
+例2：
+
+\begin{lstlisting}[numbers=none]
+var user2 Userinfo
+orm.Where(3).Find(&user2) // これは上の省略版です。
+                          //プライマリキーは省略できます。
+\end{lstlisting}
+
+例3、プライマリキーではない条件：
+
+\begin{lstlisting}[numbers=none]
+var user3 Userinfo
+//Whereは2つの引数を受け取ります。文字列型の引数をサポートします。
+orm.Where("name     = ?", "john").Find(&user3)
+\end{lstlisting}
+
+例4、もっと複雑な条件：
+
+\begin{lstlisting}[numbers=none]
+var user4 Userinfo
+//Whereは3つの引数をサポートします。
+orm.Where("name = ? and age < ?", "john", 88).Find(&user4)
+\end{lstlisting}
+
+下のインターフェースを通して複数のデータを取得できます。例をご覧ください。
+
+例1、条件id$>$3にもとづいて、20からはじまる10件のデータを取得します。
+
+
+\begin{lstlisting}[numbers=none]
+var allusers []Userinfo
+err := orm.Where("id > ?", "3").Limit(10,20).FindAll(&allusers)
+\end{lstlisting}
+
+例2、limitの第二引数は省略できます。デフォルトは0から開始となります。10件のデータを取得します。
+
+\begin{lstlisting}[numbers=none]
+var tenusers []Userinfo
+err := orm.Where("id > ?", "3").Limit(10).FindAll(&tenusers)
+\end{lstlisting}
+
+例3、すべてのデータを取得します。
+
+\begin{lstlisting}[numbers=none]
+var everyone []Userinfo
+err := orm.OrderBy("uid desc,username asc").FindAll(&everyone)
+\end{lstlisting}
+
+上ではLimit関数があります。これは検索結果の数をコントロールするのに用いられます。
+
+Limit:2つの引数をサポートします。第一引数は検索数を表し、第二引数は取得するデータの開始位置を表しています。デフォルトは0です。
+
+OrderBy:この関数は検索をソートするために用いられます。引数はソートの条件である必要があります。
+
+上の例では取得するデータが直接structオブジェクトにマッピングされます。もし、データをmapとして取得したいだけであれば、下の方法で実現することができます：
+
+\begin{lstlisting}[numbers=none]
+a, _ := orm.SetTable("userinfo").SetPK("uid").
+            Where(2).Select("uid,username").FindMap()
+\end{lstlisting}
+
+上とこの例の中ではまた新しいインターフェースの関数Selectがでてきました。この関数はいくつのフィールドを検索したいのか定義するために用いられます。デフォルトでは全てのフィールドとなる\texttt{*}となります。
+
+FindMap()関数は\texttt{[]map[string][]byte}型を返します。そのため、自分自身で型変換を行う必要があります。

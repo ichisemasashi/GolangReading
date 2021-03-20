@@ -1,0 +1,28 @@
+上ではデフォルトでバッファリング型の無いchannelをご紹介しました。しかし、Goはchannelのバッファリングの大小も指定することを許しています。とても簡単です。つまりchannelはいくつもの要素を保存することができるのです。ch:= make(chan bool, 4)は４つのbool型の要素を持てるchannelを作成します。このchannelの中で、前の4つの要素はブロックされずに入力することができます。５番目の要素が入力された場合、コードはブロックされ、その他のgoroutineがchannelから要素を取り出すまで空間を退避します。
+
+
+\begin{lstlisting}[numbers=none]
+ch := make(chan type, value)
+
+value == 0 ! バッファリング無し（ブロック）
+value > 0 ! バッファリング（ブロック無し、value個の要素まで）
+\end{lstlisting}
+
+下の例をご覧ください。ローカルでテストしてみることができます。対応するvalue値を変更してください
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import "fmt"
+
+func main() {
+    c := make(chan int, 2)
+    //2を1に修正するとエラーが発生します。
+    //2を3に修正すると正常に実行されます。
+    c <- 1
+    c <- 2
+    fmt.Println(<-c)
+    fmt.Println(<-c)
+}
+\end{lstlisting}
+

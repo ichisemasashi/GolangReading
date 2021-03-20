@@ -1,0 +1,18 @@
+現在beedbはstructのリレーションをサポートしていません。しかしいくつかのアプリケーションはリレーションによる検索を必要としています。そのため、現在beedbは簡単なソリューションを提供しています。
+
+\begin{lstlisting}[numbers=none]
+a, _ := orm.SetTable("userinfo").
+        Join("LEFT", "userdeatail", "userinfo.uid=userdeatail.uid").
+        Where("userinfo.uid=?", 1).
+        Select("userinfo.uid,userinfo.username,userdeatail.profile").
+        FindMap()
+\end{lstlisting}
+
+
+上のコードでは新しいインターフェースのJoin関数が出て来ました。この関数には3つの引数があります。
+
+\begin{itemize}
+  \item 第一引数には：INNER, LEFT, OURTER, CROSS等が入れられます
+  \item 第二匹数は接続するテーブルを表します
+  \item 第三引数は接続の条件を表します
+\end{itemize}

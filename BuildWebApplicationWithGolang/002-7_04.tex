@@ -1,0 +1,35 @@
+上の例では、２回cの値を読み込む必要がありました。これではあまり便利ではありません。Goはこの点を考慮し、rangeによってsliceやmapを操作するのと同じ感覚でバッファリング型のchannelを操作することができます。下の例をご覧ください。
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+)
+
+func fibonacci(n int, c chan int) {
+    x, y := 1, 1
+    for i := 0; i < n; i++ {
+        c <- x
+        x, y = y, x + y
+    }
+    close(c)
+}
+
+func main() {
+    c := make(chan int, 10)
+    go fibonacci(cap(c), c)
+    for i := range c {
+        fmt.Println(i)
+    }
+}
+\end{lstlisting}
+
+\texttt{for i := range c}でこのchannelがクローズを明示されるまで連続してchannelの中のデータを読み込むことができます。上のコードでchannelのクローズが明示されているのが確認できるかと思います。生産者は\texttt{close}ビルトイン関数によってchannelを閉じます。channelを閉じた後はいかなるデータも送信することはできません。消費側は\texttt{v, ok := <-ch}という式でchannelがすでに閉じられているかテストすることができます。もしokにfalseが返ってきたら、channelはすでにどのようなデータも無く、閉じられているということになります。
+
+\begin{quote}
+生産者の方でchannelが閉じられる事に注意してください。消費側ではありません。これは容易にpanicを引き起こします。
+
+また、channelはファイルのようなものでないことにも注意してください。頻繁に閉じる必要はありません。何のデータも送ることが無い場合またはrangeループを終了させたい場合などで結構です。
+\end{quote}

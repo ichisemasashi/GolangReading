@@ -1,0 +1,110 @@
+データベースのテーブル作成文：
+
+
+\begin{lstlisting}[numbers=none]
+CREATE TABLE userinfo
+(
+    uid serial NOT NULL,
+    username character varying(100) NOT NULL,
+    departname character varying(500) NOT NULL,
+    Created date,
+    CONSTRAINT userinfo_pkey PRIMARY KEY (uid)
+)
+WITH (OIDS=FALSE);
+
+CREATE TABLE userdeatail
+(
+    uid integer,
+    intro character varying(100),
+    profile character varying(100)
+)
+WITH(OIDS=FALSE);
+\end{lstlisting}
+
+下ではGoがどのようにデータベースのテーブルのデータを操作するか見て行きましょう：追加・削除・修正・検索
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "database/sql"
+    "fmt"
+    _ "https://github.com/lib/pq"
+)
+
+func main() {
+    db, err := sql.Open("postgres", "user=astaxie password=astaxie
+                         dbname=test sslmode=disable")
+    checkErr(err)
+
+    //データの挿入
+    stmt, err := db.Prepare("INSERT INTO userinfo(username,departname,
+                              created) VALUES($1,$2,$3) RETURNING uid")
+    checkErr(err)
+
+    res, err := stmt.Exec("astaxie", "研究開発部門", "2012-12-09")
+    checkErr(err)
+
+    //pgはこの関数をサポートしていません。
+    //MySQLのインクリメンタルなIDのようなものが無いためです。
+    id, err := res.LastInsertId()
+    checkErr(err)
+
+    fmt.Println(id)
+
+    //データの更新
+    stmt, err = db.Prepare("update userinfo set username=$1 where
+                                                          uid=$2")
+    checkErr(err)
+
+    res, err = stmt.Exec("astaxieupdate", 1)
+    checkErr(err)
+
+    affect, err := res.RowsAffected()
+    checkErr(err)
+
+    fmt.Println(affect)
+
+    //データの検索
+    rows, err := db.Query("SELECT * FROM userinfo")
+    checkErr(err)
+
+    for rows.Next() {
+        var uid int
+        var username string
+        var department string
+        var created string
+        err = rows.Scan(&uid, &username, &department, &created)
+        checkErr(err)
+        fmt.Println(uid)
+        fmt.Println(username)
+        fmt.Println(department)
+        fmt.Println(created)
+    }
+
+    //データの削除
+    stmt, err = db.Prepare("delete from userinfo where uid=$1")
+    checkErr(err)
+
+    res, err = stmt.Exec(1)
+    checkErr(err)
+
+    affect, err = res.RowsAffected()
+    checkErr(err)
+
+    fmt.Println(affect)
+
+    db.Close()
+
+}
+
+func checkErr(err error) {
+    if err != nil {
+        panic(err)
+    }
+}
+\end{lstlisting}
+
+上のコードによって、PostgreSQLが\texttt{\$1}や\texttt{\$2}といった方法によって引数を渡している様子がお分かりいただけるかとおもいます。MySQLの中の\texttt{?}ではありません。また、sql.Openではdsn情報のシンタックスがMySQLのドライバでのdsnシンタックスと異なります。そのため、使用される際はこの違いにご注意ください。
+
+また、pgはLastInsertId関数をサポートしていません。PostgreSQLの内部ではMySQLのインクリメンタルなIDを返すといった実装がないためです。その他のコードはほとんど同じです。

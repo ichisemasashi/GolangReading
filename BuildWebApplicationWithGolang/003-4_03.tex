@@ -1,0 +1,32 @@
+httpパッケージへの分析を通して、全体のコードの実行プロセスを整理してみましょう。
+
+\begin{itemize}
+  \item まずHttp.HandleFuncをコールします。\\ 順序にしたがっていくつかの事を行います：
+  \begin{enumerate}
+  \item DefaultServeMuxのHandlerFuncをコールする。
+  \item DefaultServeMuxのHandleをコールする。
+  \item DefaultServeMuxのmap[string]muxEntryで目的のhandlerとルーティングルールを追加する。
+  \end{enumerate}
+  \item 次にhttp.ListenAndServe(":9090", nil)をコールする。\\ 順序にしたがっていくつかの事を行う：
+  \begin{enumerate}
+  \item Serverのエンティティ化
+  \item ServerのListenAndServe()をコールする
+  \item net.Listen("tcp", addr)をコールし、ポートを監視する
+  \item forループを起動し、ループの中でリクエストをAcceptする
+  \item 各リクエストに対してConnを一つエンティティ化し、このリクエストに対しgoroutineを一つ開いてgo c.serve()のサービスを行う。
+  \item 各リクエストの内容を読み込むw, err := c.readRequest()
+  \item handlerが空でないか判断する。もしhandlerが設定されていなければ（この例ではhandlerは設定していません）、handlerはDefaultServeMuxに設定されます。
+  \item handlerのServeHttpをコールする
+  \item この例の中では、この後DefaultServeMux.ServeHttpの中に入ります
+  \item requestに従ってhandlerを選択し、このhandlerのServeHTTPに入ります
+    \begin{lstlisting}[numbers=none]
+mux.handler(r).ServeHTTP(w, r)
+  \end{lstlisting}
+  \item handlerを選択します：
+\begin{itemize}
+  \item ルータがこのrequestを満足したか判断します（ループによってServerMuxのmuxEntryを走査します。）
+  \item もしルーティングされれば、このルーティングhandlerのServeHttpをコールします。
+  \item ルーティングされなければ、NotFoundHandlerのServeHttpをコールします
+\end{itemize}
+  \end{enumerate}
+\end{itemize}

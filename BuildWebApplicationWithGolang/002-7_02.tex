@@ -1,0 +1,45 @@
+goroutineは同じアドレス空間で実行されます。そのため、共有されたメモリへのアクセスはかならず同期されていなければなりません。では、goroutineの間ではどのようにしてデータの通信を行うのでしょうか。Goはチャネルというとても良い通信機構を提供しています。チャネルはUnix shellとの双方向パイプを作成します。これを通して値を送信したり受信することができます。これらの値は特定の型のみが許容されます。チャネル型。channelを定義した場合チャネルに送信する値の型も定義しなければなりません。ご注意ください。かならずmakeを使ってchannelを作成します。
+
+\begin{lstlisting}[numbers=none]
+ci := make(chan int)
+cs := make(chan string)
+cf := make(chan interface{})
+\end{lstlisting}
+
+channelは\texttt{<-}演算子を使ってデータを送ったり受けたりします。
+
+\begin{lstlisting}[numbers=none]
+ch <- v    // vをchannel chに送る。
+v := <-ch  // chの中からデータを受け取り、vに代入する。
+\end{lstlisting}
+
+これを私達の例の中に当てはめてみましょう：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import "fmt"
+
+func sum(a []int, c chan int) {
+    total := 0
+    for _, v := range a {
+        total += v
+    }
+    c <- total  // send total to c
+}
+
+func main() {
+    a := []int{7, 2, 8, -9, 4, 0}
+
+    c := make(chan int)
+    go sum(a[:len(a)/2], c)
+    go sum(a[len(a)/2:], c)
+    x, y := <-c, <-c  // receive from c
+
+    fmt.Println(x, y, x + y)
+}
+\end{lstlisting}
+
+デフォルトでは、channelがやり取りするデータはブロックされています。もう片方が準備できていなければ、Goroutinesの同期はもっと簡単になります。lockを表示する必要はありません。いわゆるブロックとは、もし（value := $<$-ch）を読み取った場合、これはブロックされます。データを受け取った段階で（ch$<$-5）を送信するいずれのものもデータが読み込まれるまでブロックされます。バッファリングの無いchannelは複数のgoroutineの間で同期を行う非常に優れたツールです。
+
+

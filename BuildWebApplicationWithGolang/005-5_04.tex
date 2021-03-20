@@ -1,0 +1,24 @@
+つづけて上の例で更新操作をご覧にいれましょう。現在saveoneのプライマリキーはすでに値が存在します。この時saveインターフェースをコールして、beedb内は自動的にupdateをコールすることによってデータの更新を行います。挿入操作ではありません。
+
+\begin{lstlisting}[numbers=none]
+saveone.Username = "Update Username"
+saveone.Departname = "Update Departname"
+saveone.Created = time.Now()
+orm.Save(&saveone)  //現在saveoneにはプライマリキーが
+                    //あります。更新操作を行います。
+\end{lstlisting}
+
+データの更新はmap操作の直接の使用をサポートしています。
+
+\begin{lstlisting}[numbers=none]
+t := make(map[string]interface{})
+t["username"] = "astaxie"
+orm.SetTable("userinfo").SetPK("uid").Where(2).Update(t)
+\end{lstlisting}
+
+ここではいくつかのbeedbの関数をコールしてみます。
+
+SetPK：ORMに対して、データベースのテーブル\texttt{userinfo}のプライマリキーがuidであることを明示します。
+
+Where:条件を設定するために用いられます。複数の引数をサポートし、第一引数がもし整数であった場合、Where("プライマリキー=?",値)がコールされたものとなります。 Update関数はmap型のデータを受け取り、データの更新を実行します。
+

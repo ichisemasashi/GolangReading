@@ -1,0 +1,10 @@
+あるユーザの英語名を知りたいときなど、フォームの要素から英語の値を取り出したい場合は、astaxieであってasta謝ではないはずです。（訳注:「謝」はピンインでxieと書く）
+
+
+簡単な正規表現を使ってデータを検証することができます：
+
+\begin{lstlisting}[numbers=none]
+if m, _ := regexp.MatchString("^[a-zA-Z]+$", r.Form.Get("engname")); !m {
+    return false
+}
+\end{lstlisting}

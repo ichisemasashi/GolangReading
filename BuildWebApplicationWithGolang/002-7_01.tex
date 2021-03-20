@@ -1,0 +1,52 @@
+goroutineはGoのマルチスレッドのコアです。goroutineは実は最初から最後までスレッドです。しかしスレッドよりも小さく、十数個のgoroutineは低レイヤーで5,6個のスレッドを実現しているだけです。Go言語の内部ではこれらのgoroutineの間ではメモリの共有を実現しています。goroutineを実行するには非常に少ないスタックメモリ（大体4$\sim$5KBです。）を必要とするだけです。当然対応するデータによって伸縮しますが、まさにこのためいくつものマルチスレッドタスクを実行することができます。goroutineはthreadに比べより使いやすく、効果的で、便利です。
+
+goroutineはGoのruntime管理を利用したスレッドコントローラです。goroutineは\texttt{go}キーワードによって実現します。実は単なる普通の関数です。
+
+\begin{lstlisting}[numbers=none]
+go hello(a, b, c)
+\end{lstlisting}
+
+キーワードgoを通じてgoroutineを起動します。例を見てみましょう。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "runtime"
+)
+
+func say(s string) {
+    for i := 0; i < 5; i++ {
+        runtime.Gosched()
+        fmt.Println(s)
+    }
+}
+
+func main() {
+    go say("world") //新しいGoroutinesを実行する。
+    say("hello") //現在のGoroutines実行
+}
+
+// 上のプログラムを実行すると以下のように出力されます：
+// hello
+// world
+// hello
+// world
+// hello
+// world
+// hello
+// world
+// hello
+\end{lstlisting}
+
+goキーワードで非常に簡単にマルチスレッドプログラミングを実現することがお分かりいただけるかと思います。 上の複数のgoroutineは同じプロセスで実行されています。メモリのデータを共有しますが、デザイン上共有を利用して通信を行ったりせず、通信によって共有を行うようにしましょう。
+
+
+\begin{quote}
+    runtime.Gosched()ではCPUに時間を他の人に受け渡します。次にある段階で継続してこのgoroutineを実行します。
+
+    デフォルトでは、ディスパッチャはプロセスを使うのみで、マルチスレッドを実現するだけです。マルチコアプロセッサのマルチスレッドを実現したい場合は、我々のプログラムでruntime.GOMAXPROCS(n)をコールすることでディスパッチャに同時に複数のプロセスを使用させる必要があります。GOMAXPROCSは同時に実行するロジックコードのシステムプロセスの最大数を設定し、前の設定を返します。もしn < 1であった場合、現在の設定は変更されません。Goの新しいバージョンでディスパッチャが修正されれば、これは削除されるでしょう。Robによるマルチスレッドの開発についてはこちらに文章があります。http:\//\//concur.rspace.googlecode.com\//hg\//talk\//concur.html\#landing-slide
+\end{quote}
+
+

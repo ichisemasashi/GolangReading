@@ -1,0 +1,41 @@
+下のコードはどのように記録を挿入するか示しています。我々が操作しているのはstructオブジェクトで、元々のsql文ではありません。Saveインターフェースをコールしてデータをデータベースに保存します。
+
+\begin{lstlisting}[numbers=none]
+var saveone Userinfo
+saveone.Username = "Test Add User"
+saveone.Departname = "Test Add Departname"
+saveone.Created = time.Now()
+orm.Save(&saveone)
+\end{lstlisting}
+
+挿入後、挿入に成功した際のインクリメンタルなIDが\texttt{saveone.Uid}です。Saveインターフェースは自動的に保存します。
+
+beedbインターフェースはもう一種類の挿入の方法を提供しています。mapデータ挿入です。
+
+\begin{lstlisting}[numbers=none]
+add := make(map[string]interface{})
+add["username"] = "astaxie"
+add["departname"] = "cloud develop"
+add["created"] = "2012-12-02"
+orm.SetTable("userinfo").Insert(add)
+\end{lstlisting}
+
+複数のデータを挿入
+
+\begin{lstlisting}[numbers=none]
+addslice := make([]map[string]interface{}, 0)
+add:=make(map[string]interface{})
+add2:=make(map[string]interface{})
+add["username"] = "astaxie"
+add["departname"] = "cloud develop"
+add["created"] = "2012-12-02"
+add2["username"] = "astaxie2"
+add2["departname"] = "cloud develop2"
+add2["created"] = "2012-12-02"
+addslice =append(addslice, add, add2)
+orm.SetTable("userinfo").InsertBatch(addslice)
+\end{lstlisting}
+
+上の操作方法はメソッドチェーンによる検索にすこし似ています。jqueryに詳しい方はとても馴染みがあるのではないでしょうか。毎回コールされるmethodはすべてもともとのormオブジェクトを返しているので、継続してオブジェクトの他のmethodをコールすることができます。
+
+上でコールしたSetTable関数はORMに対して、これから実行するこのmapに対応したデータベーステーブルが\texttt{userinfo}であると明示しています。

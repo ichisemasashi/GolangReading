@@ -1,0 +1,9 @@
+RowsAffectedは実はint64のエイリアスです。しかしResultインターフェースを実装していますので、低レイヤーでResultの表示メソッドを実装するために用いられます。
+
+\begin{lstlisting}[numbers=none]
+type RowsAffected int64
+
+func (RowsAffected) LastInsertId() (int64, error)
+
+func (v RowsAffected) RowsAffected() (int64, error)
+\end{lstlisting}

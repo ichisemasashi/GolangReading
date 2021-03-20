@@ -1,0 +1,19 @@
+男と女という性別の選択肢を出力するようなラジオボタンでどれかが選択されているか判断するとします。15歳の退屈な少年がhttpプロトコルの本を片手にtelnetクライアントからあなたのプログラムに対してリクエストを送信したとしましょう。あなたは男に1を、女に2を設定していて、彼が3という値を送信した場合、あなたのプログラムは例外を出すでしょうか？プルダウンメニューの判断と同じように我々が得ようとしている値がそもそも設定されたものであるかを判断しなければなりません。
+
+\begin{lstlisting}[numbers=none]
+<input type="radio" name="gender" value="1">男
+<input type="radio" name="gender" value="2">女
+\end{lstlisting}
+
+プルダウンメニューの方法と同じように行うことができます
+
+\begin{lstlisting}[numbers=none]
+slice:=[]int{1,2}
+
+for _, v := range slice {
+    if v == r.Form.Get("gender") {
+        return true
+    }
+}
+return false
+\end{lstlisting}

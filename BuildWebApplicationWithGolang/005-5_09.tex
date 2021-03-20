@@ -1,0 +1,22 @@
+現在beedbはすでに多くの国内外からのユーザによってフィードバックを得ています。現在作り直しを考えています。以降ではいくつかの方面で改良が行われる予定です。
+
+\begin{itemize}
+  \item interface設計の実装。database/sql/driverの設計に似て、beedbのインターフェースを設計します。その後対応するデータベースのCRUD操作を実現します。
+  \item リレーショナルデータベースの設計の実現。一対一、一対多、多対多のサポートを実現します。コードは以下のとおり：
+\begin{lstlisting}[numbers=none]
+type Profile struct{
+    Nickname    string
+    Mobile        string
+}
+
+type Userinfo struct {
+    Uid     int `PK`
+    Username    string
+    Departname  string
+    Created     time.Time
+    Profile     `HasOne`
+}
+\end{lstlisting}
+  \item 自動的にデータベース、テーブル、インデックスを作成
+  \item 接続プールの実現、goroutineを採用。
+\end{itemize}

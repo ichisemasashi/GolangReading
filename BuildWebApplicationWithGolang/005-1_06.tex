@@ -1,0 +1,9 @@
+これはConnが実装できるインターフェースです。
+
+\begin{lstlisting}[numbers=none]
+type Execer interface {
+    Exec(query string, args []Value) (Result, error)
+}
+\end{lstlisting}
+
+もしこのインターフェースの定義がなければ、DB.Execがコールされます。つまり、まずPrepareがコールされStmtを返し、その後StmtのExecが実行され、Stmtが閉じられます。

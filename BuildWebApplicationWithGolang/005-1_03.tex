@@ -1,0 +1,16 @@
+Connはデータベース接続のインターフェース定義です。これにはいくつかのメソッドが定義されています。このConnはひとつのgoroutineの中でしか使用することができず、複数のgoroutineの中では使用することができません。詳細は上の説明をご確認ください。
+
+\begin{lstlisting}[numbers=none]
+type Conn interface {
+    Prepare(query string) (Stmt, error)
+    Close() error
+    Begin() (Tx, error)
+}
+\end{lstlisting}
+
+Prepare関数は現在の接続と関連した実行されるSQL文の準備状態を返します。検索、削除等の操作を行うことができます。
+
+Close関数は現在の接続を閉じます。接続が持っているリソースを開放するなど整理作業を行います。ドライバはdatabase/sqlの中のconn poolを実現しているので、問題を起こしやすいのです。
+
+Begin関数はトランザクション処理を表すTxを返します。これを利用して検索、更新といった操作を行うことができます。またはトランザクションに対してロールバックやコミットを行います。
+

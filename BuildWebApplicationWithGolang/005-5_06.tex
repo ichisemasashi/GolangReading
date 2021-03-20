@@ -1,0 +1,23 @@
+beedbは豊富なデータ削除インターフェースを備えています。下の例をご覧ください。
+
+例1、単一のデータを削除
+
+\begin{lstlisting}[numbers=none]
+//saveoneは上の例で示したあのsaveoneです。
+orm.Delete(&saveone)
+\end{lstlisting}
+
+例2、複数のデータを削除
+
+\begin{lstlisting}[numbers=none]
+//alluserは上で定義した複数のデータのsliceです。
+orm.DeleteAll(&alluser)
+\end{lstlisting}
+
+例3、sqlにしたがってデータを削除
+
+\begin{lstlisting}[numbers=none]
+orm.SetTable("userinfo").Where("uid>?", 3).DeleteRow()
+\end{lstlisting}
+
+

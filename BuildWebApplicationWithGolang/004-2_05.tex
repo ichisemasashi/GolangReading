@@ -1,0 +1,10 @@
+ユーザが入力したEmailアドレスが正しいか確認したい場合は以下のような方法で検証できます：
+
+\begin{lstlisting}[numbers=none]
+if m, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`,
+                              r.Form.Get("email")); !m {
+    fmt.Println("no")
+}else{
+    fmt.Println("yes")
+}
+\end{lstlisting}

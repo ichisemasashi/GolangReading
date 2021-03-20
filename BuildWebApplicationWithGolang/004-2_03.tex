@@ -1,0 +1,7 @@
+フォームの要素からユーザの中国語名を得たい場合で、なおかつ正しい中国語であることを保証したい場合、検証を行う必要があります。ユーザに自由に入力はさせません。中国語に対する有効な検証には、\texttt{unicode} パッケージが提供する \texttt{func Is(rangeTab *RangeTable, r rune) bool} と正規表現を使う方法があります。下のコードをご確認ください
+
+\begin{lstlisting}[numbers=none]
+if m, _ := regexp.MatchString("^\\p{Han}+$", r.Form.Get("realname")); !m {
+    return false
+}
+\end{lstlisting}

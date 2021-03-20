@@ -1,0 +1,12 @@
+beedbは私が開発したGoによるORM操作のためのライブラリです。これはGo styleの方法でデータベースに対し操作を行います。structからテーブルの記録へのマッピングを実現します。beedbは十分軽量なGo ORMフレームワークです。このライブラリを開発した動機は複雑なORM学習曲線を引き下げたいと思ったからです。出来る限りORMの実行効率と機能の間でバランスをとったつもりです。beedbは現在オープンソースのGo ORMフレームワークの中で比較的完全なライブラリのひとつです。また、実行効率も相当良く、機能も基本的に需要を満足させています。しかし現在はまだアソシエーション関係をサポートしておらず、これは次のバージョンの主なポイントです。
+
+beedbはdatabase/sql標準インターフェースをサポートしたORMライブラリです。そのため、理論上では、データベースドライバがdatabase/sqlインターフェースをサポートしていさえすればすんなりbeedbを使うことができます。現在までに私がテストしたドライバパッケージは以下のとおり：
+
+\begin{description}
+  \item Mysql:github.com/ziutek/mymysql/godrv[*]
+  \item Mysql:github/go-mysql-driver/mysql[*]
+  \item PostgreSQL:github.com/lib/pq[*]
+  \item SQLite:github.com/mattn/go-sqlite3[*]
+  \item MS ADODB: github.com/mattn/go-adodb[*]
+  \item ODBC: bitbucket.org/miquella/mgodbc[*]
+\end{description}

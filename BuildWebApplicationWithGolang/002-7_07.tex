@@ -1,0 +1,9 @@
+runtimeパッケージにはgoroutineを処理するいくつかの関数が含まれます：
+
+\begin{description}
+  \item[Goexit] 事前に実行されたgoroutineから抜けます。ただし、defer関数は継続してコールされます。
+  \item[Gosched] 事前のgoroutineの実行権限をジェネレートします。ディスパッチャが他の待機中のタスクの実行を予定し、次のある時点でこの位置から実行を復元します。
+  \item[NumCPU] CPUのコア数を返します。
+  \item[NumGoroutine] 現在実行しているgoroutineの総数を返します。
+  \item[GOMAXPROCS] 実行できるCPUコア数の最大値を設定し、前のコア数を返します。
+\end{description}

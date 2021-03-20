@@ -1,0 +1,12 @@
+これはUpdate/Insertといった操作が行った結果を返すインターフェースの定義です。
+
+\begin{lstlisting}[numbers=none]
+type Result interface {
+    LastInsertId() (int64, error)
+    RowsAffected() (int64, error)
+}
+\end{lstlisting}
+
+LastInsertId関数はデータベースによって実行された挿入操作によって得られるインクリメントIDを返します。
+
+RowsAffected関数はquery操作で影響されるデータの数を返します。

@@ -1,0 +1,16 @@
+いくつかのアプリケーションがgroup byとhavingの機能を必要としているため、beedbも簡単な実現方法を提供しています。
+
+
+\begin{lstlisting}[numbers=none]
+a, _ := orm.SetTable("userinfo").
+            GroupBy("username").
+            Having("username='astaxie'").
+            FindMap()
+\end{lstlisting}
+
+上のコードで現れる2つの新しいインターフェースの関数
+
+GroupBy:groupbyのフィールドを実行するために用いられます
+
+Having:havingを実行する際の条件を指定するために用いられます
+

@@ -1,0 +1,21 @@
+ときどきgoroutineがブロックされる状況にでくわします。ではプログラム全体がブロックされる状況をどのように回避するのでしょうか？selectを使ってタイムアウトを設定することができます。下のような方法で実現します：
+
+\begin{lstlisting}[numbers=none]
+func main() {
+    c := make(chan int)
+    o := make(chan bool)
+    go func() {
+        for {
+            select {
+                case v := <- c:
+                    println(v)
+                case <- time.After(5 * time.Second):
+                    println("timeout")
+                    o <- true
+                    break
+            }
+        }
+    }()
+    <- o
+}
+\end{lstlisting}

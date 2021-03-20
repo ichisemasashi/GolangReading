@@ -1,0 +1,15 @@
+Rowsは実行された検索のリザルトセットのインターフェースの定義です
+
+\begin{lstlisting}[numbers=none]
+type Rows interface {
+    Columns() []string
+    Close() error
+    Next(dest []Value) error
+}
+\end{lstlisting}
+
+Columns関数はデータベースの検索におけるフィールド情報を返します。これが返すsliceとsql検索のフィールドは一つ一つが対応しており、すべての表のフィールドを返すわけではありません。
+
+Close関数はRowsイテレータを閉じるために用いられます。
+
+Next関数はひとつのデータを返すのに用いられます。データはdestに代入され、destの中の要素はstringを除いてdriver.Valueの値でなければなりません。返されるデータの中のすべてのstringは[]byteに変換される必要があります。もし最後にデータが無い場合、Next関数はio.EOFを返します。

@@ -1,0 +1,13 @@
+database/sqlではdatabase/sql/driverにて提供されるインターフェースの基礎の上にいくつかもっと高い階層のメソッドを定義しています。データベース操作を容易にし、内部でconn poolを実装しています。
+
+\begin{lstlisting}[numbers=none]
+type DB struct {
+    driver      driver.Driver
+    dsn         string
+    mu       sync.Mutex // protects freeConn and closed
+    freeConn []driver.Conn
+    closed   bool
+}
+\end{lstlisting}
+
+Open関数がDBオブジェクトを返しています。この中にはfreeConnがあり、これがまさに簡単な接続プールのことです。この実装はとても簡単でまた簡素です。Db.prepareを実行する際\texttt{defer db.putConn(ci, err)}を行います。つまりこの接続を接続プールに放り込むのです。毎回connをコールする際はまずfreeConnの長さが0よりも大きいか確認し、0よりも大きかった場合connを再利用してもよいことを示しています。直接使ってかまいません。もし0以下であった場合はconnを作成してこれを返します。

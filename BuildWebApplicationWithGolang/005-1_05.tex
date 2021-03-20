@@ -1,0 +1,10 @@
+トランザクション処理には一般的に2つのプロセスがあります。コミットかロールバックです。データベースドライバの中ではこの2つの関数を実装すれば問題ありません。
+
+\begin{lstlisting}[numbers=none]
+type Tx interface {
+    Commit() error
+    Rollback() error
+}
+\end{lstlisting}
+
+この2つの関数のうちひとつはコミットに使用され、もうひとつはロールバックに使用されます。

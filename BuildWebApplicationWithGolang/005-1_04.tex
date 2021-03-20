@@ -1,0 +1,19 @@
+Stmtは準備が整った状態です。Connの関連性と、またひとつのgoroutineの中でしか使用することができません。複数のgoroutineに使用することはできません。
+
+\begin{lstlisting}[numbers=none]
+type Stmt interface {
+    Close() error
+    NumInput() int
+    Exec(args []Value) (Result, error)
+    Query(args []Value) (Rows, error)
+}
+\end{lstlisting}
+
+Close関数は現在の接続状態を閉じます。ただし、もし現在実行されているqueryはrowsデータを返します。
+
+NumInput関数は現在予約されている引数の個数を返します。$>$=0が返された時はデータベースドライバがインテリジェントに使用側の引数を検査します。データベースドライバパッケージが予約された引数を知らない場合は-1を返します。
+
+Exec関数はPrepareで準備の整ったsqlを実行します。引数を渡し、update/insertといった操作を実行します。Resultデータを返します。
+
+Query関数はPrepareで準備の整ったsqlを実行します。必要な引数を渡し、select操作を実行します。Rowsリザルトセットを返します。
+

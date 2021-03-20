@@ -1,0 +1,22 @@
+趣味を選択するチェックボックスがあり、ユーザが選択したものとあなたがユーザに提供した選択が同じ型のデータであることを保証する場合
+
+\begin{lstlisting}[numbers=none]
+<input type="checkbox" name="interest" value="football">サッカー
+<input type="checkbox" name="interest" value="basketball">バスケットボール
+<input type="checkbox" name="interest" value="tennis">テニス
+\end{lstlisting}
+
+チェックボックスではラジオボタンの時とくらべ検証方法が少し異なります。受け取るデータはsliceだからです。
+
+\begin{lstlisting}[numbers=none]
+slice:=[]string{"football","basketball","tennis"}
+a:=Slice_diff(r.Form["interest"],slice)
+if a == nil{
+    return true
+}
+
+return false
+\end{lstlisting}
+
+上の\texttt{Slice\_diff}という関数には私のオープンソースのライブラリが含まれます（sliceとmapを操作するライブラリ）https://github.com/astaxie/beeku
+

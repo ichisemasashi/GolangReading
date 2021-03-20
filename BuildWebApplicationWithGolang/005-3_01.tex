@@ -1,0 +1,9 @@
+Goがサポートするsqliteのドライバも比較的多いのですが、大部分はdatabase/sqlインターフェースをサポートしていません。
+
+\begin{description}
+  \item[https://github.com/mattn/go-sqlite3] database/sqlインターフェースをサポートしています。cgo(cgoに関する情報はオフィシャルドキュメントかこの本の最後の章をご参考ください)に基づいて記述されています。
+  \item[https://github.com/feyeleanor/gosqlite3] database/sqlインターフェースをサポートしていません。cgoに基いて記述されています。
+  \item[https://github.com/phf/go-sqlite3] database/sqlインターフェースをサポートしていません。cgoに基いて記述されています。
+\end{description}
+
+現在database/sqlをサポートしているSQLiteデータベースドライバは一つ目だけです。私も現在これを採用してプロジェクトで開発しています。標準インターフェースを採用することは今後より良いドライバが開発された時に移行できることです。
