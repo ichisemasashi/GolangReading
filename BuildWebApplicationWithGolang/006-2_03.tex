@@ -1,0 +1,11 @@
+session管理は以下のいくつかのファクターが関わってきます
+
+\begin{itemize}
+  \item グローバルなsessionマネージャ
+  \item sessionidがグローバルにユニークであることの保証
+  \item 各ユーザをひとつのsessionに関連付ける
+  \item sessionの保存(メモリ、ファイル、データベース等に保存できます)
+  \item sessionの期限切れ処理
+\end{itemize}
+
+以降ではsession管理の全体の設計構想と対応するgoのコード例について解説します：

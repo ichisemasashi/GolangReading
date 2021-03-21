@@ -1,0 +1,17 @@
+ではSessionマネージャがどのように破棄を管理しているのかみてみることにしましょう。Mainが呼び出される際に実行するだけです：
+
+\begin{lstlisting}[numbers=none]
+func init() {
+    go globalSessions.GC()
+}
+
+func (manager *Manager) GC() {
+    manager.lock.Lock()
+    defer manager.lock.Unlock()
+    manager.provider.SessionGC(manager.maxlifetime)
+    time.AfterFunc(time.Duration(manager.maxlifetime),
+                                 func() { manager.GC() })
+}
+\end{lstlisting}
+
+GCが十分にtimeパッケージのタイマー機能を利用していることがおわかりいただけるかと思います。時間が\texttt{maxLifeTime}を超えた後GC関数をコールした際、これによって\texttt{maxLiefTime}時間内でsessionが利用できることを保証できます。このような方法はまたオンラインユーザの数といった統計に用いることもできます。

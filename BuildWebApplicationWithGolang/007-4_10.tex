@@ -1,0 +1,35 @@
+テンプレートパッケージには\texttt{Must}という関数があります。この作用はテンプレートが正しいか検査することです。例えば大括弧が揃っているか、コメントは正しく閉じられているか、変数は正しく書かれているかといったことです。ここでは例を一つお見せします。Mustを使ってテンプレートが正しいか判断します：
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "text/template"
+)
+
+func main() {
+    tOk := template.New("first")
+    template.Must(tOk.Parse(" some static text /* and a comment */"))
+    fmt.Println("The first one parsed OK.")
+
+    template.Must(template.New("second").
+                           Parse("some static text {{ .Name }}"))
+    fmt.Println("The second one parsed OK.")
+
+    fmt.Println("The next one ought to fail.")
+    tErr := template.New("check parse error with Must")
+    template.Must(tErr.Parse(" some static text {{ .Name }"))
+}
+\end{lstlisting}
+
+出力は以下の内容となります：
+
+\begin{lstlisting}[numbers=none]
+The first one parsed OK.
+The second one parsed OK.
+The next one ought to fail.
+panic: template: check parse error with Must:1: unexpected "}" in command
+\end{lstlisting}
+

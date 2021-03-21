@@ -1,0 +1,11 @@
+Session IDはWebアプリケーションにアクセスした各ユーザを識別するために用いられます。その為これはグローバルでユニークであることを保証する必要があります。（GUID）、下のコードはどのようにこの要求を満足させるか示しています。
+
+\begin{lstlisting}[numbers=none]
+  func (manager *Manager) sessionId() string {
+    b := make([]byte, 32)
+    if _, err := io.ReadFull(rand.Reader, b); err != nil {
+      return ""
+    }
+    return base64.URLEncoding.EncodeToString(b)
+  }
+\end{lstlisting}

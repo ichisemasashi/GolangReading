@@ -1,0 +1,217 @@
+Matchパターンは文字列の判断に対してのみ使うことができ、文字列の一部分を切り取ったり、文字列にフィルターをかけたり、合致する条件の文字列を取り出したりすることはできません。これらの需要を満足したければ、正規表現の複雑なパターンを使用する必要があります。
+
+我々はよく一種のスクレイピングプログラムが必要となります。下ではスクレイピングを例にどのように正規表現を使って取得したデータに対しフィルタリングまたは切り取りを行うかご説明します：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "net/http"
+    "regexp"
+    "strings"
+)
+
+func main() {
+    resp, err := http.Get("http://www.baidu.com")
+    if err != nil {
+        fmt.Println("http get error.")
+    }
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Println("http read error")
+        return
+    }
+
+    src := string(body)
+
+    //HTMLタグを全て小文字に変換します
+    re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
+    src = re.ReplaceAllStringFunc(src, strings.ToLower)
+
+    //<style>タグを除去します
+    re, _ = regexp.Compile("\\<style[\\S\\s]+?\\</style\\>")
+    src = re.ReplaceAllString(src, "")
+
+    //<script>タグを除去
+    re, _ = regexp.Compile("\\<script[\\S\\s]+?\\</script\\>")
+    src = re.ReplaceAllString(src, "")
+
+    //<>内の全てのHTMLコードを削除し、改行文字に置き換えます
+    re, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
+    src = re.ReplaceAllString(src, "\n")
+
+    //連続した改行を除去します
+    re, _ = regexp.Compile("\\s{2,}")
+    src = re.ReplaceAllString(src, "\n")
+
+    fmt.Println(strings.TrimSpace(src))
+}
+\end{lstlisting}
+
+この例からわかるように、複雑な正規表現を使用する場合はまずCompileを行います。これは正規表現が正しいかどうかを解析し、もし正しければRegexpを返します。返されたRegexpは任意の文字列で必要な操作を実行することができるようになります。
+
+正規表現の解析は以下のいくつかの方法があります：
+
+\begin{lstlisting}[numbers=none]
+func Compile(expr string) (*Regexp, error)
+func CompilePOSIX(expr string) (*Regexp, error)
+func MustCompile(str string) *Regexp
+func MustCompilePOSIX(str string) *Regexp
+\end{lstlisting}
+
+CompilePOSIXとCompileの違いはPOSIXにはかならずPOSIX文法を使う必要があるということです。これは最長一致方式を使って検索を行い、Compileではただ最長一致方式が採用されます。(例えば[a-z]\{2,4\}のような正規表現を"aa09aaa88aaaa"というようなテキストに適用する際、CompilePOSIXはaaaaを返します。またCompileが返す正規表現はaaとなります)、前にMustとつく関数は正規表現の文法を解析する際もしパターンが正確な文法でなければ直接panicとならず、Mustのつかないものはただエラーを返します。
+
+どのようにRegexpを作成するか理解したところで、このstructがどのような方法によって我々の文字列操作を提供しているのかもう一度見てみることにしましょう。まず下の検索を行うための関数を見てみます：
+
+\begin{lstlisting}[numbers=none]
+func (re *Regexp) Find(b []byte) []byte
+func (re *Regexp) FindAll(b []byte, n int) [][]byte
+func (re *Regexp) FindAllIndex(b []byte, n int) [][]int
+func (re *Regexp) FindAllString(s string, n int) []string
+func (re *Regexp) FindAllStringIndex(s string, n int) [][]int
+func (re *Regexp) FindAllStringSubmatch(s string, n int) [][]string
+func (re *Regexp) FindAllStringSubmatchIndex(s string, n int) [][]int
+func (re *Regexp) FindAllSubmatch(b []byte, n int) [][][]byte
+func (re *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int
+func (re *Regexp) FindIndex(b []byte) (loc []int)
+func (re *Regexp) FindReaderIndex(r io.RuneReader) (loc []int)
+func (re *Regexp) FindReaderSubmatchIndex(r io.RuneReader) []int
+func (re *Regexp) FindString(s string) string
+func (re *Regexp) FindStringIndex(s string) (loc []int)
+func (re *Regexp) FindStringSubmatch(s string) []string
+func (re *Regexp) FindStringSubmatchIndex(s string) []int
+func (re *Regexp) FindSubmatch(b []byte) [][]byte
+func (re *Regexp) FindSubmatchIndex(b []byte) []int
+\end{lstlisting}
+
+上の18個の関数は入力ソース(byte slice、stringおよびio.RuneReader)の違いに従って下のいくつかのように簡素化することができます。その他はただ入力ソースが異なるだけで、そのほかの機能は基本的に同じです：
+
+\begin{lstlisting}[numbers=none]
+func (re *Regexp) Find(b []byte) []byte
+func (re *Regexp) FindAll(b []byte, n int) [][]byte
+func (re *Regexp) FindAllIndex(b []byte, n int) [][]int
+func (re *Regexp) FindAllSubmatch(b []byte, n int) [][][]byte
+func (re *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int
+func (re *Regexp) FindIndex(b []byte) (loc []int)
+func (re *Regexp) FindSubmatch(b []byte) [][]byte
+func (re *Regexp) FindSubmatchIndex(b []byte) []int
+\end{lstlisting}
+
+これらの関数の使用に対して以下の例を見てみましょう
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "regexp"
+)
+
+func main() {
+    a := "I am learning Go language"
+
+    re, _ := regexp.Compile("[a-z]{2,4}")
+
+    //正規表現にマッチする最初のものを探し出す
+    one := re.Find([]byte(a))
+    fmt.Println("Find:", string(one))
+
+    //正規表現にマッチするすべてのsliceを探し出す。
+    //nが0よりも小さかった場合はすべてのマッチする
+    //文字列を返します。さもなければ指定した長さが返ります。
+    all := re.FindAll([]byte(a), -1)
+    fmt.Println("FindAll", all)
+
+    //条件にマッチするindexの位置を探し出す。開始位置と終了位置。
+    index := re.FindIndex([]byte(a))
+    fmt.Println("FindIndex", index)
+
+    //条件にマッチするすべてのindexの位置を探し出す、nは同上
+    allindex := re.FindAllIndex([]byte(a), -1)
+    fmt.Println("FindAllIndex", allindex)
+
+    re2, _ := regexp.Compile("am(.*)lang(.*)")
+
+    //Submatchを探し出し、配列を返します。はじめの要素は
+    //マッチしたすべての要素です。２つ目の要素ははじめの()
+    //の中で、３つ目は２つ目の()の中です。
+    //以下の出力でははじめの要素は"am learning Go language"です。
+    //２つ目の要素は" learning Go "です。空白を含んで出力すること
+    //に注意してください。
+    //３つ目の要素は"uage"です。
+    submatch := re2.FindSubmatch([]byte(a))
+    fmt.Println("FindSubmatch", submatch)
+    for _, v := range submatch {
+        fmt.Println(string(v))
+    }
+
+    //定義と上のFindIndexは同じです。
+    submatchindex := re2.FindSubmatchIndex([]byte(a))
+    fmt.Println(submatchindex)
+
+    //FindAllSubmatchは条件にマッチするすべてのサブマッチを探し出します。
+    submatchall := re2.FindAllSubmatch([]byte(a), -1)
+    fmt.Println(submatchall)
+
+    //FindAllSubmatchIndexはすべてのサブマッチのindexを探し出します。
+    submatchallindex := re2.FindAllSubmatchIndex([]byte(a), -1)
+    fmt.Println(submatchallindex)
+}
+\end{lstlisting}
+
+ここまででマッチ関数をご紹介しました。Regexpも３つの関数を定義しています。これらは同盟の外部関数と機能はまったく一緒です。じつは、外部関数はこのRegexpの３つの関数をコールすることで実現しています。
+
+\begin{lstlisting}[numbers=none]
+func (re *Regexp) Match(b []byte) bool
+func (re *Regexp) MatchReader(r io.RuneReader) bool
+func (re *Regexp) MatchString(s string) bool
+\end{lstlisting}
+
+次に置換関数はどのように操作するか理解していきましょう。
+
+\begin{lstlisting}[numbers=none]
+func (re *Regexp) ReplaceAll(src, repl []byte) []byte
+func (re *Regexp) ReplaceAllFunc
+               (src []byte, repl func([]byte) []byte) []byte
+func (re *Regexp) ReplaceAllLiteral(src, repl []byte) []byte
+func (re *Regexp) ReplaceAllLiteralString(src, repl string) string
+func (re *Regexp) ReplaceAllString(src, repl string) string
+func (re *Regexp) ReplaceAllStringFunc
+              (src string, repl func(string) string) string
+\end{lstlisting}
+
+
+これらの置換関数は上のスクレイピングの例に詳細な応用例があります。
+
+次にExpandの解説を見てみましょう：
+
+\begin{lstlisting}[numbers=none]
+func (re *Regexp) Expand(dst []byte, template []byte,
+                         src []byte, match []int) []byte
+func (re *Regexp) ExpandString(dst []byte, template string,
+                         src string, match []int) []byte
+\end{lstlisting}
+
+Expandは一体何に使われるのでしょうか？下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+func main() {
+    src := []byte(`
+        call hello alice
+        hello bob
+        call hello eve
+    `)
+    pat := regexp.MustCompile(`(?m)(call)\s+(?P<cmd>\w+)\s+(?P<arg>.+)\s*$`)
+    res := []byte{}
+    for _, s := range pat.FindAllSubmatchIndex(src, -1) {
+        res = pat.Expand(res, []byte("$cmd('$arg')\n"), src, s)
+    }
+    fmt.Println(string(res))
+}
+\end{lstlisting}
+
+これまでに既にGo言語の\texttt{regexp}パッケージの全てをご紹介しました。これに対する主な関数の紹介と例を通して、みなさんはGo言語の正規表現パッケージを使って基本的な正規表現の操作が可能になったことと信じております。
+

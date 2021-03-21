@@ -1,0 +1,108 @@
+もし我々が上で示したようなXMLファイルを解析したいのではなく、生成したいとしたら、go言語ではどのように実現すべきでしょうか？xmlパッケージで提供される\texttt{Marshal}と\texttt{MarshalIndent}という２つの関数で我々の需要を満たすことができます。この２つの関数の主な違いは２つ目の関数はプレフィックスを増加したり短縮したりする可能性があるということです。関数の定義は下の通り：
+
+\begin{lstlisting}[numbers=none]
+func Marshal(v interface{}) ([]byte, error)
+func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error)
+\end{lstlisting}
+
+２つの関数のはじめの引数はXMLの構造体が定義する型のデータを生成するために用いられます。どちらも生成したXMLデータストリームを返します。
+
+ここでは上のXMLをどのように出力するのか見てみましょう：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "encoding/xml"
+    "fmt"
+    "os"
+)
+
+type Servers struct {
+    XMLName xml.Name `xml:"servers"`
+    Version string   `xml:"version,attr"`
+    Svs     []server `xml:"server"`
+}
+
+type server struct {
+    ServerName string `xml:"serverName"`
+    ServerIP   string `xml:"serverIP"`
+}
+
+func main() {
+    v := &Servers{Version: "1"}
+    v.Svs = append(v.Svs, server{"Shanghai_VPN", "127.0.0.1"})
+    v.Svs = append(v.Svs, server{"Beijing_VPN", "127.0.0.2"})
+    output, err := xml.MarshalIndent(v, "  ", "    ")
+    if err != nil {
+        fmt.Printf("error: %v\n", err)
+    }
+    os.Stdout.Write([]byte(xml.Header))
+
+    os.Stdout.Write(output)
+}
+\end{lstlisting}
+
+上のコードは以下のような情報を出力します：
+
+\begin{lstlisting}[numbers=none]
+<?xml version="1.0" encoding="UTF-8"?>
+<servers version="1">
+<server>
+    <serverName>Shanghai_VPN</serverName>
+    <serverIP>127.0.0.1</serverIP>
+</server>
+<server>
+    <serverName>Beijing_VPN</serverName>
+    <serverIP>127.0.0.2</serverIP>
+</server>
+</servers>
+\end{lstlisting}
+
+我々が以前定義したファイルの形式とまったく同じです。\texttt{os.Stdout.Write([]byte(xml.Header))}というコードが出現したのは、\texttt{xml.MarshalIndent}または\texttt{xml.Marshal}が出力する情報がどちらもXMLヘッダを持たないためです。正しいxmlファイルを生成するために、xmlパッケージであらかじめ定義されているHeader変数を使用しました。
+
+\texttt{Marshal}関数が受け取る引数vはinterface{}型です。つまり任意の型の引数を受け取れることを示しています。ではxmlパッケージはどのようなルールにしたがって対応するXMLファイルを生成しているのでしょうか？
+
+\begin{itemize}
+  \item もしvがarrayまたはsliceであれば、各要素を出力します。value</tape>のようなものです。
+  \item もしvがポインタであれば、Marshalポインタが指し示す内容となります。もしポインタが空であれば、何も出力しません。
+  \item もしvがinterfaceであれば、interfaceが含むデータを処理します。
+  \item もしvがその他のデータ型であれば、このデータ型がもつフィールド情報を出力します。
+\end{itemize}
+
+また、生成されるXMLファイルの中のelementの名前はどのように決定するのでしょうか？要素名は下の優先度に従ってstructの中より取得されます：
+
+\begin{itemize}
+  \item もしvがstructであれば、XMLNameのtagで定義されている名前となります。
+  \item 型がxml.Nameの名前であれば、XMLNameのフィールドの値が呼ばれます。
+  \item structのフィールドのtagを通して取得されます。
+  \item structのフィールド名を通して取得されます。
+  \item marshallの型名になります。
+\end{itemize}
+
+どのようにしてstructの中のフィールドのtag情報を設定し、最終的なxmlファイルの生成をコントロールするのでしょうか？
+
+\begin{itemize}
+  \item XMLNameは出力されません
+  \item tagに含まれる\texttt{"-"}のフィールドは出力されません
+  \item tagに含まれる\texttt{"name,attr"}では、nameをプロパティ名、フィールド値を値としてこのXML要素を出力します。
+  \item tagに含まれる\texttt{",attr"}では、このstructのフィールド名をプロパティ名としてXML要素の属性を出力します。上と同じようにこのnameのデフォルト値がフィールド名となるだけです。
+  \item tagに含まれる\texttt{",chardata"}では、xmlのcharacter dataが出力されます。elementではありません。
+  \item tagに含まれる\texttt{",innerxml"}では、元の通り出力されます。一般的なエンコーディングプロセスは行われません。
+  \item tagに含まれる\texttt{",comment"}では、xmlコメントとして出力されます。一般的なエンコーディングプロセスは行われません。フィールドの値には"--"という文字列を含めることができません。
+  \item tagに含まれる\texttt{"omitempty"}では、もしこのフィールドの値が空であればこのフィールドはXMLに出力されません。空の値には以下が含まれます： false、0、nilポインタまたはnilインターフェースまたは長さが0のarray、slice、map、string。
+  \item tagに含まれる\texttt{"a>b>c"}では、３つの要素aが含むb、bが含むcが順番に出力されます。例えば以下のコードではこうなります：
+    \begin{lstlisting}[numbers=none]
+FirstName string   `xml:"name>first"`
+LastName  string   `xml:"name>last"`
+
+<name>
+<first>Asta</first>
+<last>Xie</last>
+</name>
+    \end{lstlisting}
+\end{itemize}
+
+ここではどのようにGo言語のxmlパッケージを使ってXMLファイルをエンコード/デコードするかご紹介しました。大切なのはXMLのすべての操作はすべてstruct tagによって実現されているという点です。より詳しい内容またはtagの定義については対応するオフィシャルドキュメントをご参照ください。
+
+

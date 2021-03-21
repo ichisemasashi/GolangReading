@@ -1,0 +1,41 @@
+各ユーザに対して彼らと結びつくSessionを与えたり取得することで、Session情報に従って操作を検証する必要があります。SessionStartという関数はあるSessionが現在アクセスしているユーザと既に関係しているか検査するために用いられます。もし無ければ新規にこれを作成します。
+
+\begin{lstlisting}[numbers=none]
+func (manager *Manager) SessionStart(w http.ResponseWriter,
+                                     r *http.Request) (session Session) {
+    manager.lock.Lock()
+    defer manager.lock.Unlock()
+    cookie, err := r.Cookie(manager.cookieName)
+    if err != nil || cookie.Value == "" {
+        sid := manager.sessionId()
+        session, _ = manager.provider.SessionInit(sid)
+        cookie := http.Cookie{Name: manager.cookieName,
+                              Value: url.QueryEscape(sid),
+                              Path: "/", HttpOnly: true,
+                              MaxAge: int(manager.maxlifetime)}
+        http.SetCookie(w, &cookie)
+    } else {
+        sid, _ := url.QueryUnescape(cookie.Value)
+        session, _ = manager.provider.SessionRead(sid)
+    }
+    return
+}
+\end{lstlisting}
+
+前のlogin操作で示したsessionの運用を利用します：
+
+\begin{lstlisting}[numbers=none]
+func login(w http.ResponseWriter, r *http.Request) {
+    sess := globalSessions.SessionStart(w, r)
+    r.ParseForm()
+    if r.Method == "GET" {
+        t, _ := template.ParseFiles("login.gtpl")
+        w.Header().Set("Content-Type", "text/html")
+        t.Execute(w, sess.Get("username"))
+    } else {
+        sess.Set("username", r.Form["username"])
+        http.Redirect(w, r, "/", 302)
+    }
+}
+\end{lstlisting}
+

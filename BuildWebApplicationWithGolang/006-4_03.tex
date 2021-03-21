@@ -1,0 +1,16 @@
+もう一つの方法は、sessionの他に作成時間を設けることです。一定の時間が過ぎると、このsessionIDは破棄され、再度新しいsessionが生成されます。このようにすることで、ある程度sessionハイジャックの問題を防ぐことができます。
+
+\begin{lstlisting}[numbers=none]
+createtime := sess.Get("createtime")
+if createtime == nil {
+    sess.Set("createtime", time.Now().Unix())
+} else if (createtime.(int64) + 60) < (time.Now().Unix()) {
+    globalSessions.SessionDestroy(w, r)
+    sess = globalSessions.SessionStart(w, r)
+}
+\end{lstlisting}
+
+sessionが始まると、生成されたsessionIDの時間を記録する一つの値が設定されます。毎回のリクエストが有効期限(ここでは60秒と設定しています)を超えていないか判断し、定期的に新しいIDを生成します。これにより攻撃者は有効なsessionIDを取得する機会を大きく失います。
+
+上の２つの手段を組み合わせると実践においてsessionハイジャックのリスクを取り除くことができます。sessionIDを頻繁に変えると攻撃者に有効なsessionIDを取得する機会を失わせます。sessionIDはcookieの中でやりとりされ、httponlyを設定されるため、URLに基づいた攻撃の可能性はゼロです。同時にXSSによるsessionIDの取得も不可能です。最後にMaxAge=0を設定します。これによりsession cookieがブラウザのログの中に記録されなくなります。
+

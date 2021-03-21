@@ -1,0 +1,102 @@
+テンプレートがオブジェクトのフィールドの値を出力する際、\texttt{fmt}パッケージを採用してオブジェクトを文字列に変換します。しかしときどき我々はこうしたくはないときもあります。例えばスパムメールの送信者がウェブページから拾い集めてくる方法で我々のメールボックスへ情報を送信することを防止したいときがあります。\texttt{@}をatに変換したいわけです。たとえば：\texttt{astaxie at beego.me}のように。このような機能を実装したい場合は、自分で定義した関数でこの機能を作成する必要があります。
+
+各テンプレート関数はいずれも単一の名前をもっていて、一つのGo関数と関係しています。以下の方法によって関係をもたせます。
+
+
+\begin{lstlisting}[numbers=none]
+type FuncMap map[string]interface{}
+\end{lstlisting}
+
+例えば、もしemail関数のテンプレート関数の名前を\texttt{emailDeal}としたい場合は、これが関係するGo関数の名前は\texttt{EmailDealWith}となります。下の方法でこの関数を登録することができます。
+
+\begin{lstlisting}[numbers=none]
+t = t.Funcs(template.FuncMap{"emailDeal": EmailDealWith})
+\end{lstlisting}
+
+\texttt{EmailDealWith}という関数の引数と戻り値は以下のように定義します：
+
+\begin{lstlisting}[numbers=none]
+func EmailDealWith(args ...interface{}) string
+\end{lstlisting}
+
+以下の実装例を見てみましょう：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "html/template"
+    "os"
+    "strings"
+)
+
+type Friend struct {
+    Fname string
+}
+
+type Person struct {
+    UserName string
+    Emails   []string
+    Friends  []*Friend
+}
+
+func EmailDealWith(args ...interface{}) string {
+    ok := false
+    var s string
+    if len(args) == 1 {
+        s, ok = args[0].(string)
+    }
+    if !ok {
+        s = fmt.Sprint(args...)
+    }
+    // find the @ symbol
+    substrs := strings.Split(s, "@")
+    if len(substrs) != 2 {
+        return s
+    }
+    // replace the @ by " at "
+    return (substrs[0] + " at " + substrs[1])
+}
+
+func main() {
+    f1 := Friend{Fname: "minux.ma"}
+    f2 := Friend{Fname: "xushiwei"}
+    t := template.New("fieldname example")
+    t = t.Funcs(template.FuncMap{"emailDeal": EmailDealWith})
+    t, _ = t.Parse(`hello {{.UserName}}!
+                {{range .Emails}}
+                    an emails {{.|emailDeal}}
+                {{end}}
+                {{with .Friends}}
+                {{range .}}
+                    my friend name is {{.Fname}}
+                {{end}}
+                {{end}}
+                `)
+    p := Person{UserName: "Astaxie",
+        Emails:  []string{"astaxie@beego.me", "astaxie@gmail.com"},
+        Friends: []*Friend{&f1, &f2}}
+    t.Execute(os.Stdout, p)
+}
+\end{lstlisting}
+
+上ではどのように自分で関数を定義するかお見せしました。実は、テンプレートパッケージの内部ではすでにビルトインの関数が実装されています。下のコードを切り取って自分のテンプレートパッケージの中にはりつけてください。
+
+\begin{lstlisting}[numbers=none]
+var builtins = FuncMap{
+    "and":      and,
+    "call":     call,
+    "html":     HTMLEscaper,
+    "index":    index,
+    "js":       JSEscaper,
+    "len":      length,
+    "not":      not,
+    "or":       or,
+    "print":    fmt.Sprint,
+    "printf":   fmt.Sprintf,
+    "println":  fmt.Sprintln,
+    "urlquery": URLQueryEscaper,
+}
+\end{lstlisting}
+

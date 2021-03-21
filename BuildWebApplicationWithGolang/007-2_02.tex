@@ -1,0 +1,87 @@
+上のような解析方法は解析されるJSONデータの構造を事前に知っている場合に採用されるソリューションです。もし解析されるデータの形式が事前に分からなかった場合はどのように解析すればよいでしょうか？
+
+我々はinterface{}に任意のデータ型のオブジェクトを保存できることを知っています。このようなデータ構造は未知の構造のjsonデータの解析結果を保存するのにぴったりです。JSONパッケージではmap[string]interface{}と[]interface{}構造を採用して任意のJSONオブジェクトと配列を保存します。Goの型とJSONの型の対応関係は以下の通りです：
+
+\begin{itemize}
+  \item bool は JSON booleans を表します,
+  \item float64 は JSON numbers を表します,
+  \item string は JSON string を表します,
+  \item nil は JSON null を表します,
+\end{itemize}
+
+現在以下のようなJSONデータがあるものと仮定します
+
+\begin{lstlisting}[numbers=none]
+b := []byte(`{"Name":"Wednesday","Age":6,"Parents":["Gomez","Morticia"]}`)
+\end{lstlisting}
+
+この構造を知らない段階では、これをinterface{}の中に解析します。
+
+\begin{lstlisting}[numbers=none]
+var f interface{}
+err := json.Unmarshal(b, &f)
+\end{lstlisting}
+
+この時fの中にはmap型が保存されます。これらのkeyはstringで、値は空のinterface{]の中に保存されます。
+
+\begin{lstlisting}[numbers=none]
+f = map[string]interface{}{
+    "Name": "Wednesday",
+    "Age":  6,
+    "Parents": []interface{}{
+        "Gomez",
+        "Morticia",
+    },
+}
+\end{lstlisting}
+
+ではどのようにしてこれらのデータにアクセスするのでしょうか？アサーションによる方法です：
+
+\begin{lstlisting}[numbers=none]
+m := f.(map[string]interface{})
+\end{lstlisting}
+
+アサーションを通して以下のような方法で中のデータにアクセスすることができます。
+
+\begin{lstlisting}[numbers=none]
+for k, v := range m {
+    switch vv := v.(type) {
+    case string:
+        fmt.Println(k, "is string", vv)
+    case int:
+        fmt.Println(k, "is int", vv)
+    case float64:
+        fmt.Println(k,"is float64",vv)
+    case []interface{}:
+        fmt.Println(k, "is an array:")
+        for i, u := range vv {
+            fmt.Println(i, u)
+        }
+    default:
+        fmt.Println(k, "is of a type I don't know how to handle")
+    }
+}
+\end{lstlisting}
+
+上の例では、interface{}とtype assertの組み合わせによって未知の構造のJSONデータを解析することができました。
+
+これはオフィシャルが提供するソリューションです。実は多くの場合、型のアサーションは操作からしてあまり便利ではありません。現在bitly社では\texttt{simplejson}と呼ばれるパッケージがオープンに開発されています。未知の構造体のJSONを処理する場合にとても便利です。詳細な例は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+js, err := NewJson([]byte(`{
+    "test": {
+        "array": [1, "2", 3],
+        "int": 10,
+        "float": 5.150,
+        "bignum": 9223372036854775807,
+        "string": "simplejson",
+        "bool": true
+    }
+}`))
+
+arr, _ := js.Get("test").Get("array").Array()
+i, _ := js.Get("test").Get("int").Int()
+ms := js.Get("test").Get("string").MustString()
+\end{lstlisting}
+
+このようにこのライブラリを使用してJSONを操作するのはオフィシャルパッケージに比べてとても簡単です。詳細は以下のアドレスをご参照ください：https://github.com/bitly/go-simplejson

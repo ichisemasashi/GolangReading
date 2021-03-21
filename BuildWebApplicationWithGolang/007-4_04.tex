@@ -1,0 +1,38 @@
+Go言語のテンプレートは\texttt{\{\{\}\}}を通して適用時に置換する必要のあるフィールドを含めます。\texttt{\{\{.\}\}}は現在のオブジェクトを示しています。これはJavaやC++の中のthisに似たものです。もし現在のオブジェクトのフィールドにアクセスしたい場合は\texttt{\{\{.FieldName\}\}}というようにします。ただし注意してください：このフィールドは必ずエクスポートされたものとなります（頭文字が大文字になります）、さもなければ適用時にエラーを発生させます。下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "html/template"
+    "os"
+)
+
+type Person struct {
+    UserName string
+}
+
+func main() {
+    t := template.New("fieldname example")
+    t, _ = t.Parse("hello {{.UserName}}!")
+    p := Person{UserName: "Astaxie"}
+    t.Execute(os.Stdout, p)
+}
+\end{lstlisting}
+
+上のコードでは正しく\texttt{hello Astaxie}と出力されます。しかしもしコードに修正を加え、テンプレートにエクスポートされていないフィールドを含むと、エラーを発生させます。
+
+\begin{lstlisting}[numbers=none]
+type Person struct {
+    UserName string
+    email    string  //エクスポートされていないフィールド、頭文字が小文字です。
+}
+
+t, _ = t.Parse("hello {{.UserName}}! {{.email}}")
+\end{lstlisting}
+
+上のコードはエラーを発生させます。なぜならエクスポートされていないフィールドをコールしたためです。しかしもし存在しないフィールドをコールした場合はエラーを発生させず、空文字列を出力します。
+
+テンプレートで\texttt{\{\{.\}\}}を出力すると、一般的には文字列オブジェクトに対して適用されます。デフォルトでfmtパッケージがコールされ文字列の内容が出力されます。
+
+

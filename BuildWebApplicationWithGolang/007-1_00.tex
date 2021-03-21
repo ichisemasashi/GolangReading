@@ -1,0 +1,21 @@
+XMLはデータと情報のやりとりするための形式として十分普及しています。Webサービスが日々広範囲で応用されてくるにつれ、現在XMLは日常的な開発作業において重要な役割を演じてきました。この節ではGo言語の標準パッケージにあるXML関連のパッケージをご紹介します。
+
+この節ではXMLの規約に関する内容には触れず（もし関連した知識が必要であれば他の文献をあたってください）、どのようにGo言語でXMLファイルをエンコード/デコードするかといった知識についてご紹介します。
+
+あなたが作業員だとして、あなたが管理するすべてのサーバに以下のような内容のxmlの設定ファイルを作成するとします：
+
+\begin{lstlisting}[numbers=none]
+<?xml version="1.0" encoding="utf-8"?>
+<servers version="1">
+    <server>
+        <serverName>Shanghai_VPN</serverName>
+        <serverIP>127.0.0.1</serverIP>
+    </server>
+    <server>
+        <serverName>Beijing_VPN</serverName>
+        <serverIP>127.0.0.2</serverIP>
+    </server>
+</servers>
+\end{lstlisting}
+
+上のXMLドキュメントは2つのサーバの情報を記述しています。サーバ名とサーバのIP情報を含んでいます。以降のGoの例ではこのXML記述に対して操作を行なっていきます。

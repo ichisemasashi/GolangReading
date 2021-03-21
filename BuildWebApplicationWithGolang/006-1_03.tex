@@ -1,0 +1,16 @@
+上の例ではどのようにcookieデータを設定するかご説明しました。ここではどのようにcookieを読み取るのか見てみましょう。
+
+\begin{lstlisting}[numbers=none]
+cookie, _ := r.Cookie("username")
+fmt.Fprint(w, cookie)
+\end{lstlisting}
+
+もうひとつのロード方法は
+
+\begin{lstlisting}[numbers=none]
+for _, cookie := range r.Cookies() {
+    fmt.Fprint(w, cookie.Name)
+}
+\end{lstlisting}
+
+requestを通してcookieが非常に簡単に取得できるのがおわかりいただけるとおもいます。

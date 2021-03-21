@@ -1,0 +1,21 @@
+Go言語では、\texttt{template}パッケージを使用してテンプレートの処理を行います。\texttt{Parse}、\texttt{ParseFile}、\texttt{Execute}といった方法を使ってファイルや文字列からテンプレートをロードします。その後植えの図で示したテンプレートのmerge操作のようなものを実行します。下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+func handler(w http.ResponseWriter, r *http.Request) {
+    t := template.New("some template") //テンプレートを新規に作成する。
+    t, _ = t.ParseFiles("tmpl/welcome.html", nil)  //テンプレートファイルを解析
+    user := GetUser() //現在のユーザの情報を取得する。
+    t.Execute(w, user)  //テンプレートのmerger操作を実行する。
+}
+\end{lstlisting}
+
+上の例で、Go言語のテンプレート操作は非常に簡単で便利だとおわかりいただけるかと思います。その他の言語のテンプレート処理に似ていて、まずデータを取得した後データを適用します。
+
+デモとテストコードの簡便のため、以降の例では以下の形式のコードを採用します。
+
+\begin{itemize}
+  \item ParseFilesの代わりにParseを使用します。Parseは直接文字列をテストでき、外部のファイルを必要としないためです。
+  \item handlerを使ってデモコードを書くことはせず、それぞれひとつのmainをテストします。便利なテストです。
+  \item \texttt{http.ResponseWriter}の代わりに\texttt{os.Stdout}を使用します。\texttt{os.Stdout}は\texttt{io.Writer}インターフェースを実装しているからです。
+\end{itemize}
+

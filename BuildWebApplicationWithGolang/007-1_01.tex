@@ -1,0 +1,112 @@
+どのようにして上のXMLファイルを解析するのでしょうか？xmlパッケージの\texttt{Unmarshal}関数を使って目的を達成することができます。
+
+\begin{lstlisting}[numbers=none]
+func Unmarshal(data []byte, v interface{}) error
+\end{lstlisting}
+
+dataはXMLのデータストリームを受け取ります。vは出力先となる構造体です。定義はinterfaceで、XMLを任意の形式に変換することができます。ここでは主にstructの変換をご紹介します。なぜなら、structとXMLはどちらも似たようなツリー構造の特徴を持っているからです。
+
+コード例は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "encoding/xml"
+    "fmt"
+    "io/ioutil"
+    "os"
+)
+
+type Recurlyservers struct {
+    XMLName     xml.Name `xml:"servers"`
+    Version     string   `xml:"version,attr"`
+    Svs         []server `xml:"server"`
+    Description string   `xml:",innerxml"`
+}
+
+type server struct {
+    XMLName    xml.Name `xml:"server"`
+    ServerName string   `xml:"serverName"`
+    ServerIP   string   `xml:"serverIP"`
+}
+
+func main() {
+    file, err := os.Open("servers.xml") // For read access.        
+    if err != nil {
+        fmt.Printf("error: %v", err)
+        return
+    }
+    defer file.Close()
+    data, err := ioutil.ReadAll(file)
+    if err != nil {
+        fmt.Printf("error: %v", err)
+        return
+    }
+    v := Recurlyservers{}
+    err = xml.Unmarshal(data, &v)
+    if err != nil {
+        fmt.Printf("error: %v", err)
+        return
+    }
+
+    fmt.Println(v)
+}
+\end{lstlisting}
+
+XMLは本来ツリー構造のデータ形式なので、対応するgo言語のstruct型を定義することができます。xml.Unmarshalを使ってxmlの中にあるデータを解析し、対応するstructオブジェクトにします。上の例では以下のようなデータを出力します。
+
+\begin{lstlisting}[numbers=none]
+{{ servers} 1 [{{ server} Shanghai_VPN 127.0.0.1}
+      {{ server} Beijing_VPN 127.0.0.2}]
+<server>
+    <serverName>Shanghai_VPN</serverName>
+    <serverIP>127.0.0.1</serverIP>
+</server>
+<server>
+    <serverName>Beijing_VPN</serverName>
+    <serverIP>127.0.0.2</serverIP>
+</server>
+}
+\end{lstlisting}
+
+上の例では、xmlファイルを解析して対応するstructオブジェクトにするには\texttt{xml.Unmarshal}によって行われました。この過程はどのように実現されているのでしょうか？我々のstruct定義の後の方を見てみると\texttt{xml:"serverName"}のような内容があることがわかります。これはstructの特徴の一つです。struct tagと呼ばれています。これはリフレクションを補助するために用いられます。\texttt{Unmarshal}の定義を見てみましょう：
+
+\begin{lstlisting}[numbers=none]
+func Unmarshal(data []byte, v interface{}) error
+\end{lstlisting}
+
+関数には２つの引数があることがわかります。はじめの引数はXMLデータストリームです。ふたつめは保存される対応した型です。現在struct、sliceおよびstringをサポートしています。XMLパッケージの内部ではリフレクションを採用してデータのリフレクションを行なっています。そのため、vの中のフィールドは必ずエクスポートされなければなりません。\texttt{Unmarshal}が解析する際XML要素とフィールドはどのように対応づけられるのでしょうか？これは優先度のあるロードプロセスです。まずstruct tagを読み込み、もしなければ、対応するフィールド名となります。注意しなければならないのは、tag、フィールド名、XML要素を解析する際大文字と小文字を区別するということです。そのため、フィールドは逐一対応していなければなりません。
+
+Go言語のリフレクションメカニズムはこれらのtag情報を使って将来XMLファイルにあるデータをstructオブジェクトに反映させることができます。リフレクションがどのようにstruct tagを利用するかについてのより詳しい内容はreflectの中の対応するコンテンツをご参照ください。
+
+XMLをstructに解析する際は以下のルールに従います：
+
+
+\begin{itemize}
+  \item もしstructのフィールドがstringまたは[]byte型であり、tagに\texttt{",innerxml"}を含む場合は、Unmarshalはこのフィールドが対応する要素の中に含まれるすべてのオリジナルのxmlをこのフィールドに上乗せします。上の例のDescription定義のように、最後の出力は以下のようになります：
+    \begin{lstlisting}[numbers=none]
+<server>
+    <serverName>Shanghai_VPN</serverName>
+    <serverIP>127.0.0.1</serverIP>
+</server>
+<server>
+    <serverName>Beijing_VPN</serverName>
+    <serverIP>127.0.0.2</serverIP>
+</server>
+    \end{lstlisting}
+  \item もしstructにXMLNameがあり、かつ型がxml.Nameフィールドであれば、解析する際このelementの名前をこのフィールドに保存します。上の例ではserversにあたります。
+  \item もしあるstructフィールドのtagの定義においてXML構造のelementの名前が含まれている場合、解析する際対応するelement値をこのフィールドに代入します。上の例ではservernameとserverip定義にあたります。
+  \item もしあるstructフィールドのtag定義の中に\texttt{",attr"}とあれば、解析の際にこの構造に対応するelementとフィールド名のプロパティの値をこのフィールドに代入します。上の例のversion定義にあたります。
+  \item もしあるstructフィールドのtag定義の型が\texttt{"a>b>c"}のようであれば、解析の際にxml構造のaの下のbの下のc要素の値をこのフィールドに代入します。
+  \item もしあるstructフィールドのtagが\texttt{"-"}を定義していると、このフィールドに対してはいかなるマッチしたxmlデータも解析しません。
+  \item もしstructフィールドの後のtagに\texttt{",any"}が定義されていると、もしこの子要素が他のルールを満足していない場合にこのフィールドにマッチします。
+  \item もしあるXML要素がひとつまたは複数のコメントを含んでいる場合、これらのコメントはひとつめのtagに含まれる"comments"のフィールドに上乗せされます。このフィールドの型は[]byteやstringである可能性があります。もしこのようなフィールドが存在しなければ、コメントは破棄されます。
+\end{itemize}
+
+上でどのようにstructのtagを定義するか詳細に述べました。tagが正しく設定されていさえすれば、XML解析は上の例のように簡単になります。tagとXMLのelementは一つ一つ対応しています。上で示したとおり、sliceによって複数の同じレベルの要素を表現することもできます。
+
+\begin{quote}
+注意：正しく解析するために、go言語のxmlパッケージはstructの定義の中ですべてのフィールドがエクスポート可能である必要があります。（つまり、頭文字が大文字であるということです。）
+\end{quote}
+

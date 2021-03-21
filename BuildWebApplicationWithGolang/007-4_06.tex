@@ -1,0 +1,35 @@
+Goテンプレートにおいてもし条件判断が必要となった場合は、Go言語の\texttt{if-else}文に似た方法を使用することで処理することができます。もしpipelineが空であれば、ifはデフォルトでfalseだと考えます。下の例でどのように\texttt{if-else}文を使用するか示します：
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "os"
+    "text/template"
+)
+
+func main() {
+    tEmpty := template.New("template test")
+    tEmpty = template.Must(tEmpty.Parse(
+        "空の pipeline if demo: {{if ``}} 出力されません。 {{end}}\n"))
+    tEmpty.Execute(os.Stdout, nil)
+
+    tWithValue := template.New("template test")
+    tWithValue = template.Must(tWithValue.Parse(
+        "空ではない pipeline if demo: {{if `anything`}} コンテンツがあります
+        。出力します。 {{end}}\n"))
+    tWithValue.Execute(os.Stdout, nil)
+
+    tIfElse := template.New("template test")
+    tIfElse = template.Must(tIfElse.Parse("if-else demo:
+               {{if `anything`}} if部分 {{else}} else部分.{{end}}\n"))
+    tIfElse.Execute(os.Stdout, nil)
+}
+\end{lstlisting}
+
+上のデモコードを通して\texttt{if-else}文が相当簡単であることがわかりました。使用に際してとても簡単にテンプレートコードの中に集約されます。
+
+\begin{quote}
+注意：ifの中では条件判断を使用することができません。例えば、\texttt{Mail=="astaxie@gmail.com"}のような判断は誤りです。ifの中ではbool値のみ使用できます。
+\end{quote}

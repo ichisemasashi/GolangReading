@@ -1,0 +1,47 @@
+上のようなJSON文字列があると仮定します。ではどのようにこのJSON文字列を解析するのでしょうか？GoのJSONパッケージには以下のような関数があります
+
+\begin{lstlisting}[numbers=none]
+func Unmarshal(data []byte, v interface{}) error
+\end{lstlisting}
+
+この関数を使って解析の目的を実現することができます。詳細な解析の例は以下のコードをご覧ください：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type Server struct {
+    ServerName string
+    ServerIP   string
+}
+
+type Serverslice struct {
+    Servers []Server
+}
+
+func main() {
+    var s Serverslice
+    str := `{"servers":[{"serverName":"Shanghai_VPN",
+                         "serverIP":"127.0.0.1"},
+                          {"serverName":"Beijing_VPN",
+                           "serverIP":"127.0.0.2"}]}`
+    json.Unmarshal([]byte(str), &s)
+    fmt.Println(s)
+}
+\end{lstlisting}
+
+
+
+上のコード例の中では、まずjsonデータに対応する構造体を定義します。配列はsliceに、フィールド名はJSONの中のKEYに相当します。解析の際どのようにjsonデータとstructフィールドをマッチさせるのでしょうか？例えばJSONのkeyが\texttt{Foo}であった場合、どのようにして対応するフィールドを探すのでしょうか？
+
+\begin{itemize}
+  \item まずtagに含まれる\texttt{Foo}のエクスポート可能なstructフィールド(頭文字が大文字)を探し出します。
+  \item 次にフィールド名が\texttt{Foo}のエクスポートフィールドを探し出します。
+  \item 最後に\texttt{FOO}または\texttt{FoO}のような頭文字を除いたその他の大文字小文字を区別しないエクスポートフィールドを探し出します。
+\end{itemize}
+
+聡明なあなたであればお気づきかもしれません：代入されうるフィールドはエクスポート可能なフィールドである必要があります。（すなわち、頭文字が大文字であるということです。）同時にJSONを解析する際探しだせるフィールドを解析するのみで、探せないフィールドについては無視されます。これのメリットは：とても大きなJSONデータ構造を受け取ってしまいその中のいち部分のデータだけを取得したいような場合です。あなたは必要なデータに対応するフィールド名の大文字だけで簡単にこの問題を解決することができます。

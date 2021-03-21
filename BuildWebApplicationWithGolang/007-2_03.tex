@@ -1,0 +1,115 @@
+多くのアプリケーションを開発する際、最後はJSONデータ文字列を出力する必要があります。ではどのようにして処理するのでしょうか？JSONパッケージでは\texttt{Marshal}関数を通して処理します。関数の定義は以下の通り：
+
+
+\begin{lstlisting}[numbers=none]
+func Marshal(v interface{}) ([]byte, error)
+\end{lstlisting}
+
+上のサーバのリスト情報を出力する必要があるものと仮定します。どのように処理すべきでしょうか？下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type Server struct {
+    ServerName string
+    ServerIP   string
+}
+
+type Serverslice struct {
+    Servers []Server
+}
+
+func main() {
+    var s Serverslice
+    s.Servers = append(s.Servers, Server{ServerName: "Shanghai_VPN",
+                                         ServerIP: "127.0.0.1"})
+    s.Servers = append(s.Servers, Server{ServerName: "Beijing_VPN",
+                                         ServerIP: "127.0.0.2"})
+    b, err := json.Marshal(s)
+    if err != nil {
+        fmt.Println("json err:", err)
+    }
+    fmt.Println(string(b))
+}
+\end{lstlisting}
+
+下のような内容が出力されます：
+
+\begin{lstlisting}[numbers=none]
+{"Servers":[{"ServerName":"Shanghai_VPN","ServerIP":"127.0.0.1"},
+    {"ServerName":"Beijing_VPN","ServerIP":"127.0.0.2"}]}
+\end{lstlisting}
+
+上で出力されたフィールド名の頭文字はどれも大文字です。もし頭文字に小文字を使いたい場合はどうすればよいでしょうか？構造体のフィールド名の頭文字を小文字にすべきでしょうか？JSONで出力する際に注意が必要なのは、エクスポートされたフィールドのみが出力されるということです。もしフィールド名を修正してしまうと、何も出力されなくなってしまいます。ですので必ずstruct tagによって定義した上で実装する必要があります：
+
+\begin{lstlisting}[numbers=none]
+type Server struct {
+    ServerName string `json:"serverName"`
+    ServerIP   string `json:"serverIP"`
+}
+
+type Serverslice struct {
+    Servers []Server `json:"servers"`
+}
+\end{lstlisting}
+
+上の構造体の定義を修正することで、出力されるJSON文字列と我々が最初に定義したJSON文字列は一致します。
+
+JSONの出力に対して、struct tagを定義する場合注意すべきいくつかのことは：
+
+\begin{itemize}
+  \item フィールドのtagが\texttt{"-"}であった場合、このフィールドはJSONに出力されません。
+  \item tagにカスタム定義の名前が含まれる場合、このカスタム定義された名前はJSONのフィールド名に出現します。例えば上の例のserverNameに当たります。
+  \item tagに\texttt{"omitempty"}オプションが含まれる場合、このフィールドの値が空であればJSON文字列の中には出力されません。
+  \item もしフィールドの型がbool, string, int, int65等で、tagに\texttt{",string"}オプションが含まれる場合、このフィールドがJSONに出力される際はこのフィールドに対応した値が変換されてJSON文字列となります。
+\end{itemize}
+
+例をあげてご説明しましょう：
+
+\begin{lstlisting}[numbers=none]
+type Server struct {
+    // ID はJSONの中にエクスポートされません。
+    ID int `json:"-"`
+
+    // ServerName2 の値は二次JSONエンコーディングが行われます。
+    ServerName  string `json:"serverName"`
+    ServerName2 string `json:"serverName2,string"`
+
+    // もし ServerIP が空であれば、JSON文字列の中には出力されません。
+    ServerIP   string `json:"serverIP,omitempty"`
+}
+
+s := Server {
+    ID:         3,
+    ServerName:  `Go "1.0" `,
+    ServerName2: `Go "1.0" `,
+    ServerIP:   ``,
+}
+b, _ := json.Marshal(s)
+os.Stdout.Write(b)
+\end{lstlisting}
+
+以下のような内容が出力されます：
+
+\begin{lstlisting}[numbers=none]
+{"serverName":"Go \"1.0\" ","serverName2":"\"Go \\\"1.0\\\" \""}
+\end{lstlisting}
+
+Marshal関数は変換に成功した時のみデータを返します。変換の過程で注意しなければならないのは：
+
+\begin{itemize}
+  \item JSONオブジェクトはstringのみをkeyとしてサポートします。そのためmapをエンコードしたい場合は必ずmap[string]Tのような型となります。(TはGo言語の中の任意の型です。)
+  \item Channel, complexとfunctionはJSONにはエンコードされません。
+  \item ネストしたデータはエンコードされません。さもないとJSONのエンコードは永久ループに入ってしまいます。
+  \item ポインタがエンコードされる際はポインタが指定している内容が出力されます。空のポインタはnullを出力します。
+\end{itemize}
+
+この節ではどのようにGo言語のjson標準パッケージを使ってJSONデータをエンコードするかご紹介しました。同時にどのようにサードパーティパッケージである\texttt{go-simplejson}を使っていくつかの状況で簡単な操作をご紹介しました。これらを学び運用に慣れることは以降にご紹介するWeb開発においてとても重要になります。
+
+
+

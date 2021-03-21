@@ -1,0 +1,15 @@
+ときどき、テンプレートを使っていてローカル変数を定義したい場合があります。操作の中でローカル変数を宣言することができます。例えば\texttt{with``range``if}プロセスではローカル変数を宣言します。この変数のスコープは\texttt{\{\{end\}\}}の前です。Go言語で宣言されたローカル変数の形式は以下のとおりです：
+
+
+\begin{lstlisting}[numbers=none]
+$variable := pipeline
+\end{lstlisting}
+
+詳細な例は以下をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+{{with $x := "output" | printf "%q"}}{{$x}}{{end}}
+{{with $x := "output"}}{{printf "%q" $x}}{{end}}
+{{with $x := "output"}}{{$x | printf "%q"}}{{end}}
+\end{lstlisting}
+

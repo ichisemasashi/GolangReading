@@ -1,0 +1,16 @@
+上のセッションハイジャックの簡単な例で、sessionが他の人にハイジャックされると非常に危険だとわかりました。ハイジャック側はハイジャックされた側を装い多くの非合法な操作を行うことができます。ではどのように効果的にsessionハイジャックを防止するのでしょうか？
+
+ひとつの方法はsessionIDの値にcookieによってのみ設定されるようにすることです。URLの書き直し方法は許さないようにし、同時にcookieのhttponlyをtrueに設定します。このプロパティはクライアントサイドのスクリプトが設定されたcookieにアクセスできるか否かを設定します。まず、これによってこのcookieがXSSによって読み取られ、sessionハイジャックを引き起こすことを防止できます。つぎにcookieの設定がURLの書き直し方法によって容易にsessionIDを取得することができなくなります。
+
+ステップ2は各リクエストの中にtokenを追加することです。前の章で述べたformの重複送信を防止するのに似た機能を実装します。各リクエストの中で隠されたtokenを追加し、毎回このtokenを検証することでユーザのリクエストがユニークであることを保証します。
+
+\begin{lstlisting}[numbers=none]
+h := md5.New()
+salt:="astaxie%^7&8888"
+io.WriteString(h,salt+time.Now().String())
+token:=fmt.Sprintf("%x",h.Sum(nil))
+if r.Form["token"]!=token{
+    //ログイン画面を表示
+}
+sess.Set("token",token)
+\end{lstlisting}
