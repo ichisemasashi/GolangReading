@@ -1,0 +1,13 @@
+ファイルを新規作成するには以下の２つのメソッドがあります
+
+\begin{itemize}
+  \item func Create(name string) (file *File, err Error)\\ 与えられたファイル名に従って新しいファイルを作成し、ファイルオブジェクトを返します。デフォルトでパーミッションは0666のファイルになります。返されたファイルオブジェクトは読み書きできます。
+  \item func NewFile(fd uintptr, name string) *File\\ ファイルディスクリプタに従って対応するファイルを作成し、ファイルオブジェクトを返します。
+\end{itemize}
+
+以下の２つのメソッドによってファイルを開きます：
+
+\begin{itemize}
+  \item func Open(name string) (file *File, err Error)\\ このメソッドは名前がnameのファイルを開きます。しかし読み込みしかできません。内部では実はOpenFileがコールされています。
+  \item func OpenFile(name string, flag int, perm uint32) (file *File, err Error) \\ 名前がnameのファイルを開きます。flagはオープンモードです。読み込むだけか、読み書きできるかといったものです。permはパーミッションです。
+\end{itemize}

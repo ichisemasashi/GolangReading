@@ -1,0 +1,34 @@
+ファイルへの書き込みを行う関数：
+
+\begin{itemize}
+  \item func (file *File) Write(b []byte) (n int, err Error)\\ byte型の情報をファイルに書き込みます。
+  \item func (file *File) WriteAt(b []byte, off int64) (n int, err Error)\\ 指定した位置から開始してbyte型の情報を書き込みます。
+  \item func (file *File) WriteString(s string) (ret int, err Error)\\ string情報をファイルに書き込みます。
+\end{itemize}
+
+
+ファイルへの書き込みを行うコード例
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    userFile := "astaxie.txt"
+    fout, err := os.Create(userFile)        
+    if err != nil {
+        fmt.Println(userFile, err)
+        return
+    }
+    defer fout.Close()
+    for i := 0; i < 10; i++ {
+        fout.WriteString("Just a test!\r\n")
+        fout.Write([]byte("Just a test!\r\n"))
+    }
+}
+\end{lstlisting}

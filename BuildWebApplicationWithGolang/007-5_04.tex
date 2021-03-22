@@ -1,0 +1,35 @@
+ファイルへの読み込みを行う関数：
+
+\begin{itemize}
+  \item func (file *File) Read(b []byte) (n int, err Error)\\ データを読み取りbに渡します
+  \item func (file *File) ReadAt(b []byte, off int64) (n int, err Error)\\ offから開始してデータを読み取りbに渡します
+\end{itemize}
+
+ファイルを読み取るコード例：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    userFile := "asatxie.txt"
+    fl, err := os.Open(userFile)        
+    if err != nil {
+        fmt.Println(userFile, err)
+        return
+    }
+    defer fl.Close()
+    buf := make([]byte, 1024)
+    for {
+        n, _ := fl.Read(buf)
+        if 0 == n {
+            break
+        }
+        os.Stdout.Write(buf[:n])
+    }
+}
+\end{lstlisting}

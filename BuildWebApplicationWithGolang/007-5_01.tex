@@ -1,0 +1,29 @@
+ファイル操作の大部分の関数はどれもosパッケージにあります。以下にいくつかディレクトリの操作を行うものを挙げます：
+
+\begin{itemize}
+  \item func Mkdir(name string, perm FileMode) error\\ 名前がnameのディレクトリを作成します。パーミッションの設定はpermで、例えば0777です。
+  \item func MkdirAll(path string, perm FileMode) error\\ pathに従って階層的なサブディレクトリを作成します。たとえばastaxie/test1/test2です。
+  \item func Remove(name string) error\\ 名前がnameのディレクトリを削除します。ディレクトリにファイルまたはその他のディレクトリがある場合はエラーを発生させます。
+  \item func RemoveAll(path string) error\\ pathに従って階層的なサブディレクトリを削除します。たとえばpathがあるひとつの名前であった場合、このディレクトリ以下のサブディレクトリが全て削除されます。
+\end{itemize}
+
+以下はコード例です：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "os"
+)
+
+func main() {
+    os.Mkdir("astaxie", 0777)
+    os.MkdirAll("astaxie/test1/test2", 0777)
+    err := os.Remove("astaxie")
+    if err != nil {
+        fmt.Println(err)
+    }
+    os.RemoveAll("astaxie")
+}
+\end{lstlisting}
