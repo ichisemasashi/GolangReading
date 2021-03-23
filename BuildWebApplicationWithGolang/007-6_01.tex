@@ -1,0 +1,62 @@
+以下の関数はstringsパッケージに入っています。ここでは普段よく使う関数をいくつかご紹介します。詳細はオフィシャルドキュメントをご参照ください。
+
+\begin{itemize}
+\item func Contains(s, substr string) bool\\ 文字列sにsubstrが含まれるか判断します。bool値を返します。
+\begin{lstlisting}[numbers=none]
+fmt.Println(strings.Contains("seafood", "foo"))
+fmt.Println(strings.Contains("seafood", "bar"))
+fmt.Println(strings.Contains("seafood", ""))
+fmt.Println(strings.Contains("", ""))
+//Output:
+//true
+//false
+//true
+//true
+\end{lstlisting}
+\item func Join(a []string, sep string) string\\ 文字列連結。slice aに対しsepで連結します。
+\begin{lstlisting}[numbers=none]
+s := []string{"foo", "bar", "baz"}
+fmt.Println(strings.Join(s, ", "))
+//Output:foo, bar, baz
+\end{lstlisting}
+\item func Index(s, sep string) int \\ 文字列sでsepが存在する位置です。インデックスを返します。見つからなければ-1を返します。
+\begin{lstlisting}[numbers=none]
+fmt.Println(strings.Index("chicken", "ken"))
+fmt.Println(strings.Index("chicken", "dmr"))
+//Output:4
+//-1
+\end{lstlisting}
+\item func Repeat(s string, count int) string\\ s文字列をcount回リピートします。最後にリピートされた文字列を返します。
+\begin{lstlisting}[numbers=none]
+fmt.Println("ba" + strings.Repeat("na", 2))
+//Output:banana
+\end{lstlisting}
+\item func Replace(s, old, new string, n int) string\\ s文字列において、old文字列をnew文字列に置換します。nは置換回数を表しています。0以下では全て置換します。
+\begin{lstlisting}[numbers=none]
+fmt.Println(strings.Replace("oink oink oink", "k", "ky", 2))
+fmt.Println(strings.Replace("oink oink oink", "oink", "moo", -1))
+//Output:oinky oinky oink
+//moo moo moo
+\end{lstlisting}
+\item func Split(s, sep string) []string\\sepによってs文字列を分割します。sliceを返します。
+\begin{lstlisting}[numbers=none]
+fmt.Printf("%q\n", strings.Split("a,b,c", ","))
+fmt.Printf("%q\n", strings.Split("a man a plan a canal panama", "a "))
+fmt.Printf("%q\n", strings.Split(" xyz ", ""))
+fmt.Printf("%q\n", strings.Split("", "Bernardo O'Higgins"))
+//Output:["a" "b" "c"]
+//["" "man " "plan " "canal panama"]
+//[" " "x" "y" "z" " "]
+//[""]
+\end{lstlisting}
+\item func Trim(s string, cutset string) string\\ s文字列の先頭と末尾からcutsetで指定した文字列を除去する。
+\begin{lstlisting}[numbers=none]
+fmt.Printf("[%q]", strings.Trim(" !!! Achtung !!! ", "! "))
+//Output:["Achtung"]
+\end{lstlisting}
+\item func Fields(s string) []string\\ s文字列の空白文字を除去し、空白に従って分割されたsliceを返します。
+\begin{lstlisting}[numbers=none]
+fmt.Printf("Fields are: %q", strings.Fields("  foo bar  baz   "))
+//Output:Fields are: ["foo" "bar" "baz"]
+\end{lstlisting}
+\end{itemize}
