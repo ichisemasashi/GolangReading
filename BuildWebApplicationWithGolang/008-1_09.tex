@@ -1,0 +1,155 @@
+上でTCPのクライアントプログラムを書きました。また、netパッケージを使ってサーバのプログラムを作成することもできます。サーバではサービスを指定のアクティベートされていないポートに紐付け、このポートを監視する必要があります。クライアントのリクエストが到着した時にクライアントから接続したリクエストを受け取ることができます。netパッケージには対応する機能の関数があります。関数の定義は以下のとおりです：
+
+\begin{lstlisting}[numbers=none]
+func ListenTCP(net string, laddr *TCPAddr) (l *TCPListener, err os.Error)
+func (l *TCPListener) Accept() (c Conn, err os.Error)
+\end{lstlisting}
+
+引数の説明はDialTCPの引数と同じです。以下では簡単な時間同期サービスを実装しています。7777ポートを監視します。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net"
+    "os"
+    "time"
+)
+
+func main() {
+    service := ":7777"
+    tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+    checkError(err)
+    listener, err := net.ListenTCP("tcp", tcpAddr)
+    checkError(err)
+    for {
+        conn, err := listener.Accept()
+        if err != nil {
+            continue
+        }
+        daytime := time.Now().String()
+        conn.Write([]byte(daytime)) // don't care about return value
+        conn.Close()                // we're finished with this client
+    }
+}
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}
+
+上のサービスは動かすと、ずっとそこで新しいクライアントがリクエストを送ってくるのを待っています。新しいクライアントのリクエストが届き、受け付け\texttt{Accept}に同意すると、このリクエストの時現在の時刻情報をフィードバックします。注意すべきは、コードの中の\texttt{for}ループです。エラーが発生した際、直接continueし、ループは抜けません。なぜならサーバがコードを走らせて、エラーが発生するような状況ではサーバにエラーを記録させ、現在接続しているクライアントは直接エラーを発生させてログアウトします。そのため、現在のサーバが実行しているサービス全体には影響を与えません。
+
+上のコードには欠点があります。実行される際はひとつのタスクです。同時に複数のリクエストを受け取ることができません。ではどのようにして並列処理をサポートできるよう改造するのでしょうか？Goではgoroutineメカニズムがあります。下の改造後のコードをご覧ください。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net"
+    "os"
+    "time"
+)
+
+func main() {
+    service := ":1200"
+    tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+    checkError(err)
+    listener, err := net.ListenTCP("tcp", tcpAddr)
+    checkError(err)
+    for {
+        conn, err := listener.Accept()
+        if err != nil {
+            continue
+        }
+        go handleClient(conn)
+    }
+}
+
+func handleClient(conn net.Conn) {
+    defer conn.Close()
+    daytime := time.Now().String()
+    conn.Write([]byte(daytime)) // don't care about return value
+    // we're finished with this client
+}
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}
+
+タスク処理を関数\texttt{handleClinet}に分離することで、一歩進んで並列実行を実現できるようになります。見た目にはあまりかっこ良くありません。\texttt{go}キーワードを追加することでサーバの並列処理を実現しました。この例からgoroutineの強力さを見ることができます。
+
+こう思う方もおられるかもしれません：このサーバはクライアントが実際にリクエストしたコンテンツを処理していない。もしもクライアントから異なるリクエストで異なる時刻形式を求められ、しかも長時間に渡る接続だった場合どうすればよいのか？と。その場合は以下をご覧ください：
+
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net"
+    "os"
+    "time"
+    "strconv"
+)
+
+func main() {
+    service := ":1200"
+    tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+    checkError(err)
+    listener, err := net.ListenTCP("tcp", tcpAddr)
+    checkError(err)
+    for {
+        conn, err := listener.Accept()
+        if err != nil {
+            continue
+        }
+        go handleClient(conn)
+    }
+}
+
+func handleClient(conn net.Conn) {
+    conn.SetReadDeadline(time.Now().Add(2 * time.Minute))
+                                 // set 2 minutes timeout
+    request := make([]byte, 128)
+    // set maxium request length to 128B to prevent flood attack
+    defer conn.Close()  // close connection before exit
+    for {
+        read_len, err := conn.Read(request)
+
+        if err != nil {
+            fmt.Println(err)
+            break
+        }
+
+        if read_len == 0 {
+            break // connection already closed by client
+        } else if string(request) == "timestamp" {
+            daytime := strconv.FormatInt(time.Now().Unix(), 10)
+            conn.Write([]byte(daytime))
+        } else {
+            daytime := time.Now().String()
+            conn.Write([]byte(daytime)) 
+        }
+
+        request = make([]byte, 128) // clear last read content
+    }
+}
+
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}
+
+上の例では\texttt{conn.Read()}を使用してクライアントが送信するリクエストを絶え間なく読み込んでいます。クライアントとの長時間接続を保持しなければならないため、一度のリクエストを読み終わった後も接続を切断することはできません。\texttt{conn.SetReadDeadline()}はタイムアウトを設定しているので、一定時間内にクライアントからリクエストが送られなければ、\texttt{conn}は自動的に接続を切断します。下のforループは接続が切断されることによって抜け出します。注意しなければならないのは、\texttt{request}は新規に作成される際にflood attackを防止するため最大の長さを指定しなければならないということです；毎回リクエストが読み込まれ処理が完了する度にrequestを整理しなければなりません。なぜなら\texttt{conn.Read()}は新しく読み込んだ内容を元の内容の後にappendしてしまうかもしれないからです。

@@ -1,0 +1,85 @@
+Go言語におけるUDP SocketとTCP Socketの処理の違いはサーバで処理される複数のクライアントのリクエストデータパケットの方法です。UDPはクライアントの接続リクエストに対するAccept関数が欠けています。その他基本的にはほとんど同じです。TCPをただUDPに置き換えただけです。UDPの主ないくつかの関数は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+func ResolveUDPAddr(net, addr string) (*UDPAddr, os.Error)
+func DialUDP(net string, laddr, raddr *UDPAddr) (c *UDPConn, err os.Error)
+func ListenUDP(net string, laddr *UDPAddr) (c *UDPConn, err os.Error)
+func (c *UDPConn) ReadFromUDP(b []byte) (n int, addr *UDPAddr, err os.Error
+func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (n int, err os.Error)
+\end{lstlisting}
+
+UDPのクライアントコードは以下に示しています。違いはTCPをUDPに置き換えただけだとわかります。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net"
+    "os"
+)
+
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Fprintf(os.Stderr, "Usage: %s host:port", os.Args[0])
+        os.Exit(1)
+    }
+    service := os.Args[1]
+    udpAddr, err := net.ResolveUDPAddr("udp4", service)
+    checkError(err)
+    conn, err := net.DialUDP("udp", nil, udpAddr)
+    checkError(err)
+    _, err = conn.Write([]byte("anything"))
+    checkError(err)
+    var buf [512]byte
+    n, err := conn.Read(buf[0:])
+    checkError(err)
+    fmt.Println(string(buf[0:n]))
+    os.Exit(0)
+}
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error ", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}
+
+UDPサーバがどのように処理するか見てみましょう；
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net"
+    "os"
+    "time"
+)
+
+func main() {
+    service := ":1200"
+    udpAddr, err := net.ResolveUDPAddr("udp4", service)
+    checkError(err)
+    conn, err := net.ListenUDP("udp", udpAddr)
+    checkError(err)
+    for {
+        handleClient(conn)
+    }
+}
+func handleClient(conn *net.UDPConn) {
+    var buf [512]byte
+    _, addr, err := conn.ReadFromUDP(buf[0:])
+    if err != nil {
+        return
+    }
+    daytime := time.Now().String()
+    conn.WriteToUDP([]byte(daytime), addr)
+}
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error ", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}

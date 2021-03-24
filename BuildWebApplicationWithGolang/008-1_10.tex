@@ -1,0 +1,22 @@
+TCPには多くの接続コントロール関数があります。我々が普段よく使うものは以下のいくつかの関数です：
+
+\begin{lstlisting}[numbers=none]
+func DialTimeout(net, addr string, timeout time.Duration) (Conn, error)
+\end{lstlisting}
+
+接続のタイムアウトを設定すると、クライアントとサーバのどちらにも適用されます。設定された時間が過ぎると、接続は自動的に切断されます。
+
+\begin{lstlisting}[numbers=none]
+func (c *TCPConn) SetReadDeadline(t time.Time) error
+func (c *TCPConn) SetWriteDeadline(t time.Time) error
+\end{lstlisting}
+
+接続のタイムアウトへの書き込み/読み取りを設定するのに用いられます。接続は自動的に切断されます。
+
+\begin{lstlisting}[numbers=none]
+func (c *TCPConn) SetKeepAlive(keepalive bool) os.Error
+\end{lstlisting}
+
+クライアントがサーバと長時間接続を保つかどうか設定することで、TCP接続時のハンドシェイクのオーバーヘッドを減らすことができます。頻繁にデータをやりとりする必要のあるアプリケーションに適しています。
+
+より詳しい内容については\texttt{net}パッケージのドキュメントをご参照ください。

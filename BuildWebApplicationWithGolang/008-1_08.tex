@@ -1,0 +1,69 @@
+Go言語ではnetパッケージの\texttt{DialTCP}関数によってTCP接続を一つ確立し、\texttt{TCPConn}型のオブジェクトを一つ返します。接続が確立した時サーバも同じ型のオブジェクトを作成します。この時クライアントとサーバは各自が持っている\texttt{TCPConn}オブジェクトを使ってデータのやりとりを行います。一般的に、クライアントは\texttt{TCPConn}オブジェクトを使ってリクエスト情報をサーバに送信し、サーバのレスポンス情報を読み取ります。サーバはクライアントからのリクエストを読み取り、解析して、応答情報を返します。この接続はどちらかが接続を切断することによってのみ失効し、そうでなければこの接続はずっと使うことができます。接続を確立する関数の定義は以下のとおり：
+
+\begin{lstlisting}[numbers=none]
+func DialTCP(net string, laddr, raddr *TCPAddr) (c *TCPConn, err os.Error)
+\end{lstlisting}
+
+\begin{itemize}
+  \item net引数は"tcp4"、"tcp6"、"tcp"の中の任意の一つです。それぞれTCP(IPv4-only),TCP(IPv6-only)とTCP(IPv4,IPv6の任意の一つ）を表しています。
+  \item laddrはローカルのアドレスを表しています。一般にはnilを設定します。
+  \item raddrはリモートのサーバアドレスを表しています。
+\end{itemize}
+
+ここでは簡単な例を一つ書いてみましょう。HTTPプロトコルに基づくクライアントによるWebサーバへのリクエストをエミュレートします。簡単なhttpリクエストヘッダを書く必要があります。形式は以下のようになります：
+
+\begin{lstlisting}[numbers=none]
+"HEAD / HTTP/1.0\r\n\r\n"
+\end{lstlisting}
+
+サーバから受け取るレスポンス情報の形式は以下のようになります：
+
+\begin{lstlisting}[numbers=none]
+HTTP/1.0 200 OK
+ETag: "-9985996"
+Last-Modified: Thu, 25 Mar 2010 17:51:10 GMT
+Content-Length: 18074
+Connection: close
+Date: Sat, 28 Aug 2010 00:43:48 GMT
+Server: lighttpd/1.4.23
+\end{lstlisting}
+
+我々のクライアントのコードは以下のようになります：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "net"
+    "os"
+)
+
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Fprintf(os.Stderr, "Usage: %s host:port ", os.Args[0])
+        os.Exit(1)
+    }
+    service := os.Args[1]
+    tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+    checkError(err)
+    conn, err := net.DialTCP("tcp", nil, tcpAddr)
+    checkError(err)
+    _, err = conn.Write([]byte("HEAD / HTTP/1.0\r\n\r\n"))
+    checkError(err)
+    result, err := ioutil.ReadAll(conn)
+    checkError(err)
+    fmt.Println(string(result))
+    os.Exit(0)
+}
+func checkError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+        os.Exit(1)
+    }
+}
+\end{lstlisting}
+
+上のコードでわかることは：まずプログラムはユーザの入力を引数\texttt{service}として\texttt{net.ResolveTCPAddr}に渡し、tcpAddrを一つ取得します。その後tcpAddrをDialTCPに渡し、TCP接続\texttt{conn}を確立します。\texttt{conn}を通してリクエスト情報を送信し、最後に\texttt{ioutil.ReadAll}を通して\texttt{conn}からすべてのテキスト、つまりサーバのリクエストフィードバックの情報を取得します。
+

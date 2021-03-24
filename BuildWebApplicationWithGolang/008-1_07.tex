@@ -1,0 +1,34 @@
+どのようにしてネットワークのポートからサービスにアクセスするか知っていれば、何ができるのでしょうか？クライアントからすれば、あるリモートの機器のあるネットワークポートに対してリクエストを一つ送信することによって、機器のこのポートを監視しているサーバのフィードバック情報を得ることができます。サーバからすると、サーバをある指定されたポートに紐付け、このポートを監視する必要があります。クライアントからアクセスがあった時情報を取得し、フィードバック情報を書き込むことになります。
+
+Go言語の\texttt{net}パッケージには\texttt{TCPConn}という型があります。この型はクライアントとサーバ間のやりとりの通り道として使用することができます。これには主に２つの関数が存在します：
+
+\begin{lstlisting}[numbers=none]
+func (c *TCPConn) Write(b []byte) (n int, err os.Error)
+func (c *TCPConn) Read(b []byte) (n int, err os.Error)
+\end{lstlisting}
+
+\texttt{TCPConn}はクライアントとサーバがデータを読み書きするのに使うことができます。
+
+また\texttt{TCPAddr}型も知っておく必要があります。これはTCPのアドレス情報を示しています。この定義は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+type TCPAddr struct {
+    IP IP
+    Port int
+}
+\end{lstlisting}
+
+Go言語では\texttt{ResolveTCPAddr}を使ってひとつの\texttt{TCPAddr}を取得します。
+
+
+
+\begin{lstlisting}[numbers=none]
+func ResolveTCPAddr(net, addr string) (*TCPAddr, os.Error)
+\end{lstlisting}
+
+
+\begin{itemize}
+  \item net引数は"tcp4"、"tcp6"、"tcp"の中の任意の一つです。それぞれTCP(IPv4-only),TCP(IPv6-only)とTCP(IPv4,IPv6の任意の一つ）を表しています。
+  \item addrはドメインまたはIPアドレスを示しています。例えば"www.google.com:80"または"127.0.0.1:22"です。
+\end{itemize}
+

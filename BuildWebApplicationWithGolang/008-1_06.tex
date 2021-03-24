@@ -1,0 +1,33 @@
+Goの\texttt{net}パッケージではいくつもの型が定義されています。関数とメソッドはネットワークプログラミングを行うために使われます。この中でIPの定義は以下の通りです：
+
+\begin{lstlisting}[numbers=none]
+type IP []byte
+\end{lstlisting}
+
+\texttt{net}パッケージではたくさんの関数によってIPを操作します。しかし比較的使われるものは数個しかありません。このうち\texttt{ParseIP(s string) IP}関数はIPv4またはIPv6のアドレスをIP型に変換します。下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+package main
+import (
+    "net"
+    "os"
+    "fmt"
+)
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Fprintf(os.Stderr, "Usage: %s ip-addr\n", os.Args[0])
+        os.Exit(1)
+    }
+    name := os.Args[1]
+    addr := net.ParseIP(name)
+    if addr == nil {
+        fmt.Println("Invalid address")
+    } else {
+        fmt.Println("The address is ", addr.String())
+    }
+    os.Exit(0)
+}
+\end{lstlisting}
+
+実行するとIPアドレスを入力することで対応するIP形式が出力されるのがお分かりいただけるかと思います。
+
