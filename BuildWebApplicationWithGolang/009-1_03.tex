@@ -1,0 +1,66 @@
+上の紹介で、読者はこのような攻撃が非常に恐ろしいと思われたのではないでしょうか。恐怖を意識するのはいいことです。どのようにして似たようなセキュリティホールの出現を防止/改善し、以降の内容を引き続き読み進めていくことを促してくれます。
+
+CSRFの防御はサーバとクライアントの両方から着手することができます。防御はサーバから手をつけるのが効果的です。現在一般的なCSRF防御はどれもサーバで行われます。
+
+サーバでCSRF攻撃を予防する方法にはいくつかありますが、思想上はどれも大差ありません。主に以下の２つの方面から行われます：
+
+\begin{enumerate}
+  \item GET,POSTとCookieを正しく使用する
+  \item GETでないリクエストで擬似乱数を追加する
+\end{enumerate}
+
+前の章でRESTメソッドのWebアプリケーションをご紹介しました。一般的には普通のWebアプリケーションはどれもGET、POSTがメインで、もう一種類のリクエストはCookie方式です。我々は一般的に以下の方法でアプリケーションを設計します：
+
+\begin{enumerate}
+  \item GETは閲覧、列挙、表示といったリソースを変更する必要のない場合に限ります
+  \item POSTは注文を行い、リソースに変更を加えたりといった状況に限ります
+\end{enumerate}
+
+ではGo言語を使って例をご説明します。どのようにしてリソースのアクセス方法を制限するのでしょうか：
+
+\begin{lstlisting}[numbers=none]
+mux.Get("/user/:uid", getuser)
+mux.Post("/user/:uid", modifyuser)
+\end{lstlisting}
+
+このように処理すると、修正にはPOSTのみに限定しているため、GETメソッドでリクエストした際レスポンスを拒絶します。そのため、上の図で示したGETメソッドのCSRF攻撃は防止されます。しかしこれですべて問題は解決されたのでしょうか？当然そうではありません。POSTも同じだからです。
+
+そのため、第二ステップを実施する必要があります。GETでないメソッドのリクエストにおいてランダムな数を追加します。これはだいたい三種類の方法によって実行されます：
+
+\begin{itemize}
+  \item 各ユーザにユニークなcookie tokenをひとつ生成します。すべてのフォームは同じ擬似乱数を含んでいます。この方法は最も簡単です。なぜなら攻撃者は第三者のCookieを(理論上は)取得することができず、そのため、フォームのデータを構成することができません。しかしユーザのCookieはページのXSSセキュリティホールによって容易に盗まれてしまいます。そのため、この方法はかならずXSSがない状況で安全だといえます。
+  \item 各リクエストでCAPTCHAを使用します。この方法は完璧です。複数回CAPTCHAを入力する必要がありますので、ユーザビリティは非常に悪く実際の運用には適しません。
+  \item 異なるフォームにそれぞれ異なる擬似乱数を含ませます。4.4節でご紹介した”どのようにしてフォームの複数送信を防止するか"で、この方法をご紹介しました。関連するコードを再掲します：
+\end{itemize}
+
+ランダムなtokenを生成します
+
+\begin{lstlisting}[numbers=none]
+h := md5.New()
+io.WriteString(h, strconv.FormatInt(crutime, 10))
+io.WriteString(h, "ganraomaxxxxxxxxx")
+token := fmt.Sprintf("%x", h.Sum(nil))
+
+t, _ := template.ParseFiles("login.gtpl")
+t.Execute(w, token)
+\end{lstlisting}
+
+tokenを出力
+
+\begin{lstlisting}[numbers=none]
+<input type="hidden" name="token" value="{{.}}">
+\end{lstlisting}
+
+tokenを検証
+
+\begin{lstlisting}[numbers=none]
+r.ParseForm()
+token := r.Form.Get("token")
+if token != "" {
+    //tokenの合法性を検証
+} else {
+    //tokenが存在しない場合はエラーを発生
+}
+\end{lstlisting}
+
+このように基本的には安全なPOSTを実現しました。しかしもしtokenのアルゴリズムが暴かれてしまったらと思われるかもしれません。しかし理論上は破られることは基本的に不可能です。ある人が計算したところ、この文字列を無理に破るにはだいたい2の11乗の時間が必要です。
