@@ -1,0 +1,45 @@
+もし上の２ステップが完了すると、データフィルタリングの作業は基本的に完了です。しかしWebアプリケーションを書いている時我々はすでにフィルタリングして汚染されているデータを区別する必要があります。なぜならこのようにすることでデータのフィルタリングの完全性を保証し、入力したデータには影響を与えないようにすることができるからです。我々はすべてのフィルタリングされたデータをグローバルなMap変数(CleanMap)の中に保存します。この時２つの重要なステップで汚染されたデータが注入されるのを防ぐ必要があります：
+
+\begin{itemize}
+  \item 各リクエストはCleamMapを空のMapとして初期化する必要があります。
+  \item 検査を加えて外部のデータ元の変数がCleanMapとされるのを阻止する。
+\end{itemize}
+
+続けて、例を一つ挙げてこの概念を強固にしましょう。下のフォームをご覧ください
+
+\begin{lstlisting}[numbers=none]
+<form action="/whoami" method="POST">
+    あなたは誰ですか：
+    <select name="name">
+        <option value="astaxie">astaxie</option>
+        <option value="herry">herry</option>
+        <option value="marry">marry</option>
+    </select>
+    <input type="submit" />
+</form>
+\end{lstlisting}
+
+このフォームのプログラムロジックを処理している時に、非常に簡単に犯してしまう間違いは３つの選択肢の一つだけが送信されると思い込んでしまうことです。攻撃者はPOST操作をいじることができますから、\texttt{name=attack}といったデータを送信できます。そのため、この時ホワイトリストににた処理を行う必要があります。
+
+\begin{lstlisting}[numbers=none]
+r.ParseForm()
+name := r.Form.Get("name")
+CleanMap := make(map[string]interface{}, 0)
+if name == "astaxie" || name == "herry" || name == "marry" {
+    CleanMap["name"] = name
+}
+\end{lstlisting}
+
+上のコードではCleamMapという変数をひとつ初期化しています。取得したnameが\texttt{astaxie}、\texttt{herry}、\texttt{marry}の３つの打ちの一つだと判断した後、データをCleanMapに保存します。このようにCleanMap["name"]のなかのデータが合法であると保証することができます。そのためコードの他の部分にもこれを使用します。当然else部分に非合法なデータの処理を追加してもかまいません。再度フォームを表示しエラーを表示するといったこともできます。しかしフレンドリーに汚染されたデータを出力してはいけません。
+
+上の方法はすでに知っている合法な値のデータをフィルタリングするのには有効ですが、すでに合法な文字列で構成されていると知っているデータをフィルタリングする場合はなんの助けにもなりません。例えば、ユーザ名をアルファベットと数字のみから構成させたいとする場合です：
+
+\begin{lstlisting}[numbers=none]
+r.ParseForm()
+username := r.Form.Get("username")
+CleanMap := make(map[string]interface{}, 0)
+if ok, _ := regexp.MatchString("^[a-zA-Z0-9].$", username); ok {
+    CleanMap["username"] = username
+}
+\end{lstlisting}
+

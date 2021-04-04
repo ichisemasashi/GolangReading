@@ -1,0 +1,8 @@
+答えは簡単です。ユーザのいかなる入力も決して信用せず、入力に含まれるすべての特殊文字をフィルタリングするのです。このようにすれば大部分のXSS攻撃を根絶することができます。
+
+現在XSSの防御では主に以下のいくつかの方法があります：
+
+\begin{itemize}
+  \item 特殊文字のフィルタリング\\ XSSを避ける方法の一つは主にユーザが提供するコンテンツに対してフィルタリングを行うことです。Go言語ではHTMLのフィルタリング関数を提供しています： \\ text/templateパッケージのHTMLEscapeString、JSEscapeStringといった関数です。
+  \item HTTPヘッダに指定した型を使用する\\ \texttt{w.Header().Set("Content-Type","text/javascript")}\\ このようにすることでブラウザにhtmlを出力させずjavascriptコードを解釈させることができます。
+\end{itemize}
