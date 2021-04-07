@@ -1,0 +1,34 @@
+現在最も多く使用されているパスワードの保存方法は平文のパスワードを単方向ハッシュにかけて保存するものです。単方向ハッシュアルゴリズムの特徴は：ハッシュされたあとのダイジェスト(digest)からはオリジナルのデータを復元することができないということです。これが"単方向"であるということの所以です。よく使われる単方向ハッシュアルゴリズムにはSHA-256、SHA-1、MD5等があります。
+
+Go言語のこの三種類の暗号化アルゴリズムの実装は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+//import "crypto/sha256"
+h := sha256.New()
+io.WriteString(h,
+   "His money is twice tainted: 'taint yours and 'taint mine.")
+fmt.Printf("% x", h.Sum(nil))
+
+//import "crypto/sha1"
+h := sha1.New()
+io.WriteString(h,
+   "His money is twice tainted: 'taint yours and 'taint mine.")
+fmt.Printf("% x", h.Sum(nil))
+
+//import "crypto/md5"
+h := md5.New()
+io.WriteString(h, "暗号化する必要のあるパスワード")
+fmt.Printf("%x", h.Sum(nil))
+\end{lstlisting}
+
+
+単方向ハッシュには２つの特徴があります：
+
+\begin{enumerate}
+  \item 同じパスワードを単方向ハッシュにかけると、いつでもユニークな確定したダイジェストを得ます。
+  \item 速い計算速度。技術の進歩により、現在は一秒間に数十億回の単方向ハッシュ計算が可能です。
+\end{enumerate}
+
+上の２つの特徴を総合して、多数の人間が使用するパスワードをよくあるセットとして考えると、攻撃者はすべてのパスワードのよくあるセットに対して単方向ハッシュをかけることで、ダイジェストのセット得ることができます。その後データベースの中のダイジェストと比較することで対応するパスワードを取得することができます。このダイジェストのセットを\texttt{rainbow table}と呼びます。
+
+そのため、単方向暗号化を行ったあとに保存されたデータは平文で保存されるのとあまり違いはありません。ですので一旦ウェブサイトのデータベースが漏洩すると、すべてのユーザのパスワード自身が白日のもとに晒されることになります。
