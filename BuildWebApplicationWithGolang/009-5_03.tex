@@ -6,7 +6,7 @@
 
 ここでは\texttt{scrypt}の方法をおすすめしましょう。\texttt{scrypt}は有名なFreeBSDハッカーであるColin Percivalが彼の予備のサービスとしてTarsnapで開発しました。
 
-現在Go言語でサポートされているライブラリ\texttt{http://code.google.com/p/go/source/browse?repo=crypto\#hg\%2Fscrypt}
+現在Go言語でサポートされているライブラリ\texttt{http://code.google.com/p/go/source/browse?repo=\\crypto\#hg\%2Fscrypt}
 
 \begin{lstlisting}[numbers=none]
 dk := scrypt.Key([]byte("some password"), []byte(salt), 16384, 8, 1, 32)
