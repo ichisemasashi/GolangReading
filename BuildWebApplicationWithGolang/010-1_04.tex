@@ -1,0 +1,10 @@
+現在最もよく使われるLocaleの設定方法はURLにパラメータを追加することです。例えば\texttt{www.asta.com/hello?locale=zh}または\texttt{www.asta.com/zh/hello}といった具合に。このようにすることで地域を設定することができます：\texttt{i18n.SetLocale(params["locale"])}。
+
+このような設定方法は前に述べたドメインによるLocaleの設定のすべてのメリットをほとんど持ちあわせています。これはRESTfulな方法を採用しており、余計な方法を追加することで処理する必要がありません。しかしこのような方法では各linkにおいて対応するパラメータlocaleを追加する必要があり、すこし複雑でかなりめんどくさい場合もあります。しかし共通の関数urlを書くことですべてのlinkアドレスをこの関数を通して生成することができます。この関数では\texttt{locale=params["locale"]}パラメータを追加することでめんどくささを和らげます。
+
+URLアドレスをもっとRESTfulな見た目にしたいと思うかもしれません。例えば：\texttt{www.asta.com/en/books}(英語のサイト)と\texttt{www.asta.com/zh/books}(中国語のサイト)。このような方法のURLはさらにSEOに効果的です。またユーザビリティもよく、URLから直感的にアクセスしているサイトを知ることができます。このようなURLアドレスはrouterを使ってlocaleを取得します(RESTの節でご紹介したrouterプラグインの実装をご参考ください)：
+
+
+\begin{lstlisting}[numbers=none]
+mux.Get("/:locale/books", listbook)
+\end{lstlisting}

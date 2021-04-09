@@ -1,0 +1,36 @@
+Localeの設定にはアプリケーションが実行される際のドメインによって区別する方法があります。例えば、\texttt{www.asta.com}を我々の英語のサイト(デフォルトサイト)として、\texttt{www.asta.cn}というドメイン名を中国語のサイトとしたとします。この場合アプリケーションではドメイン名と対応するlocaleの対応関係を設定することで地域を設定ｓるうことができます。このような処理にはいくつかのメリットがあります：
+
+\begin{itemize}
+  \item URLを見るだけで簡単に識別できる
+  \item ユーザはドメイン名を通して直感的にどの言語のサイトに訪問するか知ることができる。
+  \item Goプログラムでは実装が非常に簡単で便利。mapを一つ使うだけで実現できる。
+  \item サーチエンジンのクローリングに有利。サイトのSEOを高めることができる。
+\end{itemize}
+
+下のコードによってドメイン名の対応するlocaleを実現できます：
+
+\begin{lstlisting}[numbers=none]
+if r.Host == "www.asta.com" {
+    i18n.SetLocale("en")
+} else if r.Host == "www.asta.cn" {
+    i18n.SetLocale("zh-CN")
+} else if r.Host == "www.asta.tw" {
+    i18n.SetLocale("zh-TW")
+}
+\end{lstlisting}
+
+当然全体のドメイン名で地域を設定する以外に、サブドメインによって地域を設定することもできます。例えば"en.asta.com"が英語のサイトを表し、"cn.asta.com"が中文のサイトを表します。実装するコードは以下の通り：
+
+\begin{lstlisting}[numbers=none]
+prefix := strings.Split(r.Host,".")
+
+if prefix[0] == "en" {
+    i18n.SetLocale("en")
+} else if prefix[0] == "cn" {
+    i18n.SetLocale("zh-CN")
+} else if prefix[0] == "tw" {
+    i18n.SetLocale("zh-TW")
+}
+\end{lstlisting}
+
+ドメイン名によるLocaleの設定は上で示したようなメリットがあります。しかし一般的にWebアプリケーションを開発する場合このような方法は採用されません。なぜならまずドメインはコストが比較的高く、Localeを一つ開発するのに一つドメイン名を必要とするからです。また、往々にして統一されたドメイン名を申請できるかどうか分かりません。次に各サイトに対してローカライズというひとつの設定を行いたくなく、urlの後にパラメータを追加する方法が採用されがちです。下のご紹介をご覧ください。
