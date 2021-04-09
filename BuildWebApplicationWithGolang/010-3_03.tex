@@ -1,0 +1,74 @@
+上では複数の言語パッケージの管理とロードを実装しました。いくつかの関数の実装はロジックレイヤに基いています。例えば："Tr.Translate"、"Tr.Time"、"Tr.Money"等です。ロジックレイヤではこのような関数を利用して必要なパラメータに対し置換を行った後テンプレートレイヤに適用する際直接出力することができます。しかしもしテンプレートレイヤでこれらの関数を直接使いたい場合はどのように実現するのでしょうか？覚えていらっしゃいますか、前にテンプレートをご紹介した時に：Go言語のテンプレートはカスタムなテンプレート関数をサポートしています。以下では操作に便利なmapfuncを実装します：
+
+\begin{enumerate}
+\item テキスト情報\\
+  テキスト情報は\texttt{Tr.Translate}をコールすることで対応するデータを置換します。mapFuncの実装は以下のとおり：
+\begin{lstlisting}[numbers=none]
+func I18nT(args ...interface{}) string {
+    ok := false
+    var s string
+    if len(args) == 1 {
+        s, ok = args[0].(string)
+    }
+    if !ok {
+        s = fmt.Sprint(args...)
+    }
+    return Tr.Translate(s)
+}
+\end{lstlisting}
+関数の登録は以下のとおり：
+\begin{lstlisting}[numbers=none]
+t.Funcs(template.FuncMap{"T": I18nT})
+\end{lstlisting}
+テンプレートでの使用は以下のとおり：
+\begin{lstlisting}[numbers=none]
+{{.V.Submit | T}}
+\end{lstlisting}
+\item 時間と日時\\
+時間と日時は\texttt{Tr.Time}関数をコールすることで対応する時間を置換します。mapFuncの実装は以下のとおり：
+\begin{lstlisting}[numbers=none]
+func I18nTimeDate(args ...interface{}) string {
+    ok := false
+    var s string
+    if len(args) == 1 {
+        s, ok = args[0].(string)
+    }
+    if !ok {
+        s = fmt.Sprint(args...)
+    }
+    return Tr.Time(s)
+}
+\end{lstlisting}
+関数の登録は以下のとおり：
+\begin{lstlisting}[numbers=none]
+t.Funcs(template.FuncMap{"TD": I18nTimeDate})
+\end{lstlisting}
+テンプレートでの使用は以下のとおり：
+\begin{lstlisting}[numbers=none]
+{{.V.Now | TD}}
+\end{lstlisting}
+\item 通貨情報\\
+通貨\texttt{Tr.Money}関数をコールすることで対応する時間を置換します。mapFuncの実装は以下のとおり：
+  \begin{lstlisting}[numbers=none]
+func I18nMoney(args ...interface{}) string {
+    ok := false
+    var s string
+    if len(args) == 1 {
+        s, ok = args[0].(string)
+    }
+    if !ok {
+        s = fmt.Sprint(args...)
+    }
+    return Tr.Money(s)
+}
+  \end{lstlisting}
+関数の登録は以下のとおり：
+  \begin{lstlisting}[numbers=none]
+t.Funcs(template.FuncMap{"M": I18nMoney})
+  \end{lstlisting}
+テンプレートでの使用は以下のとおり：
+  \begin{lstlisting}[numbers=none]
+{{.V.Money | M}}
+  \end{lstlisting}
+\end{enumerate}
+

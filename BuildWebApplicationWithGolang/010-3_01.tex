@@ -1,0 +1,41 @@
+アプリケーションをひとつ開発する時、まず決めなければならないのは、一つの言語だけをサポートすればよいのか、それとも多言語をサポートするのかということです。もし複数の言語のサポートする必要があれば、ある組織構成を作成することで、将来より多くの言語を追加できるようにしなければなりません。ここでは以下のように設計します：Localeに関係のあるファイルを\texttt{config/locales}の下に配置し、もし日本語と英語をサポートしなければならない場合は、このディレクトリの下にen.jsonとja.jsonを配置する必要があります。だいたいの内容は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+# ja.json
+
+{
+"ja": {
+    "submit": "送信",
+    "create": "作成"
+    }
+}
+
+# en.json
+
+{
+"en": {
+    "submit": "Submit",
+    "create": "Create"
+    }
+}
+\end{lstlisting}
+
+国際化をサポートするにあたって、ここでは国際化に関連したパッケージを使用することにします- - go-i18nです。まずgo-i18nパッケージに\texttt{config/locales}のディレクトリを登録することで、すべてのlocaleファイルをロードします。
+
+\begin{lstlisting}[numbers=none]
+Tr:=i18n.NewLocale()
+Tr.LoadPath("config/locales")
+\end{lstlisting}
+
+このパッケージは非常に使いやすく、以下の方法によって試すことができます：
+
+\begin{lstlisting}[numbers=none]
+fmt.Println(Tr.Translate("submit"))
+//Submitを出力
+Tr.SetLocale("ja")
+fmt.Println(Tr.Translate("submit"))
+//"送信"を出力
+\end{lstlisting}
+
+
+

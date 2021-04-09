@@ -1,0 +1,64 @@
+上ではどのようにして自動的にカスタムな言語パッケージをロードするかご紹介しました。実はgo-i18nライブラリはすでに多くのデフォルトのフォーマット情報をロードしています。たとえば時間フォーマット、通貨フォーマットです。ユーザはカスタムな設定を行う場合これらのデフォルトの設定を修正することができます。以下の処理プロセスをご覧ください：
+
+\begin{lstlisting}[numbers=none]
+//デフォルトの設定ファイルをロードします。これらのファイルは
+//すべてgo-i18n/localesの下にあります。
+
+//ファイルはそれぞれzh.json、en-json、en-US.json等と名前をつけます。
+//より多くの言語を続けて拡張することができます。
+
+func (il *IL) loadDefaultTranslations(dirPath string) error {
+    dir, err := os.Open(dirPath)
+    if err != nil {
+        return err
+    }
+    defer dir.Close()
+
+    names, err := dir.Readdirnames(-1)
+    if err != nil {
+        return err
+    }
+
+    for _, name := range names {
+        fullPath := path.Join(dirPath, name)
+
+        fi, err := os.Stat(fullPath)
+        if err != nil {
+            return err
+        }
+
+        if fi.IsDir() {
+            if err := il.loadTranslations(fullPath); err != nil {
+                return err
+            }
+        } else if locale := il.matchingLocaleFromFileName(name); locale != "" {
+            file, err := os.Open(fullPath)
+            if err != nil {
+                return err
+            }
+            defer file.Close()
+
+            if err := il.loadTranslation(file, locale); err != nil {
+                return err
+            }
+        }
+    }
+
+    return nil
+}
+\end{lstlisting}
+
+上の方法で設定ファイルをデフォルトのファイルにロードします。このようにカスタムな時間情報がない場合でも以下のようなコードで対応する情報を取得することができます：
+
+\begin{lstlisting}[numbers=none]
+//locale=zhの状況で、以下のコードを実行：
+
+fmt.Println(Tr.Time(time.Now()))
+//出力：2009年1月08日 星期四 20:37:58 CST
+
+fmt.Println(Tr.Time(time.Now(),"long"))
+//出力：2009年1月08日
+
+fmt.Println(Tr.Money(11.11))
+//出力:￥11.11
+\end{lstlisting}
