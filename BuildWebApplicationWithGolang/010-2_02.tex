@@ -1,0 +1,39 @@
+タイムゾーンの関係で、同一時刻においても異なる地域でその表示は異なってきます。またLocaleの関係で、時間のフォーマットも全く異なってきます。例えば日本語の環境下では：\texttt{2013年 10月24日 水曜日 23時11分13秒 JST}となり、英語の環境下では\texttt{Wed Oct 24 23:11:13 CST 2012}のように表示されます。ここでは２つの項目を解決しなければなりません。
+
+\begin{enumerate}
+  \item タイムゾーンの問題
+  \item フォーマットの問題
+\end{enumerate}
+
+\texttt{\$GOROOT/lib/time}パッケージのtimeinfo.zipにはlocaleに対応するタイムゾーンの定義が含まれています。対応する現在のlocaleの時間を取得するためには、まず\texttt{time.LoadLocation(name string)}を使用して対応するタイムゾーンのlocaleを取得します。例えば\texttt{Asia/Shanghai}または\texttt{America/Chicago}に対応するタイムゾーンデータです。その後、この情報を再利用し、\texttt{time.Now}をコールすることにより得られるTimeオブジェクトとあわせて最終的な時間を取得します。詳細は以下の例をご覧ください(この例では上のいくつかの変数を採用しています):
+
+
+\begin{lstlisting}[numbers=none]
+en["time_zone"]="America/Chicago"
+cn["time_zone"]="Asia/Tokyo"
+
+loc,_:=time.LoadLocation(msg(lang,"time_zone"))
+t:=time.Now()
+t = t.In(loc)
+fmt.Println(t.Format(time.RFC3339))
+\end{lstlisting}
+
+本文形式を処理する似たような方法によって時間のフォーマットの問題を解決することができます。以下に例を挙げます:
+
+\begin{lstlisting}[numbers=none]
+en["date_format"]="%Y-%m-%d %H:%M:%S"
+cn["date_format"]="%Y年 %m月%d日 %H時%M分%S秒"
+
+fmt.Println(date(msg(lang,"date_format"),t))
+
+func date(fomate string,t time.Time) string{
+    year, month, day = t.Date()
+    hour, min, sec = t.Clock()
+    //対応する%Y %m %d %H %M %Sをパースして情報を返します
+    //%Y は2012に置換されます
+    //%m は10に置換されます
+    //%d は24に置換されます
+}
+\end{lstlisting}
+
+

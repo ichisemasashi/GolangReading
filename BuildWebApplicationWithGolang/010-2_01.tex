@@ -1,0 +1,47 @@
+この情報はWebアプリケーションを書く中で最も使われるもので、ローカライズリソースでも最も多い情報でもあります。ロケールの言語に合った方法でテキスト情報を表示したい場合、ひとつの方法としては必要となる言語に対応したmapを作成することでkey-valueの関係を維持するというものがあります。出力される前に最適なmapから対応するテキストを取り出します。以下は簡単な例です：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import "fmt"
+
+var locales map[string]map[string]string
+
+func main() {
+    locales = make(map[string]map[string]string, 2)
+    en := make(map[string]string, 10)
+    en["pea"] = "pea"
+    en["bean"] = "bean"
+    locales["en"] = en
+    cn := make(map[string]string, 10)
+    cn["pea"] = "ピーナッツ"
+    cn["bean"] = "枝豆"
+    locales["ja-JP"] = cn
+    lang := "ja-JP"
+    fmt.Println(msg(lang, "pea"))
+    fmt.Println(msg(lang, "bean"))
+}
+
+func msg(locale, key string) string {
+    if v, ok := locales[locale]; ok {
+        if v2, ok := v[key]; ok {
+            return v2
+        }
+    }
+    return ""
+}
+\end{lstlisting}
+
+上の例では異なるlocaleのテキストの翻訳を試みました。日本語と英語に対して同じkeyで異なる言語の実装を実現しています。上では中文のテキスト情報を実装しています。もし英語バージョンに切り替えたい場合は、lang設定を\texttt{en}にするだけです。
+
+場合によってはkey-valueを切り替えるだけでは要求を満足できない場合があります。たとえば"I am 30 years old"といったような、日本語では"今年で30になります"となる場合、ここでの30は変数です。どうすればよいでしょうか？この時、\texttt{fmt.Printf}関数を組み合わせることで実装することができます。下のコードをご覧ください：
+
+
+\begin{lstlisting}[numbers=none]
+en["how old"] ="I am %d years old"
+cn["how old"] ="今年で%dになります"
+
+fmt.Printf(msg(lang, "how old"), 30)
+\end{lstlisting}
+
+上のコード例では内部の実装方法を使用しただけで、実際のデータはJSONの中に保存されています。そのため、\texttt{json.Unmarshal}を使って対応するmapにデータを追加することができます。

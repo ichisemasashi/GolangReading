@@ -1,0 +1,12 @@
+各地域の通過の表示も異なります。処理方法も日時とあまり変わりありません。詳細は以下のコードをご覧ください:
+
+\begin{lstlisting}[numbers=none]
+en["money"] ="USD %d"
+cn["money"] ="￥%d円"
+
+fmt.Println(date(msg(lang,"date_format"),100))
+
+func money_format(fomate string,money int64) string{
+    return fmt.Sprintf(fomate,money)
+}
+\end{lstlisting}
