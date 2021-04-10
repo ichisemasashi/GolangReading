@@ -1,0 +1,53 @@
+error型はインターフェース型の一つです。定義は：
+
+\begin{lstlisting}[numbers=none]
+type error interface {
+    Error() string
+}
+\end{lstlisting}
+
+errorはビルトインのインターフェース型のひとつです。/builtin/パッケージの下に対応する定義を探すことができます。多くの内部パッケージにおいて使用されるerrorはerrorsパッケージ以下で実装されたプライベート構造体errorStringです。
+
+\begin{lstlisting}[numbers=none]
+// errorString is a trivial implementation of error.
+type errorString struct {
+    s string
+}
+
+func (e *errorString) Error() string {
+    return e.s
+}
+\end{lstlisting}
+
+\texttt{errors.New}を通して文字列をerrorStringに変換することで、インターフェースerrorを満たすオブジェクトを得ることができます。内部の実装は以下の通り：
+
+\begin{lstlisting}[numbers=none]
+// New returns an error that formats as the given text.
+func New(text string) error {
+    return &errorString{text}
+}
+\end{lstlisting}
+
+以下の例ではどのように\texttt{errors.New}を使用するかデモを行います：
+
+
+
+\begin{lstlisting}[numbers=none]
+func Sqrt(f float64) (float64, error) {
+    if f < 0 {
+        return 0, errors.New("math: square root of negative number")
+    }
+    // implementation
+}
+\end{lstlisting}
+
+以下の例ではSqrtをコールした際に負の数を渡し、non-nilなerrorオブジェクトを取得しています。このオブジェクトをnilと比較し、結果としてtrueを得ることでfmt.Println(fmtパッケージはerrorを処理する際Errorメソッドをコールします)がコールされ、エラーを出力します。下のコールのコード例をご覧ください：
+
+
+
+\begin{lstlisting}[numbers=none]
+f, err := Sqrt(-1)
+if err != nil {
+    fmt.Println(err)
+}    
+\end{lstlisting}

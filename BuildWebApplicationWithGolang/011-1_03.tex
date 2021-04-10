@@ -1,0 +1,108 @@
+Goはエラー処理においてCに似た戻り値を検査する方法を採用しており、その他の大多数の主流な言語が採用する例外方式ではありません。これはコードを書く上でとても大きな欠点の一つです。エラー処理コードの冗長さは、このような状況において我々が検査関数を再利用することによって似たようなコードを減らします。
+
+このコード例をご確認ください：
+
+\begin{lstlisting}[numbers=none]
+func init() {
+    http.HandleFunc("/view", viewRecord)
+}
+
+func viewRecord(w http.ResponseWriter, r *http.Request) {
+    c := appengine.NewContext(r)
+    key := datastore.NewKey(c, "Record", r.FormValue("id"), 0, nil)
+    record := new(Record)
+    if err := datastore.Get(c, key, record); err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    if err := viewTemplate.Execute(w, record); err != nil {
+        http.Error(w, err.Error(), 500)
+    }
+}
+\end{lstlisting}
+
+上の例ではデータの取得とテンプレートの展開をコールする時にエラーの検査を行なっています。エラーが発生した場合は共通の処理関数である\texttt{http.Error}をコールし、クライアントに500エラーを返して対応するエラーデータを表示します。しかしHnadleFuncが追加されるに従って、このようなエラー処理ロジックのコードが多くなってきてしまいます。実は我々は自分で定義したルータを使ってコードを短縮させることができます(実装のやり方は第三章のHTTPの詳しい説明をご参考下さい)。
+
+\begin{lstlisting}[numbers=none]
+type appHandler func(http.ResponseWriter, *http.Request) error
+
+func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    if err := fn(w, r); err != nil {
+        http.Error(w, err.Error(), 500)
+    }
+}
+\end{lstlisting}
+
+上では自分でルータを定義しています。以下の方法によって関数を登録することができます：
+
+
+
+\begin{lstlisting}[numbers=none]
+func init() {
+    http.Handle("/view", appHandler(viewRecord))
+}
+\end{lstlisting}
+
+/viewをリクエストした時、我々のロジック処理は以下のようなコードに変わります。はじめの実装方法と比べるとだいぶ簡単になっています。
+
+
+
+\begin{lstlisting}[numbers=none]
+func viewRecord(w http.ResponseWriter, r *http.Request) error {
+    c := appengine.NewContext(r)
+    key := datastore.NewKey(c, "Record", r.FormValue("id"), 0, nil)
+    record := new(Record)
+    if err := datastore.Get(c, key, record); err != nil {
+        return err
+    }
+    return viewTemplate.Execute(w, record)
+}
+\end{lstlisting}
+
+上の例でエラー処理を行った場合すべてのエラーはユーザに500エラーとして返ります。その後対応するエラーコードを出力します。このエラー情報の定義はもっとユーザビリティを上げることもできます。デバッグする際に問題の箇所を確定するのに便利です。自分で返るエラー型を定義することもできます：
+
+\begin{lstlisting}[numbers=none]
+type appError struct {
+    Error   error
+    Message string
+    Code    int
+}
+\end{lstlisting}
+
+自分で定義したルータを以下のようなメソッドに変更します：
+
+\begin{lstlisting}[numbers=none]
+type appHandler func(http.ResponseWriter, *http.Request) *appError
+
+func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    if e := fn(w, r); e != nil { // e is *appError, not os.Error.
+        c := appengine.NewContext(r)
+        c.Errorf("%v", e.Error)
+        http.Error(w, e.Message, e.Code)
+    }
+}
+\end{lstlisting}
+
+このように自分で定義したエラーを修正した後、ロジックは以下のようなメソッドに修正できます：
+
+
+
+\begin{lstlisting}[numbers=none]
+func viewRecord(w http.ResponseWriter, r *http.Request) *appError {
+    c := appengine.NewContext(r)
+    key := datastore.NewKey(c, "Record", r.FormValue("id"), 0, nil)
+    record := new(Record)
+    if err := datastore.Get(c, key, record); err != nil {
+        return &appError{err, "Record not found", 404}
+    }
+    if err := viewTemplate.Execute(w, record); err != nil {
+        return &appError{err, "Can't display record", 500}
+    }
+    return nil
+}
+\end{lstlisting}
+
+上で示したとおり、viewにアクセスした際異なる状況によって異なるエラーコードとエラー情報を取得することができます。これははじめのバージョンに比べてコード量にさほど変化はありませんが、これが表示するエラーはよりわかりやすくなっています。提示されるエラー情報のユーザビリティが高められ、拡張性もはじめのものに比べてよくなっています。
+
+
+

@@ -1,0 +1,66 @@
+上のご紹介で我々はerrorが単なるinterfaceだとわかりました。そのため自分のパッケージを実装する際、このインターフェースを実装する構造体を定義することで、自分のエラー定義を実装することができます。Jsonパッケージの例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+type SyntaxError struct {
+    msg    string // エラーの説明
+    Offset int64  // エラーが発生した場所
+}
+
+func (e *SyntaxError) Error() string { return e.msg }
+\end{lstlisting}
+
+OffsetフィールドはErrorをコールする時には出力されません。しかし型アサーションを通してエラーの型を取得することができますので、対応するエラー情報を出力することができます。下の例をご覧ください：
+
+\begin{lstlisting}[numbers=none]
+if err := dec.Decode(&val); err != nil {
+    if serr, ok := err.(*json.SyntaxError); ok {
+        line, col := findLine(f, serr.Offset)
+        return fmt.Errorf("%s:%d:%d: %v", f.Name(), line, col, err)
+    }
+    return err
+}
+\end{lstlisting}
+
+関数がカスタム定義のエラーを返す時は戻り値にerror型を設定するようおすすめします。特に前もって宣言しておく必要のないエラー型の変数には注意が必要です。例えば：
+
+
+\begin{lstlisting}[numbers=none]
+func Decode() *SyntaxError { // エラー、上のレイヤでコールした
+                             //利用者によるerr!=nilの判断が
+                             //永遠にtrueになります。
+    var err *SyntaxError     // 予めエラー変数を宣言します
+    if エラー条件 {
+        err = &SyntaxError{}
+    }
+    return err               // エラー、errは永久にnilでは
+                             //ない値と等しくなり、上のレイヤで
+                             //コールした利用者によるerr!=nilの
+                             //判断が常にtrueとなります
+}
+\end{lstlisting}
+
+原因はこちら \texttt{http://golang.org/doc/faq\#nil\_error}
+
+上の例による簡単なデモでError型をどのようにして自分で定義するかお見せしました。しかしもしもっと複雑なエラー処理を必要とした場合はどうすればよいのでしょうか？netパッケージが採用している方法を参考にします：
+
+\begin{lstlisting}[numbers=none]
+package net
+
+type Error interface {
+    error
+    Timeout() bool   // Is the error a timeout?
+    Temporary() bool // Is the error temporary?
+}
+\end{lstlisting}
+
+コールされる場所ではerrがnet.Errorかどうか型アサーションにより判断することで、エラーの処理を細分化しています。例えば下の例ではもしネットワークに一時的にエラーが発生している場合にsleep 1秒を行なってリトライを行います：
+
+\begin{lstlisting}[numbers=none]
+if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+    time.Sleep(1e9)
+    continue
+}
+if err != nil {
+    log.Fatal(err)
+}
+\end{lstlisting}
