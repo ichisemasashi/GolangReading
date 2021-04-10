@@ -1,0 +1,175 @@
+以下のコードによってどのようにGDBを使ってGoプログラムをデバッグするのかデモを行います。以下はデモコードです：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func counting(c chan<- int) {
+    for i := 0; i < 10; i++ {
+        time.Sleep(2 * time.Second)
+        c <- i
+    }
+    close(c)
+}
+
+func main() {
+    msg := "Starting main"
+    fmt.Println(msg)
+    bus := make(chan int)
+    msg = "starting a gofunc"
+    go counting(bus)
+    for count := range bus {
+        fmt.Println("count:", count)
+    }
+}
+\end{lstlisting}
+
+ファイルをコンパイルして実行可能ファイルgdbfileを生成します:
+
+\begin{lstlisting}[numbers=none]
+go build -gcflags "-N -l" gdbfile.go
+\end{lstlisting}
+
+gdbコマンドによってデバッグを起動します：
+
+\begin{lstlisting}[numbers=none]
+gdb gdbfile
+\end{lstlisting}
+
+起動したらまずこのプログラムが実行できるか見てみましょう。\texttt{run}コマンドを入力してエンターキーを押すとプログラムが実行されます。プログラムが正常であれば、プログラムは以下のように出力します。コマンドラインで直接プログラムを実行したのと同じです：
+
+\begin{lstlisting}[numbers=none]
+(gdb) run
+Starting program: /home/xiemengjun/gdbfile 
+Starting main
+count: 0
+count: 1
+count: 2
+count: 3
+count: 4
+count: 5
+count: 6
+count: 7
+count: 8
+count: 9
+[LWP 2771 exited]
+[Inferior 1 (process 2771) exited normally]    
+\end{lstlisting}
+
+よし、プログラムをどのようにして起動するかわかりました。次にプログラムにブレークポイントを設定します：
+
+\begin{lstlisting}[numbers=none]
+(gdb) b 23
+Breakpoint 1 at 0x400d8d: file /home/xiemengjun/gdbfile.go, line 23.
+(gdb) run
+Starting program: /home/xiemengjun/gdbfile 
+Starting main
+[New LWP 3284]
+[Switching to LWP 3284]
+
+Breakpoint 1, main.main () at /home/xiemengjun/gdbfile.go:23
+23            fmt.Println("count:", count)
+\end{lstlisting}
+
+上の例では\texttt{b 23}で23行目にブレークポイントを設定しました。その後\texttt{run}を入力するとプログラムが開始します。現在プログラムは前に設定されたブレークポイントで停止しています。ブレークポイントに対応するコンテキストのソースコードを知るためには、\texttt{list}と入力することでソースコードが現在停止している行の前の5行から表示させることができます：
+
+
+
+\begin{lstlisting}[numbers=none]
+(gdb) list
+18        fmt.Println(msg)
+19        bus := make(chan int)
+20        msg = "starting a gofunc"
+21        go counting(bus)
+22        for count := range bus {
+23            fmt.Println("count:", count)
+24        }
+25    }
+\end{lstlisting}
+
+GDBが実行している現在のプログラムの環境ではいくつかの便利なデバッグ情報を持っています。対応する変数を出力するだけで、対応する変数の型と値を確認することができます：
+
+
+\begin{lstlisting}[numbers=none]
+(gdb) info locals
+count = 0
+bus = 0xf840001a50
+(gdb) p count
+$1 = 0
+(gdb) p bus
+$2 = (chan int) 0xf840001a50
+(gdb) whatis bus
+type = chan int
+\end{lstlisting}
+
+次にこのプログラムを継続して実行させ続けなければなりません。以下のコマンドをご覧ください
+
+\begin{lstlisting}[numbers=none]
+(gdb) c
+Continuing.
+count: 0
+[New LWP 3303]
+[Switching to LWP 3303]
+
+Breakpoint 1, main.main () at /home/xiemengjun/gdbfile.go:23
+23 fmt.Println("count:", count)
+(gdb) c
+Continuing.
+count: 1
+[Switching to LWP 3302]
+
+Breakpoint 1, main.main () at /home/xiemengjun/gdbfile.go:23
+23 fmt.Println("count:", count)
+\end{lstlisting}
+
+毎回\texttt{c}を入力する度に一回のコードが実行されます。次のforループにジャンプして、続けて対応する情報を出力します。
+
+現在コンテキストの関連する変数の情報を変えたいとします。いくつかのプロセスを飛び越えて、続けて次のステップを実行し、修正を行った後に欲しい結果を得ます：
+
+\begin{lstlisting}[numbers=none]
+(gdb) info locals
+count = 2
+bus = 0xf840001a50
+(gdb) set variable count=9
+(gdb) info locals
+count = 9
+bus = 0xf840001a50
+(gdb) c
+Continuing.
+count: 9
+[Switching to LWP 3302]
+
+Breakpoint 1, main.main () at /home/xiemengjun/gdbfile.go:23
+23 fmt.Println("count:", count)        
+\end{lstlisting}
+
+最後に少しだけ考えてみましょう。前のプログラムの実行の全過程ではいくつのgorutineが作成されたでしょうか。各goroutineは何をやっているのでしょうか：
+
+
+
+\begin{lstlisting}[numbers=none]
+(gdb) info goroutines
+* 1 running runtime.gosched
+* 2 syscall runtime.entersyscall 
+3 waiting runtime.gosched 
+4 runnable runtime.gosched
+(gdb) goroutine 1 bt
+#0 0x000000000040e33b in runtime.gosched () at /home/xiemengjun/go/src/pkg/runtime/proc.c:927
+#1 0x0000000000403091 in runtime.chanrecv (c=void, ep=void, selected=void, received=void)
+at /home/xiemengjun/go/src/pkg/runtime/chan.c:327
+#2 0x000000000040316f in runtime.chanrecv2 (t=void, c=void)
+at /home/xiemengjun/go/src/pkg/runtime/chan.c:420
+#3 0x0000000000400d6f in main.main () at /home/xiemengjun/gdbfile.go:22
+#4 0x000000000040d0c7 in runtime.main () at /home/xiemengjun/go/src/pkg/runtime/proc.c:244
+#5 0x000000000040d16a in schedunlock () at /home/xiemengjun/go/src/pkg/runtime/proc.c:267
+#6 0x0000000000000000 in ?? ()
+\end{lstlisting}
+
+goroutinesのコマンドを確認することでgoroutineの内部がどのように実行されているのか詳しく理解することができます。各関数のコールされる順番はすでにはっきり表示されています。
+
+
+

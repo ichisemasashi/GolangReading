@@ -1,0 +1,56 @@
+GDBでよく使うコマンドのいくつかは以下の通りです
+
+\begin{itemize}
+\item list\\
+  \texttt{l}と省略されます。ソースコードを表示するために使用されます。デフォルトで10行のコードを表示します。後ろに表示する具体的な行をパラメータとして渡すことができます。例えば：\texttt{list 15}では10行のコードを表示し、以下のように15行目が10行のうちの中心に表示されます。
+\begin{lstlisting}[numbers=none]
+  10            time.Sleep(2 * time.Second)
+  11            c <- i
+  12        }
+  13        close(c)
+  14    }
+  15    
+  16    func main() {
+  17        msg := "Starting main"
+  18        fmt.Println(msg)
+  19        bus := make(chan int)
+\end{lstlisting}
+\item break\\
+\texttt{b}と省略されます。ブレークポイントを設定するために用いられます。後ろにブレークポイントを置く行をパラメータとして追加します。例えば\texttt{b 10}では10行目にブレークポイントが置かれます。
+\item delete\\
+  \texttt{d}と省略されます。ブレークポイントを削除するために用いられます。後ろにブレークポイントの番号がつきます。この番号は\texttt{info breakpoints}によって対応する設定されたブレークポイントの番号を取得できます。以下では設定されたブレークポイントの番号を表示します。
+\begin{lstlisting}[numbers=none]
+  Num     Type           Disp Enb Address            What
+  2       breakpoint     keep y   0x0000000000400dc3 in main.main at /home/xiemengjun/gdb.go:23
+  breakpoint already hit 1 time
+\end{lstlisting}
+\item backtrace\\
+  \texttt{bt}と省略されます。以下のように実行しているコードの過程を出力するために用いられます：
+\begin{lstlisting}[numbers=none]
+  #0  main.main () at /home/xiemengjun/gdb.go:23
+  #1  0x000000000040d61e in runtime.main () at /home/xiemengjun/go/src/pkg/runtime/proc.c:244
+  #2  0x000000000040d6c1 in schedunlock () at /home/xiemengjun/go/src/pkg/runtime/proc.c:267
+  #3  0x0000000000000000 in ?? ()
+\end{lstlisting}
+\item info\\
+  infoコマンドは情報を表示します。後ろにいくつかのパラメータがあります。よく使われるものは以下のいくつかです：
+  \begin{itemize}
+  \item \texttt{info locals}\\ 現在実行しているプログラムの変数の値を表示します。
+  \item \texttt{info breakpoints}\\ 現在設定しているブレークポイントのリストを表示します。
+  \item \texttt{info goroutines}\\現在実行しているgoroutineのリストを表示します。以下のコードが示すとおり*がついているものは現在実行しているものです。
+\begin{lstlisting}[numbers=none]
+  * 1  running runtime.gosched
+  * 2  syscall runtime.entersyscall
+    3  waiting runtime.gosched
+    4 runnable runtime.gosched
+\end{lstlisting}
+\end{itemize}
+\item print\\\texttt{p}と省略されます。変数またはその他の情報を表示するのに用いられます。後ろに出力する必要のある変数名が追加されます。当然とても使いやすい関数\$len()と\$cap()もあります。現在のstring、slicesまたはmapsの長さと容量を返すのに使われます。
+\item whatis\\現在の変数の型を表示するのに用いられます。後ろに変数名がつきます。たとえば\texttt{whatis msg}では以下のように表示されます：
+\begin{lstlisting}[numbers=none]
+  type = struct string
+\end{lstlisting}
+\item next\\ \texttt{n}と省略されます。ステップ実行に使われます。次のステップに進みます。ブレークポイントがあれば\texttt{n}を入力することで次のステップまで続けて実行することができます。
+\item coutinue\\ \texttt{c}と省略されます。現在のブレークポイントから抜けます。後ろにパラメータをつけることで、何回かのブレークポイントを飛び越えることができます。
+\item set variable\\ このコマンドは実行中の変数の値を変更するのに用いられます。フォーマットは以下のとおり： \texttt{set variable <var>=<value>}
+\end{itemize}
