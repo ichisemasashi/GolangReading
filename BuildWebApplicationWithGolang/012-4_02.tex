@@ -1,0 +1,21 @@
+rsyncのオフィシャルサイト：\texttt{http://rsync.samba.org/} において最新版のソースコードを取得できます。当然、rsyncはとても使い勝手のよいソフトウェアですので、多くのLinuxのディストリビューションにおいてその中に収録されています。
+
+ソフトウェアパッケージのインストール
+
+\begin{lstlisting}[numbers=none]
+# sudo apt-get  install  rsync  注：debian、ubuntu 等のライブインストール方法；
+# yum install rsync    注：Fedora、Redhat、CentOS 等のライブインストール方法；
+# rpm -ivh rsync       注：Fedora、Redhat、CentOS 等rpmパッケージによるインストール方法；
+\end{lstlisting}
+
+その他のLinuxディストリビューションでは、対応するソフトウェアパッケージ管理方法によってインストールしてください。ソースコードパッケージのインストールは
+
+
+
+\begin{lstlisting}[numbers=none]
+tar xvf  rsync-xxx.tar.gz
+cd rsync-xxx
+./configure --prefix=/usr  ;make ;make install
+注：ソースコードパッケージをコンパイルしてインストールする前に
+    gccといったコンパイルツールをインストールしておく必要があります；
+\end{lstlisting}
