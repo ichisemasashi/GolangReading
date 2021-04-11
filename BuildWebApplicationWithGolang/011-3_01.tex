@@ -1,0 +1,99 @@
+\texttt{go test}コマンドでは対応するディレクトリ下の全てのファイルを実行するしかできません。そのため、\texttt{gotest}というディレクトリを新規に作成することで、すべてのコードとテストコードをこのディレクトリの中に配置することにします。
+
+次にこのディレクトリの下に2つのファイルを新規に作成します：gotest.goとgotest\_test.go
+
+\begin{enumerate}
+\item gotest.go:このファイルにはパッケージを一つ書きます。中身は除算を行う関数がひとつあります:\\
+\begin{lstlisting}[numbers=none]
+package gotest
+
+import (
+    "errors"
+)
+
+func Division(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("除数は0以外でなければなりません")
+    }
+
+    return a / b, nil
+}
+\end{lstlisting}
+  \item gotest\_test.go:これはユニットテストのファイルですが、以下の原則を覚えておいてください:
+\begin{itemize}
+  \item ファイル名は必ず\texttt{\_test.go}が最後につくようにしてください。これによって\texttt{go test}を実行した時に対応するコードが実行されるようになります。
+  \item \texttt{testing}というパッケージをimportする必要があります。
+  \item すべてのテスト関数名は\texttt{Test}から始まります。
+  \item テストはソースコードに書かれた順番に実行されます。
+  \item テスト関数\texttt{TestXxx()}のパラメータは\texttt{testing.T}です。この型を使ってエラーやテストの状態を記録することができます。
+  \item テストフォーマット: \texttt{func TestXxx (t *testing.T)}、\texttt{Xxx}の部分は任意の英数字の組み合わせです。ただし頭文字は小文字[a-z]ではいけません、例えば\texttt{Testintdiv}というのは間違った関数名です。
+  \item 関数では\texttt{testing.T}の\texttt{Error}、\texttt{Errorf}、\texttt{FailNow}、\texttt{Fatal}、\texttt{FatalIf}メソッドをコールすることでテストがパスしないことを説明します。\texttt{Log}メソッドをコールすることでテストの情報を記録します。
+\end{itemize}
+以下は我々のテストコードです：
+\begin{lstlisting}[numbers=none]
+ package gotest
+
+import (
+
+  "testing"
+
+)
+
+func Test_Division_1(t *testing.T) {
+  if i, e := Division(6, 2); i != 3 || e != nil { //try a unit test on function
+      t.Error("除算関数のテストが通りません") // もし予定されたものでなければエラーを発生させます。
+  } else {
+      t.Log("はじめのテストがパスしました") //記録したい情報を記録します
+  }
+}
+
+func Test_Division_2(t *testing.T) {
+
+  t.Error("パスしません")
+
+}
+\end{lstlisting}
+プロジェクトのディレクトリにおいて\texttt{go test}を実行すると以下のような情報が表示されます：
+\begin{lstlisting}[numbers=none]
+ --- FAIL: Test_Division_2 (0.00 seconds)
+
+  gotest_test.go:16: パスしません
+FAIL exit status 1 FAIL gotest 0.013s
+\end{lstlisting}
+この結果が示すようにテストをパスしないのは、2つ目のテスト関数でテストが通らないコード\texttt{t.Error}を書いていたからです。では1つ目の関数が実行した状況はどうでしょうか？デフォルトでは\texttt{go test}を実行するとテストがパスする情報は表示されません。\texttt{go test -v}というオプションを追加する必要があります。このようにすると以下の情報が表示されます：
+\begin{lstlisting}[numbers=none]
+ === RUN Test_Division_1 --- PASS: Test_Division_1 (0.00 seconds)
+
+  gotest_test.go:11: 1つ目のテストがパス
+
+=== RUN Test_Division_2 --- FAIL: Test_Division_2 (0.00 seconds)
+
+  gotest_test.go:16: パスしません
+
+FAIL exit status 1 FAIL gotest 0.012s
+\end{lstlisting}
+上の出力はこのテストのプロセスを詳細に表示しています。テスト関数1\texttt{Test\_Division\_1}ではテストが通りました。しかし関数2\texttt{Test\_Division\_2}のテストは失敗しました。最後にテストが通らないという結論を得ました。以降ではテスト関数2を以下のようなコードに修正します：
+\begin{lstlisting}[numbers=none]
+ func Test_Division_2(t *testing.T) {
+
+  if _, e := Division(6, 0); e == nil { //try a unit test on function
+      t.Error("Division did not work as expected.")
+                // 予期したものでなければエラーを発生
+  } else {
+      t.Log("one test passed.", e) //記録したい情報を記録
+  }
+}
+\end{lstlisting}
+その後\texttt{go test -v}を実行すると以下のような情報を表示してテストがパスします：
+\begin{lstlisting}[numbers=none]
+ === RUN Test_Division_1 --- PASS: Test_Division_1 (0.00 seconds)
+
+  gotest_test.go:11: 1つ目のテストがパス
+
+=== RUN Test_Division_2 --- PASS: Test_Division_2 (0.00 seconds)
+
+  gotest_test.go:20: one test passed.　除数は0以外
+
+PASS ok gotest 0.013s
+\end{lstlisting}
+\end{enumerate}

@@ -1,0 +1,55 @@
+耐久テストは関数（メソッド）の性能を測るために用いられます。ここでは再掲しませんが、ユニットテストを書くのと同じようなものです。ただし以下のいくつかに注意しなければなりません：
+
+\begin{itemize}
+  \item 耐久テストは以下のループの形式で行われなければなりません。この中でXXXは任意の英数字の組み合わせです。ただし、頭文字は小文字ではいけません。
+\begin{lstlisting}[numbers=none]
+func BenchmarkXXX(b *testing.B) { ... }
+\end{lstlisting}
+  \item \texttt{go test}はデフォルトで耐久テストの関数を実行しません。もし耐久テストを実行したい場合はオプション\texttt{-test.bench}を追加します。文法:\texttt{-test.bench="test\_name\_regex"}。例えば\texttt{go test -test.bench=".*"}はすべての耐久テスト関数をテストすることを表します
+  \item 耐久テストではテストが正常に実行されるよう、ループの中において\texttt{testing.B.N}を使用することを覚えておいてください
+  \item ファイル名はかならず\texttt{\_test.go}で終わります
+\end{itemize}
+
+以下ではwebbench\_test.goという名前の耐久テストファイルを作成します。コードは以下の通り：
+
+\begin{lstlisting}[numbers=none]
+package gotest
+
+import (
+    "testing"
+)
+
+func Benchmark_Division(b *testing.B) {
+    for i := 0; i < b.N; i++ { //use b.N for looping 
+        Division(4, 5)
+    }
+}
+
+func Benchmark_TimeConsumingFunction(b *testing.B) {
+  b.StopTimer() //ストレステストのタイムカウントを停止するためにこの関数を呼び出す
+
+  //ファイルデータの読み込みやデータベースの接続など、
+  // いくつかの初期化作業を行います。
+  //これにより、これらの時間がテスト機能自体のパフォーマンスに
+  //影響を与えることはありません。
+
+  b.StartTimer() //再起動時間
+    for i := 0; i < b.N; i++ {
+        Division(4, 5)
+    }
+}
+\end{lstlisting}
+
+\texttt{go test -file webbench\_test.go -test.bench=".*"}というコマンドを実行すると、以下のような結果が現れます：
+
+
+
+\begin{lstlisting}[numbers=none]
+PASS
+Benchmark_Division    500000000             7.76 ns/op
+Benchmark_TimeConsumingFunction    500000000             7.80 ns/op
+ok      gotest    9.364s    
+\end{lstlisting}
+
+
+上の結果は我々がどのような\texttt{TestXXX}なユニットテスト関数も実行していないことを示しています。表示される結果は耐久テスト関数のみを実行しただけです。第一行には\texttt{Benchmark\_Division}が500000000回実行され示し、毎回の実行が平均で7.76ミリ秒であったことを示しています。第二行は\texttt{Benchmark\_TimeConsumingFunctin}が500000000回実行され、毎回の平均実行時間が7.80ミリ秒であったことを示しています。最後の1行は全体の実行時間を示しています。
