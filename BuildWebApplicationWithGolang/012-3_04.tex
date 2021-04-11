@@ -1,0 +1,46 @@
+Supervisordのデフォルトの設定ファイルのパスは/etc/supervisord.confです。テキストエディタを使ってこのファイルを修正します。以下は設定ファイルの例です：
+
+\begin{lstlisting}[numbers=none]
+;/etc/supervisord.conf
+[unix_http_server]
+file = /var/run/supervisord.sock
+chmod = 0777
+chown= root:root
+
+[inet_http_server]
+# Web管理インターフェース設定
+port=9001
+username = admin
+password = yourpassword
+
+[supervisorctl]
+; 必ず'unix_http_server'の設定と合わせる必要があります。
+serverurl = unix:///var/run/supervisord.sock
+
+[supervisord]
+logfile=/var/log/supervisord/supervisord.log ; (main log file;default $CWD/supervisord.log)
+logfile_maxbytes=50MB       ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10          ; (num of main logfile rotation backups;default 10)
+loglevel=info               ; (log level;default info; others: debug,warn,trace)
+pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+nodaemon=true              ; (start in foreground if true;default false)
+minfds=1024                 ; (min. avail startup file descriptors;default 1024)
+minprocs=200                ; (min. avail process descriptors;default 200)
+user=root                 ; (default is current user, required if root)
+childlogdir=/var/log/supervisord/            ; ('AUTO' child log dir, default $TEMP)
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+; 管理する単一のプロセスの設定。いくつもprogramを追加することができます。
+[program:blogdemon]
+command=/data/blog/blogdemon
+autostart = true
+startsecs = 5
+user = root
+redirect_stderr = true
+stdout_logfile = /var/log/supervisord/blogdemon.log
+\end{lstlisting}
+
+
+

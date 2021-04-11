@@ -1,0 +1,10 @@
+Supervisordをインストールするとsupervisorとsupervisorctlという2つのコマンドが使えるようになります。以下ではコマンドの説明を行います：
+
+\begin{itemize}
+  \item supervisord、Supervisordを初期化し起動します。コンフィグの中で設定されたプロセスを起動、管理します。
+  \item supervisorctl stop programxxx、プロセス(programxxx)を停止します。programxxxは[program:blogdemon]の中で設定された値です。この例ではblogdemonになります。
+  \item supervisorctl start programxxx、プロセスを起動します。
+  \item supervisorctl restart programxxx、プロセスを再起動します。
+  \item supervisorctl stop all、すべてのプロセスを停止します。注：start、restart、stopは最新の設定ファイルを読み込みません。
+  \item supervisorctl reload、最新の設定ファイルを読み込み、新しい設定に沿ってすべてのプロセスを起動、管理します。
+\end{itemize}
