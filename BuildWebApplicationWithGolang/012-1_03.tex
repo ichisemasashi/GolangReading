@@ -1,0 +1,19 @@
+上の例ではどのようにメールの送信を設定するか説明しています。以下のようなsmtp設定によってメールを送信します：
+
+\begin{lstlisting}[numbers=none]
+<smtp formatid="criticalemail" senderaddress="astaxie@gmail.com"
+  sendername="ShortUrl API" hostname="smtp.gmail.com"
+  hostport="587" username="mailusername" password="mailpassword">
+    <recipient address="xiemengjun@gmail.com"/>
+</smtp>
+\end{lstlisting}
+
+メールのフォーマットはcriticalemail設定とその他のSMTPサーバの設定によって設定されます。recipient設定でメールの送信先を設定します。もし複数のユーザがいる場合はもう一行追加することができます。
+
+このコードが正しく動作するかテストする場合、コードに以下のような偽の情報を追加することが可能です。しかし後に削除することを忘れないようにしてください、さもなければ、実運用で沢山のスパムメールを受け取ることになります。
+
+\begin{lstlisting}[numbers=none]
+logs.Logger.Critical("test Critical message")
+\end{lstlisting}
+
+現在、我々のアプリケーションが実運用でCriticalな情報を一つ記録すると、あなたのメールボックスにEmailが届きます。このように一旦実運用されたシステムに問題が発生するとすぐにメールの受信ができ、その時に処理を実行することができます。

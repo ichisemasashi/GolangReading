@@ -1,0 +1,96 @@
+seelogはカスタムなログ処理の定義をサポートしています。以下はカスタムに定義されたログ処理パッケージの一部の内容にもとづいています：
+
+\begin{lstlisting}[numbers=none]
+package logs
+
+import (
+    "errors"
+    "fmt"
+    seelog "github.com/cihub/seelog"
+    "io"
+)
+
+var Logger seelog.LoggerInterface
+
+func loadAppConfig() {
+    appConfig := `
+<seelog minlevel="warn">
+    <outputs formatid="common">
+        <rollingfile type="size" filename="/data/logs/roll.log"
+                                maxsize="100000" maxrolls="5"/>
+        <filter levels="critical">
+            <file path="/data/logs/critical.log" formatid="critical"/>
+            <smtp formatid="criticalemail" senderaddress="astaxie@gmail.com"
+               sendername="ShortUrl API" hostname="smtp.gmail.com"
+               hostport="587" username="mailusername"
+               password="mailpassword">
+                <recipient address="xiemengjun@gmail.com"/>
+            </smtp>
+        </filter>
+    </outputs>
+    <formats>
+        <format id="common" format="%Date/%Time [%LEV] %Msg%n" />
+        <format id="critical" format="%File %FullPath %Func %Msg%n" />
+        <format id="criticalemail" format=
+        "Critical error on our server!\n    %Time %Date %RelFile %Func %Msg \n
+        Sent by Seelog"/>
+    </formats>
+</seelog>
+`
+    logger, err := seelog.LoggerFromConfigAsBytes([]byte(appConfig))
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    UseLogger(logger)
+}
+
+func init() {
+    DisableLog()
+    loadAppConfig()
+}
+
+// DisableLog disables all library log output
+func DisableLog() {
+    Logger = seelog.Disabled
+}
+
+// UseLogger uses a specified seelog.LoggerInterface to output library log.
+// Use this func if you are using Seelog logging system in your app.
+func UseLogger(newLogger seelog.LoggerInterface) {
+    Logger = newLogger
+}
+\end{lstlisting}
+
+上は主に３つの関数を実装しています、
+
+\begin{itemize}
+  \item \texttt{DisableLog}\\ グローバル変数Loggerをseelogを使用しない状態に初期化します。主にLoggerが複数回初期化されないよう防止するためです。
+  \item \texttt{loadAppConfig}\\ 設定ファイルが初期化したseelogの設定情報にもとづいて、設定ファイルを文字列を通して読み取り設定します。当然XMLファイルを読み取ってもかまいません。中の設定の説明は以下の通り：
+\begin{itemize}
+  \item seelog\\ minlevelパラメータはオプションです。もし設定されていれば、このレベルと同じかそれ以上のログが記録されます。maxlevelと同じです。
+  \item outputs\\ データの出力先です。ここでは２つのデータにわけます。ひとつはlog rotateファイルに記録され、もうひとつはfilterを設定します。もしエラーレベルがcriticalであれば、エラーメールを送信します。
+  \item formats\\ 各種ログフォーマットを定義します
+\end{itemize}
+  \item \texttt{UseLogger}\\ 現在のロガーを対応するログ処理に設定します
+\end{itemize}
+
+上ではカスタムにログ処理パッケージを定義しています。以下は使用例です：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "net/http"
+    "project/logs"
+    "project/configs"
+    "project/routes"
+)
+
+func main() {
+    addr, _ := configs.MainConfig.String("server", "addr")
+    logs.Logger.Info("Start server at:%v", addr)
+    err := http.ListenAndServe(addr, routes.NewMux())
+    logs.Logger.Critical("Server err:%v", err)
+}
+\end{lstlisting}

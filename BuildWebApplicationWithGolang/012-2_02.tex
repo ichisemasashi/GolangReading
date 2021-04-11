@@ -1,0 +1,75 @@
+エラー処理は実は我々も第十一章の第一節でどのようにエラー処理を設計するかご紹介しました。ここではまたひとつの例から詳細にご解説します。どのように異なるエラーを処理するのでしょうか：
+
+\begin{itemize}
+  \item ユーザにエラーが発生したことを通知する：\\ ユーザがページにアクセスした時はふたつのエラーがあります：404.htmlとerror.htmlです。以下はそれぞれエラーページを表示するソースです：
+\begin{lstlisting}[numbers=none]
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>ページが見つかりません</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="span10">
+            <div class="hero-unit">
+                <h1>404!</h1>
+                <p>{{.ErrorInfo}}</p>
+            </div>
+        </div><!--/span-->
+    </div>
+</div>
+</body>
+</html>
+\end{lstlisting}
+もうひとつのソース：
+\begin{lstlisting}[numbers=none]
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>システムエラーページ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="span10">
+            <div class="hero-unit">
+                <h1>システムはしばらく使用できません！</h1>
+                <p>{{.ErrorInfo}}</p>
+            </div>
+        </div><!--/span-->
+    </div>
+</div>
+</body>
+</html>
+\end{lstlisting}
+404のエラー処理ロジック、もしシステムのエラーだった場合もにたような操作になります。以下を見てみましょう：
+\begin{lstlisting}[numbers=none]
+func (p *MyMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    if r.URL.Path == "/" {
+        sayhelloName(w, r)
+        return
+    }
+    NotFound404(w, r)
+    return
+}
+
+func NotFound404(w http.ResponseWriter, r *http.Request) {
+    log.Error("ページが見つかりません")   //エラーログに記録
+    t, _ = t.ParseFiles("tmpl/404.html", nil)  //テンプレートファイルを解析
+    ErrorInfo := "ファイルが見つかりません" //現在のユーザ情報を取得
+    t.Execute(w, ErrorInfo)  //テンプレートのmerger操作を実行
+}
+
+func SystemError(w http.ResponseWriter, r *http.Request) {
+    log.Critical("システムエラー")
+    //システムエラーはクリティカルですので、
+    //ログに記録するだけでなくメールを送信します。
+    t, _ = t.ParseFiles("tmpl/error.html", nil)  //テンプレートファイルを解析
+    ErrorInfo := "システムは現在ご利用できません" //現在のユーザ情報を取得
+    t.Execute(w, ErrorInfo)  //テンプレートのmerger操作を実行
+}
+\end{lstlisting}
+\end{itemize}

@@ -1,0 +1,37 @@
+seelogはGo言語で実装されたログシステムのひとつです。これは複雑なログの割り当て、フィルタリングとフォーマッティングを実現する簡単な関数を提供します。主に以下の特徴があります：
+
+\begin{itemize}
+  \item XMLの動的な変更、プログラムを再コンパイルすることなく動的にデータを変更することができます。
+  \item ホットアップデート。動的に再起動する必要なく設定を変更することができます。
+  \item マルチ出力ストリームのサポート。同時にログを複数のストリームに出力することができます。たとえばファイルストリーム、ネットワークストリーム等
+  \item 異なるログの出力のサポート
+\begin{itemize}
+  \item コマンドライン出力
+  \item ファイル出力
+  \item キャッシュ出力
+  \item log rotateのサポート
+  \item SMTPメール
+\end{itemize}
+\end{itemize}
+上では特徴のいくつかを列挙しただけです。seelogは非常に強力なログ処理システムです。詳細はオフィシャルのwikiをご参照ください。以降ではどのようにしてプロジェクトにおいてこれを利用するのか簡単にご紹介します：
+
+まずseelogをインストールします
+
+\begin{lstlisting}[numbers=none]
+go get -u github.com/cihub/seelog
+\end{lstlisting}
+
+次に簡単な例を見てみます：
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import log "github.com/cihub/seelog"
+
+func main() {
+    defer log.Flush()
+    log.Info("Hello from Seelog!")
+}
+\end{lstlisting}
+
+コンパイルして実行すると\texttt{Hello from seelog}という出力がでます。seelogログシステムのインストールに成功して、正常に実行されています。
