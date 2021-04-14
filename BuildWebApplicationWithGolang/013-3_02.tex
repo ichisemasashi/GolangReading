@@ -1,0 +1,123 @@
+前の節ではルータにstructを登録する機能を実装しました。また、structではRESTメソッドを実装しています。そのため、ロジック処理に用いられるcontrollerの基底クラスを設計する必要があります。ひとつはstructで、もうひとつはinterfaceです。
+
+\begin{lstlisting}[numbers=none]
+type Controller struct {
+    Ct        *Context
+    Tpl       *template.Template
+    Data      map[interface{}]interface{}
+    ChildName string
+    TplNames  string
+    Layout    []string
+    TplExt    string
+}
+
+type ControllerInterface interface {
+    Init(ct *Context, cn string)    //コンテキストとサブクラスの名前を初期化
+    Prepare()                       //実行前のいくつかの処理を開始
+    Get()                           //method=GETの処理
+    Post()                          //method=POSTの処理
+    Delete()                        //method=DELETEの処理
+    Put()                           //method=PUTの処理
+    Head()                          //method=HEADの処理
+    Patch()                         //method=PATCHの処理
+    Options()                       //method=OPTIONSの処理
+    Finish()                        //実行完了後の処理
+    Render() error                  //methodが対応する方法を実行し終えた後、ページを構築
+}
+\end{lstlisting}
+
+前にadd関数へのルータをご紹介した際ControllerInterfaceクラスを定義しました。ですので、ここではこのインターフェースを実装すれば十分です。基底クラスのContorollerの実装は以下のようなメソッドになります：
+
+\begin{lstlisting}[numbers=none]
+func (c *Controller) Init(ct *Context, cn string) {
+    c.Data = make(map[interface{}]interface{})
+    c.Layout = make([]string, 0)
+    c.TplNames = ""
+    c.ChildName = cn
+    c.Ct = ct
+    c.TplExt = "tpl"
+}
+
+func (c *Controller) Prepare() {
+
+}
+
+func (c *Controller) Finish() {
+
+}
+
+func (c *Controller) Get() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Post() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Delete() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Put() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Head() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Patch() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Options() {
+    http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+}
+
+func (c *Controller) Render() error {
+    if len(c.Layout) > 0 {
+        var filenames []string
+        for _, file := range c.Layout {
+            filenames = append(filenames, path.Join(ViewsPath, file))
+        }
+        t, err := template.ParseFiles(filenames...)
+        if err != nil {
+            Trace("template ParseFiles err:", err)
+        }
+        err = t.ExecuteTemplate(c.Ct.ResponseWriter, c.TplNames, c.Data)
+        if err != nil {
+            Trace("template Execute err:", err)
+        }
+    } else {
+        if c.TplNames == "" {
+            c.TplNames = c.ChildName + "/" + c.Ct.Request.Method + "." + c.TplExt
+        }
+        t, err := template.ParseFiles(path.Join(ViewsPath, c.TplNames))
+        if err != nil {
+            Trace("template ParseFiles err:", err)
+        }
+        err = t.Execute(c.Ct.ResponseWriter, c.Data)
+        if err != nil {
+            Trace("template Execute err:", err)
+        }
+    }
+    return nil
+}
+
+func (c *Controller) Redirect(url string, code int) {
+    c.Ct.Redirect(code, url)
+}
+\end{lstlisting}
+
+上のcontroller基底クラスはインターフェースが定義する関数を実装しています。urlにもとづいてルータが対応するcontrollerを実行する原則に従って、以下のように実行されます：
+
+
+\begin{lstlisting}[numbers=none]
+Init()      初期化
+Prepare()   この初期化を実行することで、継承されたサブクラスはこの関数を実装することができます。
+method()    異なるmethodに従って異なる関数を実行します：GET、POST、PUT、HEAD等、サブクラスによってこれらの関数を実装します。もし実装されていなければどれもデフォルトで403となります。
+Render()    オプション。グローバル変数AutoRenderによって実行するか否かを判断します。
+Finish()    実行後に実行される操作。各サブクラスはこの関数を実装することができます。
+\end{lstlisting}
+
+
