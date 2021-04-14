@@ -1,0 +1,78 @@
+ここでお話した制限に対して、我々はまずパラメータのサポートに正規表現を使えるよう解決する必要があります。2点目と3点目については柔軟な方法によって解決します。RESTの方法をstructの方法に組み込んでしまうのです。その後関数ではなくstructにルーティングすることで、ルーティングをリダイレクトする際methodに従って異なるメソッドを実行することができるようになります。
+
+上の考え方で、我々は２つのデータ型controllerInfo(パスと対応するstructを保存する。ここではreflect.Type型)とControllerRegistor(routersはsliceを使ってユーザが追加したルーティング情報を保存する)を設計しました。
+
+\begin{lstlisting}[numbers=none]
+type controllerInfo struct {
+    regex          *regexp.Regexp
+    params         map[int]string
+    controllerType reflect.Type
+}
+
+type ControllerRegistor struct {
+    routers     []*controllerInfo
+    Application *App
+}
+\end{lstlisting}
+
+ControllerRegistorの外側のインターフェース関数には以下があります。
+
+
+
+\begin{lstlisting}[numbers=none]
+func (p *ControllerRegistor) Add(pattern string, c ControllerInterface)
+\end{lstlisting}
+
+細かい実装は以下に示します：
+
+
+
+\begin{lstlisting}[numbers=none]
+func (p *ControllerRegistor) Add(pattern string, c ControllerInterface) {
+    parts := strings.Split(pattern, "/")
+
+    j := 0
+    params := make(map[int]string)
+    for i, part := range parts {
+        if strings.HasPrefix(part, ":") {
+            expr := "([^/]+)"
+
+            //a user may choose to override the defult expression
+            // similar to expressjs: ‘/user/:id([0-9]+)’
+
+            if index := strings.Index(part, "("); index != -1 {
+                expr = part[index:]
+                part = part[:index]
+            }
+            params[j] = part
+            parts[i] = expr
+            j++
+        }
+    }
+
+    //recreate the url pattern, with parameters replaced
+    //by regular expressions. then compile the regex
+
+    pattern = strings.Join(parts, "/")
+    regex, regexErr := regexp.Compile(pattern)
+    if regexErr != nil {
+
+        //TODO add error handling here to avoid panic
+        panic(regexErr)
+        return
+    }
+
+    //now create the Route
+    t := reflect.Indirect(reflect.ValueOf(c)).Type()
+    route := &controllerInfo{}
+    route.regex = regex
+    route.params = params
+    route.controllerType = t
+
+    p.routers = append(p.routers, route)
+
+}
+\end{lstlisting}
+
+
+

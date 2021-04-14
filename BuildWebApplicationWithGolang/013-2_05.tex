@@ -1,0 +1,15 @@
+上では動的なルーティングの実装を行いました。Goのhttpパッケージはデフォルトで静的なファイルを処理するFileServerをサポートしています。自分で定義したルータを実装したわけですから、静的なファイルも自分たちで設定しなければなりません。beegoの静的ディレクトリパスはグローバル変数StaticDirに保存されています。StaticDirはmap型で、以下のように実装されています：
+
+\begin{lstlisting}[numbers=none]
+func (app *App) SetStaticPath(url string, path string) *App {
+    StaticDir[url] = path
+    return app
+}
+\end{lstlisting}
+
+アプリケーションにおいて静的なルーティングを設定するには以下の方法で行います：
+
+\begin{lstlisting}[numbers=none]
+beego.SetStaticPath("/img","/static/img")
+\end{lstlisting}
+

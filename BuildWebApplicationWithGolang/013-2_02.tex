@@ -1,0 +1,41 @@
+3.4節でGoのhttpパッケージの詳細の中でGoのhttpパッケージがどのように設計されルーティングを実装しているかをご紹介しました。ここではもうひとつ例を挙げてご説明しましょう：
+
+\begin{lstlisting}[numbers=none]
+func fooHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+}
+
+http.Handle("/foo", fooHandler)
+
+http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+})
+
+log.Fatal(http.ListenAndServe(":8080", nil))
+\end{lstlisting}
+
+上の例ではhttpのデフォルトであるDefaultServeMuxをコールしてルーティングを追加しています。２つの引数を渡すことでユーザがアクセスするリソースを提供します。１つ目の引数はユーザがこのリソースにアクセスするであろうURLパス(r.URL.Pathに保存されます)、２つ目の引数は次に実行される関数です。ルーティングの考え方は次の二点に集約されます：
+
+\begin{itemize}
+  \item ルーティング情報の追加
+  \item ユーザのリクエストを実行される関数にリダイレクトする
+\end{itemize}
+
+Goのデフォルトのルーティングは関数\texttt{http.Handle}とhttp.HandleFuncによって追加され、どちらも深いレイヤで\texttt{DefaultServeMux.Handle(pattern string, handler Handler)}をコールしています。この関数はルーティング情報をmap情報\texttt{map[string]muxEntity}に保存することで上の１つ目を解決します。
+
+Goはポートを監視し、tcp接続を受け付けるとHandlerに処理を投げます。上の例ではデフォルトのnilは\texttt{http.DefaultServeMux}です。\texttt{DefaultServeMux.ServeHTTP}関数によってディスパッチを行います。事前に保存しておいたmapルーティング情報を、ユーザがアクセスするURLにマッチングすることで、対応する登録された処理関数を探し出します。このように上の二点目を実装します。
+
+
+\begin{lstlisting}[numbers=none]
+for k, v := range mux.m {
+    if !pathMatch(k, path) {
+        continue
+    }
+    if h == nil || len(k) > n {
+        n = len(k)
+        h = v.h
+    }
+}
+\end{lstlisting}
+
+

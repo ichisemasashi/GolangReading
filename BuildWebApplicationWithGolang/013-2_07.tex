@@ -1,0 +1,23 @@
+このようなルーティング設計に基いていると、前に説明した３つの制限をクリアできます。使い方は以下に示します：
+
+基本的なルーティング登録の使用：
+
+\begin{lstlisting}[numbers=none]
+beego.BeeApp.RegisterController("/", &controllers.MainController{})
+\end{lstlisting}
+
+オプションの登録：
+
+
+
+\begin{lstlisting}[numbers=none]
+beego.BeeApp.RegisterController("/:param", &controllers.UserController{})
+\end{lstlisting}
+
+正規表現マッチング：
+
+\begin{lstlisting}[numbers=none]
+beego.BeeApp.RegisterController("/users/:uid([0-9]+)", &controllers.UserController{})
+\end{lstlisting}
+
+
