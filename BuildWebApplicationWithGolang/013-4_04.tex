@@ -1,0 +1,26 @@
+以下の関数はあるアプリケーションでの例です。リモートurlアドレスのjsonデータを取得するのに用います。実装は以下のとおり：
+
+\begin{lstlisting}[numbers=none]
+func GetJson() {
+    resp, err := http.Get(beego.AppConfig.String("url"))
+    if err != nil {
+        beego.Critical("http get info error")
+        return
+    }
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    err = json.Unmarshal(body, &AllInfo)
+    if err != nil {
+        beego.Critical("error:", err)
+    }
+}
+\end{lstlisting}
+
+関数において、フレームワークのログ関数である\texttt{beego.Critical}関数をコールすることでエラーを発生させています。\texttt{beego.AppConfig.String("url")}をコールし、設定ファイルの情報を取得します。設定ファイルの情報は以下のとおり(app.conf)：
+
+\begin{lstlisting}[numbers=none]
+appname = hs
+url ="http://www.api.com/api.html"
+\end{lstlisting}
+
+

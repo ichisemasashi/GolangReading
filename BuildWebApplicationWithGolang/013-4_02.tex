@@ -1,0 +1,125 @@
+beegoのログ設計デプロイ思想はseelogより来ています。異なるlevelによってログに記録しますが、beegoが設計するログシステムは比較的ライトウェイトです。システムのlog.Loggerインターフェースを採用し、デフォルトでos.Stdoutに出力します。ユーザはこのインターフェースを実装することで、beego.SetLoggrを通してカスタム定義の出力を設定することができます。詳しい実装を以下に示します：
+
+
+\begin{lstlisting}[numbers=none]
+// Log levels to control the logging output.
+const (
+    LevelTrace = iota
+    LevelDebug
+    LevelInfo
+    LevelWarning
+    LevelError
+    LevelCritical
+)
+
+// logLevel controls the global log level used by the logger.
+var level = LevelTrace
+
+// LogLevel returns the global log level and can be used in
+// own implementations of the logger interface.
+func Level() int {
+    return level
+}
+
+// SetLogLevel sets the global log level used by the simple
+// logger.
+func SetLevel(l int) {
+    level = l
+}
+\end{lstlisting}
+
+上ではログシステムのログレベルを実装しています。デフォルトのレベルはTraceで、ユーザはSetLevelによって異なるレベルを設定することができます。
+
+\begin{lstlisting}[numbers=none]
+// logger references the used application logger.
+var BeeLogger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+// SetLogger sets a new logger.
+func SetLogger(l *log.Logger) {
+    BeeLogger = l
+}
+
+// Trace logs a message at trace level.
+func Trace(v ...interface{}) {
+    if level <= LevelTrace {
+        BeeLogger.Printf("[T] %v\n", v)
+    }
+}
+
+// Debug logs a message at debug level.
+func Debug(v ...interface{}) {
+    if level <= LevelDebug {
+        BeeLogger.Printf("[D] %v\n", v)
+    }
+}
+
+// Info logs a message at info level.
+func Info(v ...interface{}) {
+    if level <= LevelInfo {
+        BeeLogger.Printf("[I] %v\n", v)
+    }
+}
+
+// Warning logs a message at warning level.
+func Warn(v ...interface{}) {
+    if level <= LevelWarning {
+        BeeLogger.Printf("[W] %v\n", v)
+    }
+}
+
+// Error logs a message at error level.
+func Error(v ...interface{}) {
+    if level <= LevelError {
+        BeeLogger.Printf("[E] %v\n", v)
+    }
+}
+
+// Critical logs a message at critical level.
+func Critical(v ...interface{}) {
+    if level <= LevelCritical {
+        BeeLogger.Printf("[C] %v\n", v)
+    }
+}
+\end{lstlisting}
+
+
+上のコードはデフォルトでBeeLoggerオブジェクトを初期化し、デフォルトでos.Stdoutに出力します。ユーザはbeego.SetLoggerによってloggerのインターフェース出力を実装することができます。ここでは６つの関数を実装しています。
+
+\begin{itemize}
+\item Trace（一般的な情報の記録、例：）
+  \begin{itemize}
+  \item "Entered parse function validation block"
+  \item "Validation: entered second 'if'"
+  \item "Dictionary 'Dict' is empty. Using default value"
+  \end{itemize}
+\item Debug（デバッグ情報、例：）
+  \begin{itemize}
+  \item "Web page requested: http://somesite.com Params='...'"
+  \item "Response generated. Response size: 10000. Sending."
+  \item "New file received. Type:PNG Size:20000"
+  \end{itemize}
+\item Info（プリント情報、例：）
+  \begin{itemize}
+  \item "Web server restarted"
+  \item "Hourly statistics: Requested pages: 12345 Errors: 123 ..."
+  \item "Service paused. Waiting for 'resume' call"
+  \end{itemize}
+\item Warn（警告情報、例：）
+  \begin{itemize}
+  \item "Cache corrupted for file='test.file'. Reading from back-end"
+  \item "Database 192.168.0.7/DB not responding. Using backup 192.168.0.8/DB"
+  \item "No response from statistics server. Statistics not sent"
+  \end{itemize}
+\item Error（エラー情報、例：）
+  \begin{itemize}
+  \item "Internal error. Cannot process request #12345 Error:...."
+  \item "Cannot perform login: credentials DB not responding"
+  \end{itemize}
+\item Critical（致命的なエラー、例：）
+  \begin{itemize}
+  \item "Critical panic received: .... Shutting down"
+  \item "Fatal error: ... App is shutting down to prevent data corruption or loss"
+  \end{itemize}
+\end{itemize}
+
+どの関数にもlevelに対する判断があるのがおわかりいただけるかと思います、ですのでもし我々がデプロイ時にlevel=LevelWarningを設置すると、Trace、Debug、Infoのみっつの関数は何も出力しなくなります。
