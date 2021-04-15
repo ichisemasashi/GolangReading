@@ -1,0 +1,11 @@
+データベースの設計は最も簡単なブログ情報です
+
+\begin{lstlisting}[numbers=none]
+CREATE TABLE entries (
+    id INT AUTO_INCREMENT,
+    title TEXT,
+    content TEXT,
+    created DATETIME,
+    primary key (id)
+);
+\end{lstlisting}

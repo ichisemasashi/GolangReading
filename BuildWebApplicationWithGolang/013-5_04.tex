@@ -1,0 +1,93 @@
+IndexController:
+
+\begin{lstlisting}[numbers=none]
+type IndexController struct {
+    beego.Controller
+}
+
+func (this *IndexController) Get() {
+    this.Data["blogs"] = models.GetAll()
+    this.Layout = "layout.tpl"
+    this.TplNames = "index.tpl"
+}
+\end{lstlisting}
+
+ViewController:
+
+\begin{lstlisting}[numbers=none]
+type ViewController struct {
+    beego.Controller
+}
+
+func (this *ViewController) Get() {
+    id, _ := strconv.Atoi(this.Ctx.Input.Params[":id"])
+    this.Data["Post"] = models.GetBlog(id)
+    this.Layout = "layout.tpl"
+    this.TplNames = "view.tpl"
+}
+\end{lstlisting}
+
+NewController
+
+\begin{lstlisting}[numbers=none]
+type NewController struct {
+    beego.Controller
+}
+
+func (this *NewController) Get() {
+    this.Layout = "layout.tpl"
+    this.TplNames = "new.tpl"
+}
+
+func (this *NewController) Post() {
+    inputs := this.Input()
+    var blog models.Blog
+    blog.Title = inputs.Get("title")
+    blog.Content = inputs.Get("content")
+    blog.Created = time.Now()
+    models.SaveBlog(blog)
+    this.Ctx.Redirect(302, "/")
+}        
+\end{lstlisting}
+
+EditController
+
+\begin{lstlisting}[numbers=none]
+type EditController struct {
+    beego.Controller
+}
+
+func (this *EditController) Get() {
+    id, _ := strconv.Atoi(this.Ctx.Input.Params[":id"])
+    this.Data["Post"] = models.GetBlog(id)
+    this.Layout = "layout.tpl"
+    this.TplNames = "edit.tpl"
+}
+
+func (this *EditController) Post() {
+    inputs := this.Input()
+    var blog models.Blog
+    blog.Id, _ = strconv.Atoi(inputs.Get("id"))
+    blog.Title = inputs.Get("title")
+    blog.Content = inputs.Get("content")
+    blog.Created = time.Now()
+    models.SaveBlog(blog)
+    this.Ctx.Redirect(302, "/")
+}
+\end{lstlisting}
+
+DeleteController
+
+\begin{lstlisting}[numbers=none]
+type DeleteController struct {
+    beego.Controller
+}
+
+func (this *DeleteController) Get() {
+    id, _ := strconv.Atoi(this.Ctx.Input.Params[":id"])
+    blog := models.GetBlog(id)
+    this.Data["Post"] = blog
+    models.DelBlog(blog)
+    this.Ctx.Redirect(302, "/")
+}
+\end{lstlisting}
