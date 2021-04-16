@@ -1,0 +1,51 @@
+開発者にとって、開発のプロセスというものはとても複雑なものです。また、多くの場合同じ作業を何回も行うことになります。例えばシーンプロジェクトにおいてフォームデータを一つ追加する必要がでてきたとしましょう。この場合ローカルなコードの全体の流れをすべて修正する必要が出てきます。Goではstructはよく使われるデータ構造であることを知っています。そのため、beegoのformではstructを用いてフォームの情報を処理します。
+
+まずWebアプリケーションを開発する時に対応するstructを定義します。ひとつのフィールドはひとつのform要素に対応しています。structのtagによって対応するよすおの情報と懸賞する情報を以下のように対応付けします：
+
+
+\begin{lstlisting}[numbers=none]
+type User struct{
+    Username     string     `form:text,valid:required`
+    Nickname     string     `form:text,valid:required`
+    Age            int     `form:text,valid:required|numeric`
+    Email         string     `form:text,valid:required|valid_email`
+    Introduce     string     `form:textarea`
+}
+\end{lstlisting}
+
+structを定義したらcontrollerにおいてこのように操作します
+
+\begin{lstlisting}[numbers=none]
+func (this *AddController) Get() {
+    this.Data["form"] = beego.Form(&User{})
+    this.Layout = "admin/layout.html"
+    this.TplNames = "admin/add.tpl"
+}        
+\end{lstlisting}
+
+テンプレートで以下のようにフォームを表示します
+
+
+
+\begin{lstlisting}[numbers=none]
+<h1>New Blog Post</h1>
+<form action="" method="post">
+{{.form.render()}}
+</form>
+\end{lstlisting}
+
+上では全体の第1ステップを定義しました。structからフォームを表示したあとは、ユーザが情報を入力し、サーバがデータを受け取って検証を行った後、データベースに保存されます。
+
+
+\begin{lstlisting}[numbers=none]
+func (this *AddController) Post() {
+    var user User
+    form := this.GetInput(&user)
+    if !form.Validates() {
+        return
+    }
+    models.UserInsert(&user)
+    this.Ctx.Redirect(302, "/admin/index")
+}        
+\end{lstlisting}
+
