@@ -1,0 +1,24 @@
+Goのnet/httpパッケージでは静的なファイルのサービスを提供しています。\texttt{ServeFile}と\texttt{FileServer}といった関数です。beegoの静的なファイルの処理はこのレイヤーによって処理されます。具体的な実装は以下のとおり：
+
+\begin{lstlisting}[numbers=none]
+//static file server
+for prefix, staticDir := range StaticDir {
+    if strings.HasPrefix(r.URL.Path, prefix) {
+        file := staticDir + r.URL.Path[len(prefix):]
+        http.ServeFile(w, r, file)
+        w.started = true
+        return
+    }
+}
+\end{lstlisting}
+
+StaticDirに保存されているのはurlが対応する静的なファイルが存在するディレクトリです。そのため、URLリクエストを処理する際対応するリクエストアドレスに静的な処理ではじまるurlを含んでいるか判断するだけです。もし含まれていれば、http.ServeFileによってサービスが提供されます。
+
+例を挙げましょう：
+
+\begin{lstlisting}[numbers=none]
+beego.StaticDir["/asset"] = "/static"
+\end{lstlisting}
+
+
+ではリクエストされたurlが\texttt{http://www.beego.me/asset/bootstrap.css}だった場合、リクエスト\texttt{/static/bootstrap.css}によってフィードバックがクライアントに提供されます。

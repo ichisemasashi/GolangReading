@@ -1,0 +1,69 @@
+beegoでは主に以下のグローバル変数でsession処理をコントロールします：
+
+\begin{lstlisting}[numbers=none]
+//related to session 
+SessionOn            bool
+// sessionモジュールが起動されているか。デフォルトでは起動しません。
+SessionProvider      string
+// sessionバックエンドでは処理モジュールを提供します。
+// デフォルトはsessionManagerがサポートするmemoryです。
+SessionName          string // クライアントで保存されるcookiesの名前
+SessionGCMaxLifetime int64  // cookiesの有効期限
+
+GlobalSessions *session.Manager //グローバルなsessionコントローラ
+\end{lstlisting}
+
+当然上のいくつかの変数は値を初期化する必要があり、以下のコードによって設定ファイルとともにこれらの値を設定することができます。
+
+
+
+\begin{lstlisting}[numbers=none]
+if ar, err := AppConfig.Bool("sessionon"); err != nil {
+    SessionOn = false
+} else {
+    SessionOn = ar
+}
+if ar := AppConfig.String("sessionprovider"); ar == "" {
+    SessionProvider = "memory"
+} else {
+    SessionProvider = ar
+}
+if ar := AppConfig.String("sessionname"); ar == "" {
+    SessionName = "beegosessionID"
+} else {
+    SessionName = ar
+}
+if ar, err := AppConfig.Int("sessiongcmaxlifetime"); err != nil && ar != 0 {
+    int64val, _ := strconv.ParseInt(strconv.Itoa(ar), 10, 64)
+    SessionGCMaxLifetime = int64val
+} else {
+    SessionGCMaxLifetime = 3600
+}    
+\end{lstlisting}
+
+beego.Run関数では以下のようなコードが追加されています：
+
+
+
+\begin{lstlisting}[numbers=none]
+if SessionOn {
+    GlobalSessions, _ = session.NewManager(SessionProvider,
+                                           SessionName,
+                                           SessionGCMaxLifetime)
+    go GlobalSessions.GC()
+}
+\end{lstlisting}
+
+SessionOn設定をtrueにするだけで、デフォルトでsession機能が起動します。独立してgoroutineを起動することでsessionを処理します。
+
+カスタム設定のControllerにおいて素早くsessionを使用するため、作者は\texttt{beego.Controller}で以下のような方法を提供しています：
+
+\begin{lstlisting}[numbers=none]
+func (c *Controller) StartSession() (sess session.Session) {
+    sess = GlobalSessions.SessionStart(c.Ctx.ResponseWriter, c.Ctx.Request)
+    return
+}        
+\end{lstlisting}
+
+
+
