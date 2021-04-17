@@ -1,7 +1,7 @@
 以下のリストは使用されるオリジナルのルールを表しています
 
-\begin{longtable}{|l|l|l|l|}
-  \hline ルール &	引数 & 	詳細 &	例 \\ \hline \endhead
+\begin{longtable}{|l|l|p{6cm}|l|}
+  \hline ルール &	引数 & 	詳細 &	例 \\ \hline
   required &	No &	要素が空だった場合、FALSEを返します & {} \\ \hline
   matches &	Yes &	もしフォームの要素の値と引数の対応するフォームのフィールドの値が等しくなければ、FALSEを返します & matches[form\_item] \\ \hline
 is\_unique &	Yes &	もしフォームの要素の値と指定されたデータ表に重複があった場合、Falseを返します（訳注：例えばis\_unique[User.Email]とあれば、バリデーションクラスはUser表からEmail欄に要素と同じ値が無いか確かめます。もし重複が存在すれば、falseを返します。これにより開発者は他にCallbackバリデーションコードを書く必要がなくなります。） &	is\_unique[table.field] \\ \hline

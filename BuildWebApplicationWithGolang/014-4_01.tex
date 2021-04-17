@@ -1,0 +1,44 @@
+この２つの認証はいくつかのアプリケーションが採用している比較的簡単な認証です。現在すでにオープンソースのサードパーティライブラリでこの２つの認証をサポートしています；
+
+\begin{lstlisting}[numbers=none]
+github.com/abbot/go-http-auth 
+\end{lstlisting}
+
+下のコードはこれらのライブラリをどのようにbeegoに導入するかを示しています：
+
+\begin{lstlisting}[numbers=none]
+package controllers
+
+import (
+    "github.com/abbot/go-http-auth"
+    "github.com/astaxie/beego"
+)
+
+func Secret(user, realm string) string {
+    if user == "john" {
+        // password is "hello"
+        return "$1$dlPL2MqE$oQmn16q49SqdmhenQuNgs1"
+    }
+    return ""
+}
+
+type MainController struct {
+    beego.Controller
+}
+
+func (this *MainController) Prepare() {
+    a := auth.NewBasicAuthenticator("example.com", Secret)
+    if username := a.CheckAuth(this.Ctx.Request); username == "" {
+        a.RequireAuth(this.Ctx.ResponseWriter, this.Ctx.Request)
+    }
+}
+
+func (this *MainController) Get() {
+    this.Data["Username"] = "astaxie"
+    this.Data["Email"] = "astaxie@gmail.com"
+    this.TplNames = "index.tpl"
+}
+\end{lstlisting}
+
+上のコードはbeegoのprepare関数を利用しています。正常なロジックを実行する前に認証関数をコールすることで、非常に簡単にhttp authを実装しています。digest認証も同様の原理です。
+

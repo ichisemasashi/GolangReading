@@ -1,0 +1,10 @@
+Go言語のとても良い設計は、標準ライブラリにコードの性能監視ツールを有することです。２つのパッケージがあります：
+
+\begin{lstlisting}[numbers=none]
+net/http/pprof
+
+runtime/pprof
+\end{lstlisting}
+
+
+実はnet/http/pprofではruntime/pprofパッケージを使ってラップしているだけで、httpポートで現れるだけなのです。

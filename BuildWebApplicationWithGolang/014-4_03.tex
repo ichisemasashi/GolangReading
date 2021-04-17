@@ -1,0 +1,112 @@
+カスタム定義の認証は一般的にはsessionと組み合わせて検証されます。以下のコードはあるbeegoのオープンソースブログに基づいています：
+
+\begin{lstlisting}[numbers=none]
+//ログイン処理
+func (this *LoginController) Post() {
+    this.TplNames = "login.tpl"
+    this.Ctx.Request.ParseForm()
+    username := this.Ctx.Request.Form.Get("username")
+    password := this.Ctx.Request.Form.Get("password")
+    md5Password := md5.New()
+    io.WriteString(md5Password, password)
+    buffer := bytes.NewBuffer(nil)
+    fmt.Fprintf(buffer, "%x", md5Password.Sum(nil))
+    newPass := buffer.String()
+
+    now := time.Now().Format("2006-01-02 15:04:05")
+
+    userInfo := models.GetUserInfo(username)
+    if userInfo.Password == newPass {
+        var users models.User
+        users.Last_logintime = now
+        models.UpdateUserInfo(users)
+
+        //ログイン成功でsessionを設定
+        sess := globalSessions.SessionStart(this.Ctx.ResponseWriter,
+                                            this.Ctx.Request)
+        sess.Set("uid", userInfo.Id)
+        sess.Set("uname", userInfo.Username)
+
+        this.Ctx.Redirect(302, "/")
+    }    
+}
+
+//サインアップ処理
+func (this *RegController) Post() {
+    this.TplNames = "reg.tpl"
+    this.Ctx.Request.ParseForm()
+    username := this.Ctx.Request.Form.Get("username")
+    password := this.Ctx.Request.Form.Get("password")
+    usererr := checkUsername(username)
+    fmt.Println(usererr)
+    if usererr == false {
+        this.Data["UsernameErr"] = "Username error, Please to again"
+        return
+    }
+
+    passerr := checkPassword(password)
+    if passerr == false {
+        this.Data["PasswordErr"] = "Password error, Please to again"
+        return
+    }
+
+    md5Password := md5.New()
+    io.WriteString(md5Password, password)
+    buffer := bytes.NewBuffer(nil)
+    fmt.Fprintf(buffer, "%x", md5Password.Sum(nil))
+    newPass := buffer.String()
+
+    now := time.Now().Format("2006-01-02 15:04:05")
+
+    userInfo := models.GetUserInfo(username)
+
+    if userInfo.Username == "" {
+        var users models.User
+        users.Username = username
+        users.Password = newPass
+        users.Created = now
+        users.Last_logintime = now
+        models.AddUser(users)
+
+        //ログイン成功でsessionを設定
+        sess := globalSessions.SessionStart(this.Ctx.ResponseWriter,
+                                            this.Ctx.Request)
+        sess.Set("uid", userInfo.Id)
+        sess.Set("uname", userInfo.Username)
+        this.Ctx.Redirect(302, "/")
+    } else {
+        this.Data["UsernameErr"] = "User already exists"
+    }
+
+}
+
+func checkPassword(password string) (b bool) {
+    if ok, _ := regexp.MatchString("^[a-zA-Z0-9]{4,16}$", password); !ok {
+        return false
+    }
+    return true
+}
+
+func checkUsername(username string) (b bool) {
+    if ok, _ := regexp.MatchString("^[a-zA-Z0-9]{4,16}$", username); !ok {
+        return false
+    }
+    return true
+}
+\end{lstlisting}
+
+ユーザのログインとサインアップがあって、その他のモジュールでも以下のようにユーザがログインしているかどうかの判断を追加することができます：
+
+\begin{lstlisting}[numbers=none]
+func (this *AddBlogController) Prepare() {
+    sess := globalSessions.SessionStart(this.Ctx.ResponseWriter,
+                                        this.Ctx.Request)
+    sess_uid := sess.Get("userid")
+    sess_username := sess.Get("username")
+    if sess_uid == nil {
+        this.Ctx.Redirect(302, "/admin/login")
+        return
+    }
+    this.Data["Username"] = sess_username
+}
+\end{lstlisting}

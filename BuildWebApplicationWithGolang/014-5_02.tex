@@ -1,0 +1,47 @@
+\begin{enumerate}
+  \item 言語および言語パッケージのパスを設定します。その後i18nオブジェクトを初期化します:
+\begin{lstlisting}[numbers=none]
+beego.Lang = "zh"
+beego.LangPath = "views/lang"
+beego.InitLang()
+\end{lstlisting}
+  \item 上ではどのようにして多言語パッケージを初期化するかについてご紹介しました。今から多言語パッケージを設計します。多言語パッケージはjsonファイルです。第10章でご紹介したのと同じように、設計する必要のあるファイルをLangPathの下に置きます。例えばzh.jsonまたはen.jsonといったものです。
+\begin{lstlisting}[numbers=none]
+# zh.json
+
+{
+"zh": {
+    "submit": "送信",
+    "create": "新規作成"
+    }
+}
+
+# en.json
+
+{
+"en": {
+    "submit": "Submit",
+    "create": "Create"
+    }
+}
+\end{lstlisting}
+  \item 多言語パッケージを使用する\\ controllerの中でコンパイラをコールして対応する翻訳言語を取得することができます。以下に示します：
+\begin{lstlisting}[numbers=none]
+func (this *MainController) Get() {
+    this.Data["create"] = beego.Translation.Translate("create")
+    this.TplNames = "index.tpl"
+}
+\end{lstlisting}
+テンプレートの中で直接対応する翻訳関数をコールしてもかまいません：
+\begin{lstlisting}[numbers=none]
+//直接テキスト翻訳
+{{.create | Trans}}
+
+//時間の翻訳
+{{.time | TransDate}}
+
+//通貨の翻訳
+{{.money | TransMoney}}
+\end{lstlisting}
+\end{enumerate}
+
