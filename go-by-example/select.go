@@ -24,7 +24,7 @@ func main() {
 		c2 <- "two"
 	}()
 
-	//
+	// select を使って同時にこれらの値を待ち、 受信したものから画面に表示します。
 	for i := 0; i < 2; i++ {
 		select {
 		case msg1 := <-c1:
