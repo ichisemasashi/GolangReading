@@ -1,0 +1,14 @@
+# プログラムを実行するには、コードを hello-world.go ファイルに
+# 保存し、 go run を実行します。
+% go run  hello-world.go
+hello world
+
+# 作成したプログラムをバイナリ形式にビルドしたいこともあるでしょう。
+# go build を使えば可能です。
+% go build hello-world.go
+% \ls hello*
+hello-world	hello-world.go
+# そうすれば、ビルドしたバイナリを直接実行できます。
+% ./hello-world
+hello world
+
