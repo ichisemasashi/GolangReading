@@ -1,0 +1,11 @@
+\section{Collection Functions}
+
+プログラムでデータのコレクションに対して何か操作をしたい ことはよくあります。 与えられた述語を満たす全てのアイテムを選択したり、 カスタム関数を使って全てのアイテムを新しいコレクションに マッピングしたりといった具合です。
+
+いくつかの言語では ジェネリック (generic) なデータ構造とアルゴリズムを使うのが慣習です。 しかし、Go はジェネリクスをサポートしていません。 Go では、プログラムやデータ型が必要とする場合だけ コレクション関数を提供するのが一般的です。
+
+以下は、string のスライスに対するコレクション関数の例です。 あなた自身の関数を作るために、これらの例を使えるでしょう。 ときには、ヘルパー関数を作って呼び出す代わりに、 コレクションを操作するコードを単にインラインで定義した方が、 分かりやすいこともあるので覚えておきましょう。
+
+\lstinputlisting[caption = collection-functions.go]{collection-functions.go}
+\lstinputlisting[caption = collection-functions.run,numbers=none]{collection-functions.run}
+
