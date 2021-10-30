@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 )
 
 /*
@@ -67,4 +68,47 @@ func main() {
 	}
 	res2B, _ := json.Marshal(res2D)
 	fmt.Println(string(res2B))
+
+	// 次に、JSON から Go の値へのデコードを見ていきます。
+	// 一般的なデータ構造に対する例は、次の通りです。
+	byt := []byte(`{"num":6.13,"strs":["a","b"]}`)
+
+	// JSON パッケージがデコードしたデータを格納できる変数を用意する
+	// 必要があります。map[string]interface{} は、文字列から任意の
+	// データ型へのマップを保持します。
+	var dat map[string]interface{}
+
+	// 実際のデコード処理と、関連するエラーのチェックは、
+	// 次のようになります。
+	if err := json.Unmarshal(byt, &dat); err != nil {
+		panic(err)
+	}
+	fmt.Println(dat)
+
+	// デコードされたマップの値を使うためには、適切な型へ変換する必要が
+	// あります。例えば、次の例では num の値を float64 に変換します。
+	num := dat["num"].(float64)
+	fmt.Println(num)
+
+	// ネストしたデータにアクセスするためには、一連の型変換が必要になります。
+	strs := dat["strs"].([]interface{})
+	str1 := strs[0].(string)
+	fmt.Println(str1)
+
+	// JSON をカスタムデータ型にデコードすることもできます。この方法は、
+	// プログラムを型安全にし、デコードされたデータにアクセスするときの
+	// 型チェックを不要にできるという利点があります。
+	str := `{"page": 1, "fruits": ["apple", "peach"]}`
+	res := response2{}
+	json.Unmarshal([]byte(str), &res)
+	fmt.Println(res)
+	fmt.Println(res.Fruits[0])
+
+	// これまでの例では、データを JSON 形式で標準出力へ出力するために、
+	// 中間形式としてバイト型と文字列型を常に使っていました。 os.Stdout
+	// や HTTP レスポンスボディのような os.Writers に、エンコードした
+	// JSON を直接ストリーム出力することもできます。
+	enc := json.NewEncoder(os.Stdout)
+	d := map[string]int{"apple": 5, "lettuce": 7}
+	enc.Encode(d)
 }
