@@ -1,0 +1,13 @@
+# ファイル書き込みのコードを実行します。
+% go run writing-files.go
+wote 5 bytes
+wote 7 bytes
+wote 9 bytes
+# そして、書き出されたファイルの中身を確認します。
+% cat /tmp/dat1
+hello
+go
+% cat /tmp/dat2
+some
+writes
+buffered
