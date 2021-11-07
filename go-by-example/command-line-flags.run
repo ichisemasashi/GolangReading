@@ -1,0 +1,61 @@
+# コマンドラインフラグをもつプログラムを試すためには、
+# 先にコンパイルして、出力されたバイナリを直接実行するのがよいです。
+% go build command-line-flags.go
+# まずはビルドされたプログラムにすべてのフラグの値を指定して
+# みましょう。
+% ./command-line-flags -word=opt -numb=7 -fork -svar=flag
+word: opt
+numb: 7
+fork: true
+svar: flag
+tail: []
+# フラグを省略すると、自動的にフラグごとのデフォルト値となる点
+# に注意してください。
+% ./command-line-flags -word=opt
+word: opt
+numb: 42
+fork: false
+svar: bar
+tail: []
+# 位置引数は、任意のフラグの後に続けて指定できます。
+% ./command-line-flags -word=opt a1 a2 a3
+word: opt
+numb: 42
+fork: false
+svar: bar
+tail: [a1 a2 a3]
+# flag パッケージは、すべてのフラグが位置引数の前に
+# 出現することを要求する点に注意してください。
+# (さもないと、フラグも位置引数として解釈されてしまいます)
+% ./command-line-flags -word=opt a1 a2 a3 -numb=7
+word: opt
+numb: 42
+fork: false
+svar: bar
+tail: [a1 a2 a3 -numb=7]
+# コマンドラインプログラムに対して自動生成されたヘルプテキスト
+# を取得するには、-h または --help フラグを使います。
+% ./command-line-flags -h
+Usage of ./command-line-flags:
+  -fork
+        a bool
+  -numb int
+        an int (default 42)
+  -svar string
+        a string var (default "bar")
+  -word string
+        a string (default "foo")
+# flag パッケージに指定されていないフラグを与えた場合は、
+# プログラムはエラーメッセージを表示して、ヘルプテキストを
+# 再度表示します。
+% ./command-line-flags -wat
+flag provided but not defined: -wat
+Usage of ./command-line-flags:
+  -fork
+        a bool
+  -numb int
+        an int (default 42)
+  -svar string
+        a string var (default "bar")
+  -word string
+        a string (default "foo")
