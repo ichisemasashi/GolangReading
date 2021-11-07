@@ -1,0 +1,8 @@
+\section{Command-Line Subcommands}
+
+go や git のようなコマンドラインツールには多くの サブコマンド があり、それぞれが固有のフラグをもっています。 例えば、go build と go get は、go ツールの サブコマンドのうちの 2 つです。 flag パッケージを使うと、固有のフラグをもつシンプルな サブコマンドを簡単に定義できます。
+
+\lstinputlisting[caption = command-line-subcommands.go]{command-line-subcommands.go}
+\lstinputlisting[caption = command-line-subcommands.run,numbers=none]{command-line-subcommands.run}
+
+次は、プログラムをパラメーター化する別の一般的な方法である、 環境変数を見ていきます。
