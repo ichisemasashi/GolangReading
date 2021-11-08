@@ -1,0 +1,10 @@
+# go run を使って exit.go を実行した場合は、
+# go によって終了が検知され、画面に表示されます。
+% go run exit.go
+exit status 3
+# バイナリをビルドして実行した場合は、ターミナルで
+# ステータスを確認できます。
+% go build exit.go
+% ./exit
+% echo $?
+3
