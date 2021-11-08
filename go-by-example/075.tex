@@ -1,11 +1,11 @@
 \section{Exit}
 
-指定したステータスですぐさま終了するには、 os.Exit を使います。
+指定したステータスですぐさま終了するには、 \texttt{os.Exit} を使います。
 
 \lstinputlisting[caption = exit.go]{exit.go}
 
-例えば C とは異なり、Go は終了ステータスを示すために、 main からの整数型の戻り値を使いません。 非ゼロのステータスで終了したい場合は、os.Exit を使わなければなりません。
+例えば C とは異なり、Go は終了ステータスを示すために、 \texttt{main} からの整数型の戻り値を使いません。 非ゼロのステータスで終了したい場合は、\texttt{os.Exit} を使わなければなりません。
 
 \lstinputlisting[caption = exit.run,numbers=none]{exit.run}
 
-プログラムから ! が決して表示されないことに注意してください。
+プログラムから \texttt{!} が決して表示されないことに注意してください。
