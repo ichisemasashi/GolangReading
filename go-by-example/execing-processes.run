@@ -1,0 +1,11 @@
+# プログラムを実行すると、ls に置き換わります。
+% go run execing-processes.go
+total 47104
+drwxrwxrwx  1 ichise  staff   128K Oct  2 00:12 .
+drwxrwxrwx  1 ichise  staff   128K Sep 13 21:43 ..
+-rwxrwxrwx  1 ichise  staff   4.0K Nov  5 17:08 ._GoByExample.pdf
+-rwxrwxrwx  1 ichise  staff    28B Oct 23 22:07 .gitignore
+-rwxrwxrwx  1 ichise  staff   705B Oct 23 21:53 000.tex
+-rwxrwxrwx  1 ichise  staff   306B Oct 23 22:02 001.tex
+-rwxrwxrwx  1 ichise  staff   277B Oct 23 22:14 002.tex
+...
