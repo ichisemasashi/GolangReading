@@ -1,6 +1,6 @@
 \section{Signals}
 
-ときには、Go プログラムで Unix シグナル を扱いたいこともあります。例えば、\texttt{SIGTERM} を受け取ったらサーバーを正常に終了させたり、\texttt{SIGINT} を受け取ったらコマンドラインツールの入力処理を止めたり、 といった具合です。 以下は、Go でチャネルを使ってシグナルを扱う方法です。
+ときには、Go プログラムで Unix シグナルを扱いたいこともあります。例えば、\texttt{SIGTERM} を受け取ったらサーバーを正常に終了させたり、\texttt{SIGINT} を受け取ったらコマンドラインツールの入力処理を止めたり、といった具合です。以下は、Go でチャネルを使ってシグナルを扱う方法です。
 
 \lstinputlisting[caption = signals.go]{signals.go}
 \lstinputlisting[caption = signals.run,numbers=none]{signals.run}

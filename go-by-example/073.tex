@@ -1,8 +1,8 @@
 \section{Exec'ing Processes}
 
-前回の例では、外部プロセスを生成する例を見ました。これは、実行中の Go プロセスから外部のプロセスを利用する 必要がある場合に使います。しかし、ときには現在の Go プロセスを完全に別の (おそらく Go 以外の) プロセスに置き換えたいだけの場合もあります。 そのためには、古典的な \texttt{exec} 関数の Go 実装を使います。
+前回の例では、外部プロセスを生成する例を見ました。これは、実行中の Go プロセスから外部のプロセスを利用する必要がある場合に使います。しかし、ときには現在の Go プロセスを完全に別の (おそらく Go 以外の) プロセスに置き換えたいだけの場合もあります。そのためには、古典的な \texttt{exec} 関数の Go 実装を使います。
 
 \lstinputlisting[caption = execing-processes.go]{execing-processes.go}
 \lstinputlisting[caption = execing-processes.run,numbers=none]{execing-processes.run}
 
-Go は、古典的な Unix の \texttt{fork} 関数を提供していない点に 注意してください。ゴルーチンの開始や、プロセスの生成、 プロセスの \texttt{exec} で \texttt{fork} のほとんどのユースケースを 網羅できるため、普通は問題になりません。
+Go は、古典的な Unix の \texttt{fork} 関数を提供していない点に注意してください。ゴルーチンの開始や、プロセスの生成、プロセスの \texttt{exec} で \texttt{fork} のほとんどのユースケースを網羅できるため、普通は問題になりません。
