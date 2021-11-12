@@ -1,0 +1,13 @@
+# このプログラムを実行すると、最初に同期呼び出しの出力、
+# その次に2つのゴルーチンの混ざった出力を確認できます。
+# これは、ゴルーチンが Go ランタイムによって並行実行
+# されていることを示しています。
+% go run goroutines.go
+direct : 0
+direct : 1
+direct : 2
+going
+goroutine : 0
+goroutine : 1
+goroutine : 2
+done
