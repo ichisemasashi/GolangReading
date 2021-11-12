@@ -1,0 +1,8 @@
+\section{Errors}
+
+Go では、エラーを明示的な、別の戻り値として扱うのが特徴です。これは、Java や Ruby のような言語で使われる例外や、 C で時々使われる結果/エラーを多重定義した単一の値とは対照的です。 Go のアプローチは、どの関数がエラーを返したかを調べやすくし、エラー以外のほかのタスクに使うのと同じ言語機能でエラーも扱えるようにします。
+
+\lstinputlisting[caption = errors.go]{errors.go}
+\lstinputlisting[caption = errors.run,numbers=none]{errors.run}
+
+エラーハンドリングのさらなる情報については、Go ブログのこの素晴らしい記事を参考にしてください。
