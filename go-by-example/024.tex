@@ -1,0 +1,7 @@
+\section{Channel Buffering}
+
+デフォルトでは、チャネルは バッファリングされない (unbuffered) ので、受信 (\texttt{<- chan}) の準備ができていないと送信 (\texttt{chan <-}) できません。 しかし、バッファリングされたチャネル (Buffered channels) は、対応する受信側がいなくても決められた量までなら 値を送信できます。
+
+\lstinputlisting[caption = channel-buffering.go]{channel-buffering.go}
+\lstinputlisting[caption = channel-buffering.run,numbers=none]{channel-buffering.run}
+
