@@ -1,0 +1,8 @@
+\section{Channels}
+
+チャネル (Channels) は、並行実行されるゴルーチン間を接続するパイプです。あるゴルーチンからチャネルを通して値を送信し、別のゴルーチンでその値を受信できます。
+
+\lstinputlisting[caption = channels.go]{channels.go}
+\lstinputlisting[caption = channels.run,numbers=none]{channels.run}
+
+デフォルトでは、送る側と受ける側が準備できるまで、送受信はブロックされます。この性質により、何か特別な同期処理を書かなくても、プログラムの最後で \texttt{"ping"} メッセージを受信するまで待つことができるのです。
