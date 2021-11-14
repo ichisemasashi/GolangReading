@@ -1,0 +1,8 @@
+\section{Channel Synchronization}
+
+ゴルーチン間の実行を同期するために、チャネルを使うことができます。ここでの例は、ゴルーチンの完了を待つために、ブロッキング受信を使います。複数のゴルーチンの完了を待つ場合は、 WaitGroup を使うとよいでしょう。
+
+\lstinputlisting[caption = channel-synchronization.go]{channel-synchronization.go}
+\lstinputlisting[caption = channel-synchronization.run,numbers=none]{channel-synchronization.run}
+
+このプログラムから \texttt{<- done} の行を削除すると、 \texttt{worker} が開始さえする前にプログラムが終了してしまいます。
