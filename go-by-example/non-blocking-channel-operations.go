@@ -6,7 +6,7 @@ func main() {
 	messages := make(chan string)
 	signals := make(chan bool)
 
-	// これは、ブロックしない受信の例です。 もし messages チャネルで
+	// これは、ブロックしない受信の例です。もし messages チャネルで
 	// 値が準備できていれば、 select は <-messages のケースを実行します。
 	// そうでなければ、すぐに default ケースを実行します。
 	select {
@@ -18,7 +18,7 @@ func main() {
 
 	// ブロックしない送信も同様に動作します。messages チャネルには、
 	// バッファもなければ受ける側もいないため、 msg を送信することは
-	// できません。 そのため、default ケースが実行されます。
+	// できません。そのため、default ケースが実行されます。
 	msg := "hi"
 	select {
 	case messages <- msg:
@@ -28,8 +28,8 @@ func main() {
 	}
 
 	// ブロックしない多重 select を実現するために、 default 句の前に
-	// 複数の case を使うことができます。 次の例では、messages と
-	// signals の両方に対して ブロックしない受信を試みます。
+	// 複数の case を使うことができます。次の例では、messages と
+	// signals の両方に対してブロックしない受信を試みます。
 	select {
 	case msg := <-messages:
 		fmt.Println("received message", msg)
