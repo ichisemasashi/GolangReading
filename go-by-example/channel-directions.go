@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 /*
-   この ping 関数は、チャネルを送信専用で受け取ります。 このチャネルで
+   この ping 関数は、チャネルを送信専用で受け取ります。このチャネルで
    受信しようとすると、コンパイルエラーになります。
 */
 func ping(pings chan<- string, msg string) {
@@ -11,7 +11,7 @@ func ping(pings chan<- string, msg string) {
 }
 
 /*
-   この pong 関数は、1 つ目のチャネルを受信専用で (pings)、
+   この pong 関数は、1つ目のチャネルを受信専用で (pings)、
    2つ目のチャネルを送信専用で (pongs) 受け取ります。
 */
 func pong(pings <-chan string, pongs chan<- string) {
