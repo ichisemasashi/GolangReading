@@ -1,7 +1,7 @@
-\section{Timeouts}
+\section{Non-Blocking Channel Operations}
 
-タイムアウト (Timeouts) は、外部リソースに接続するプログラムや、実行時間を制限する必要があるプログラムで重要です。 Go では、チャネルと \texttt{select} のおかげでタイムアウトを簡単かつエレガントに実現できます。
+チャネル上の基本的な送受信はブロックします。しかし、\texttt{default} 句をもった \texttt{select} を使えば、ブロックしない (non-blocking) 送信、受信、そして多重 \texttt{select} さえ実装できます。
 
-\lstinputlisting[caption = timeouts.go]{timeouts.go}
-\lstinputlisting[caption = timeouts.run,numbers=none]{timeouts.run}
+\lstinputlisting[caption = non-blocking-channel-operations.go]{non-blocking-channel-operations.go}
+\lstinputlisting[caption = non-blocking-channel-operations.run,numbers=none]{non-blocking-channel-operations.run}
 
