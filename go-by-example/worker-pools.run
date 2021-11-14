@@ -1,0 +1,17 @@
+# 実行したプログラムは、5つのジョブが様々なワーカーで実行されて
+# いることを示します。このプログラムは、合計で5秒分のタスクを
+# 実行するにもかかわらす、2秒しかかかりません。というのも、3つ
+# のワーカーが並行実行されるからです。
+% /usr/bin/time go run worker-pools.go
+% /usr/bin/time ./worker-pools
+worker 1 started job 2
+worker 3 started job 1
+worker 2 started job 3
+worker 1 finished job 2
+worker 3 finished job 1
+worker 2 finished job 3
+worker 2 started job 4
+worker 1 started job 5
+worker 1 finished job 5
+worker 2 finished job 4
+        2.33 real         0.00 user         0.00 sys
