@@ -1,0 +1,8 @@
+\section{Mutexes}
+
+前回の例では、アトミックな操作を使って、シンプルなカウンターの状態を管理する方法を見ました。より複雑な状態の場合は、複数のゴルーチンから安全にデータへアクセスするためにミューテックス (mutex) を使えます。
+
+\lstinputlisting[caption = mutexes.go]{mutexes.go}
+\lstinputlisting[caption = mutexes.run,numbers=none]{mutexes.run}
+
+次回は、これと同じ状態管理をゴルーチンとチャネルだけを使って実装する例を見ていきましょう

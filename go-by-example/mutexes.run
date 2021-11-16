@@ -1,0 +1,6 @@
+# プログラムを実行すると、mutex で同期された state を
+#  合計で90,000 回操作したことが分かります。
+% go run mutexes.go
+readOps: 78563
+writeOps 7861
+state: map[0:20 1:93 2:49 3:89 4:51]
