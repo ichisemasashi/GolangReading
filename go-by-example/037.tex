@@ -1,0 +1,8 @@
+\section{Atomic Counters}
+
+Go で状態を管理するための最も重要な仕組みは、チャネルを使った通信です。これについては、ワーカープールの例で見ました。しかし、状態を管理する方法は他にもいくつかあります。ここでは、複数のゴルーチンからアクセスされるアトミックカウンター (atomic counters) のための、 \texttt{sync/atomic} パッケージを使う方法を見ていきます。
+
+\lstinputlisting[caption = atomic-counters.go]{atomic-counters.go}
+\lstinputlisting[caption = atomic-counters.run,numbers=none]{atomic-counters.run}
+
+次は、状態を管理するもう1つの方法である、ミューテックスを見ていきましょう。
