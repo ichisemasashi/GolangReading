@@ -1,0 +1,5 @@
+# プログラムを実行すると、ゴルーチンベースの状態管理で
+# 80,000回程の操作を完了したことが分かります。
+% go run stateful-goroutines.go
+readOps: 77316
+writeOps 7793

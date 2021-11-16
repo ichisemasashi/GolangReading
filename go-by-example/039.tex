@@ -1,0 +1,8 @@
+\section{Stateful Goroutines}
+
+前回の例では、複数のゴルーチンから共有状態へのアクセスを同期するために、ミューテックスによる明示的なロックを使いました。同じ結果を得るために、ゴルーチンとチャネルがもつ組み込みの同期機能を使う方法もあります。チャネルベースのアプローチは、通信によってメモリを共有し、各データは1つのゴルーチンによって所有されるべきという、 Go の考え方に沿っています。
+
+\lstinputlisting[caption = stateful-goroutines.go]{stateful-goroutines.go}
+\lstinputlisting[caption = stateful-goroutines.run,numbers=none]{stateful-goroutines.run}
+
+今回の例では、ミューテックスベースと比べてゴルーチンベースのアプローチはやや複雑でした。しかし、他の関連するチャネルがある場合などは、複数のミューテックスを管理するのは間違えやすいので、こちらのアプローチが有用です。いずれにせよ、正しいプログラムを作るのに最も適切だと思えるアプローチを使うべきです。
