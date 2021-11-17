@@ -15,9 +15,9 @@ type byLength []string
 /*
    sort パッケージの Sort 関数を使えるように、 sort.Interface
    すなわち Len, Less, Swap 関数を実装します。 Len と Swap は
-   どの型でもだいたい同じになり、 Less が実際のカスタムソートのロジックを
-   もちます。この例では、文字列の長さの昇順でソートしたいので、
-   len(s[i]) と len(s[j]) を使っています。
+   どの型でもだいたい同じになり、 Less が実際のカスタムソートの
+   ロジックをもちます。この例では、文字列の長さの昇順でソート
+   したいので、len(s[i]) と len(s[j]) を使っています。
 */
 func (s byLength) Len() int {
 	return len(s)

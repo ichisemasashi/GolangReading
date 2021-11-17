@@ -6,8 +6,8 @@ func main() {
 	messages := make(chan string)
 	signals := make(chan bool)
 
-	// これは、ブロックしない受信の例です。もし messages チャネルで
-	// 値が準備できていれば、 select は <-messages のケースを実行します。
+	// これは、ブロックしない受信の例です。もし messages チャネルで値が
+	// 準備できていれば、 select は <-messages のケースを実行します。
 	// そうでなければ、すぐに default ケースを実行します。
 	select {
 	case msg := <-messages:

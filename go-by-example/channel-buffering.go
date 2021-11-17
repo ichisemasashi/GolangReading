@@ -3,7 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	// この例では、string を 2 つまでバッファリングするチャネルを make しています。
+	// この例では、string を2つまでバッファリング
+	// するチャネルを make しています。
 	messages := make(chan string, 2)
 
 	// このチャネルはバッファリングされるので、対応する受信側が
