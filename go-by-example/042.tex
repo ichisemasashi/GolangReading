@@ -1,0 +1,8 @@
+\section{Panic}
+
+\texttt{panic} は通常、何かが予期せず誤った結果になったことを意味します。ほとんどの場合、通常の操作では起こるはずがない、すなわち、うまく扱えないエラーが起きたときに、異常終了させるために使います。
+
+\lstinputlisting[caption = panic.go]{panic.go}
+\lstinputlisting[caption = panic.run,numbers=none]{panic.run}
+
+多くのエラー処理に例外を使う言語とは異なり、Go では可能な限りエラーを示す戻り値を使うのが慣習であることに注意してください。

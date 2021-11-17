@@ -1,0 +1,10 @@
+# このプログラムを実行すると、panic を引き起こし、
+# エラーメッセージとゴルーチンのトレースが表示され、
+# 非ゼロのステータスで終了します。
+% go run panic.go
+panic: a problem
+
+goroutine 1 [running]:
+main.main()
+        /Volumes/SSD-PLU3/work/GolangReading/go-by-example/panic.go:8 +0x27
+exit status 2
