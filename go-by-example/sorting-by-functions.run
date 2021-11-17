@@ -1,0 +1,4 @@
+# プログラムを実行すると、期待通り文字列の長さ順に
+# ソートされた リストが表示されます。
+% go run sorting-by-functions.go
+[kiwi peach banana]

@@ -1,0 +1,8 @@
+\section{Sorting by Functions}
+
+ときには、コレクションを自然順以外でソートしたいこともあります。例えば、文字列をアルファベット順ではなく、長さ順でソートしたいとしましょう。 Go のカスタムソートの例は次の通りです。
+
+\lstinputlisting[caption = sorting-by-functions.go]{sorting-by-functions.go}
+\lstinputlisting[caption = sorting-by-functions.run,numbers=none]{sorting-by-functions.run}
+
+ユーザー定義型を作成して3つの \texttt{Interface} メソッドを実装し、 \texttt{sort.Sort} 関数を呼び出す、という同じパターンに従うことで、 Go のスライスを任意の関数でソートができます。
