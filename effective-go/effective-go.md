@@ -1,22 +1,22 @@
 # Effective Go
 
-## Introduction
+## はじめに
 
-Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives. A straightforward translation of a C++ or Java program into Go is unlikely to produce a satisfactory result—Java programs are written in Java, not Go. On the other hand, thinking about the problem from a Go perspective could produce a successful but quite different program. In other words, to write Go well, it's important to understand its properties and idioms. It's also important to know the established conventions for programming in Go, such as naming, formatting, program construction, and so on, so that programs you write will be easy for other Go programmers to understand.
+Goは新しい言語です。既存の言語からアイデアを借りていますが、特殊な性質を持っているため、効果的なGoプログラムは、親戚の言語で書かれたプログラムとは異なる性質を持っています。C++やJavaのプログラムを単純にGoに翻訳しても、満足のいく結果は得られないでしょう。一方、Goの視点から問題を考えれば、成功するかもしれないが、まったく違うプログラムができるかもしれない。つまり、Goをうまく書くためには、その特性やイディオムを理解することが重要です。また、名前の付け方や書式、プログラムの組み立て方など、Goでプログラミングするための確立された慣習を知っておくことも重要です。そうすれば、あなたが書いたプログラムは、他のGoプログラマーにとって理解しやすいものになるでしょう。
 
-This document gives tips for writing clear, idiomatic Go code. It augments the [language specification](https://golang.org/ref/spec), the [Tour of Go](https://tour.golang.org/), and [How to Write Go Code](https://golang.org/doc/code.html), all of which you should read first.
+このドキュメントは、明快で慣用的なGoコードを書くためのヒントを提供します。最初に読むべき[言語仕様書](https://golang.org/ref/spec)、[Tour of Go](https://tour.golang.org/)、[How to Write Go Code](https://golang.org/doc/code.html)を補強するものです。
 
-### Examples
+### 例
 
-The [Go package sources](https://golang.org/src/) are intended to serve not only as the core library but also as examples of how to use the language. Moreover, many of the packages contain working, self-contained executable examples you can run directly from the [golang.org](https://golang.org/) web site, such as [this one](https://golang.org/pkg/strings/#example_Map) (if necessary, click on the word "Example" to open it up). If you have a question about how to approach a problem or how something might be implemented, the documentation, code and examples in the library can provide answers, ideas and background.
+[Goパッケージソース](https://golang.org/src/)は、コアライブラリとしてだけでなく、言語の使い方の例としても役立つことを目的としています。さらに、多くのパッケージには、動作する自己完結型の実行例が含まれており、[golang.org](https://golang.org/)のウェブサイトから直接実行することができます。例えば、[this one](https://golang.org/pkg/strings/#example_Map)などです（必要に応じて、「Example」をクリックして開いてください）。問題にどのように取り組むか、何かをどのように実装するかについて疑問がある場合、ライブラリのドキュメント、コード、例題、答え、アイデア、背景を提供してくれます。
 
-## Formatting
+## フォーマットについて
 
-Formatting issues are the most contentious but the least consequential. People can adapt to different formatting styles but it's better if they don't have to, and less time is devoted to the topic if everyone adheres to the same style. The problem is how to approach this Utopia without a long prescriptive style guide.
+フォーマットの問題は、最も議論の多い問題ですが、最も影響の少ない問題でもあります。人々は異なるフォーマットのスタイルに適応することができますが、その必要がない方が良いでしょうし、皆が同じスタイルを守っていれば、話題に割く時間も少なくて済みます。問題は、長い規定のスタイルガイドなしに、このユートピアにどうアプローチするかです。
 
-With Go we take an unusual approach and let the machine take care of most formatting issues. The `gofmt` program (also available as `go fmt`, which operates at the package level rather than source file level) reads a Go program and emits the source in a standard style of indentation and vertical alignment, retaining and if necessary reformatting comments. If you want to know how to handle some new layout situation, run `gofmt`; if the answer doesn't seem right, rearrange your program (or file a bug about `gofmt`), don't work around it.
+Goでは通常とは異なるアプローチをとり、ほとんどのフォーマット問題を機械に任せています。`gofmt`プログラム（ソースファイルレベルではなくパッケージレベルで動作する`go fmt`としても利用可能）は、Goプログラムを読み、インデントや垂直方向の配置などの標準的なスタイルでソースを出力し、コメントを保持し、必要に応じて再フォーマットします。もし、答えが正しくないようであれば、プログラムを再構成して (あるいは、`gofmt` に関するバグを報告して)ください。わざわざ時間をかける必要はありません。
 
-As an example, there's no need to spend time lining up the comments on the fields of a structure. `Gofmt` will do that for you. Given the declaration
+例えば，構造体の各フィールドのコメントを並べるのに時間をかける必要はありません．`Gofmt` がそのようにしてくれます。次のような宣言があるとします。
 
 ```go
 type T struct {
@@ -25,7 +25,7 @@ type T struct {
 }
 ```
 
-`gofmt` will line up the columns:
+`gofmt` は列を並べます。
 
 ```go
 type T struct {
@@ -33,29 +33,30 @@ type T struct {
     value   int    // its value
 }
 ```
-All Go code in the standard packages has been formatted with `gofmt`.
 
-Some formatting details remain. Very briefly:
+標準パッケージのすべての Go コードは `gofmt` でフォーマットされています。
 
-- Indentation
-  - We use tabs for indentation and `gofmt` emits them by default. Use spaces only if you must.
-- Line length
-  - Go has no line length limit. Don't worry about overflowing a punched card. If a line feels too long, wrap it and indent with an extra tab.
-- Parentheses
-  - Go needs fewer parentheses than C and Java: control structures (`if`, `for`, `switch`) do not have parentheses in their syntax. Also, the operator precedence hierarchy is shorter and clearer, so
+いくつかのフォーマットの詳細は残っています。とても簡単に言うと
+
+- インデント
+  - インデントにはタブを使用します。`gofmt` はデフォルトでタブを出力します。必要に応じてスペースを使用してください。
+- 行の長さ
+  - Go には行数の制限はありません。パンチカードから溢れてしまう心配はありません。行が長すぎると感じた場合は、行を折り返し、タブでインデントしてください。
+- 括弧の数
+  - 制御構造(`if`, `for`, `switch`)の構文には括弧がありませんので、GoはCやJavaよりも少ない括弧で済みます。また、演算子の優先順位の階層は、より短く、より明確になっています。だから
     ```go
      x<<8 + y<<16
     ```
-    means what the spacing implies, unlike in the other languages.
+    は、他の言語とは異なり、その間隔が意味するところを意味します。
 
 
-## Commentary
+## コメント
 
-Go provides C-style `/* */` block comments and C++-style `//` line comments. Line comments are the norm; block comments appear mostly as package comments, but are useful within an expression or to disable large swaths of code.
+Goには、Cスタイルの `/* */` ブロックコメントとC++スタイルの `//` ラインコメントがあります。ブロックコメントは、主にパッケージのコメントとして表示されますが、式の中で使用したり、コードの大部分を無効にするのに便利です。
 
-The program — and web server — `godoc` processes Go source files to extract documentation about the contents of the package. Comments that appear before top-level declarations, with no intervening newlines, are extracted along with the declaration to serve as explanatory text for the item. The nature and style of these comments determine the quality of the documentation `godoc` produces.
+プログラム（およびウェブサーバー）の `godoc` は、Go のソースファイルを処理して、パッケージの内容に関するドキュメントを抽出します。トップレベルの宣言の前に現れるコメント（間に改行がない）は、宣言と一緒に抽出され、その項目の説明テキストとして使用されます。これらのコメントの性質やスタイルは、`godoc` が作成するドキュメントの品質を決定します。
 
-Every package should have a package comment, a block comment preceding the package clause. For multi-file packages, the package comment only needs to be present in one file, and any one will do. The package comment should introduce the package and provide information relevant to the package as a whole. It will appear first on the `godoc` page and should set up the detailed documentation that follows.
+すべてのパッケージは、パッケージ節の前のブロックコメントであるパッケージコメントを持つべきです。マルチファイルパッケージの場合、パッケージコメントは1つのファイルに存在するだけでよく、どのファイルでも構いません。パッケージコメントは、パッケージを紹介し、パッケージ全体に関連する情報を提供する必要があります。パッケージコメントは `godoc` ページで最初に表示され、その後に続く詳細なドキュメントを設定します。
 
 ```go
 /*
@@ -80,20 +81,20 @@ The syntax of the regular expressions accepted is:
 package regexp
 ```
 
-If the package is simple, the package comment can be brief.
+パッケージがシンプルなものであれば、パッケージのコメントは簡潔で構いません。
 
 ```go
 // Package path implements utility routines for
 // manipulating slash-separated filename paths.
 ```
 
-Comments do not need extra formatting such as banners of stars. The generated output may not even be presented in a fixed-width font, so don't depend on spacing for alignment — `godoc`, like `gofmt`, takes care of that. The comments are uninterpreted plain text, so HTML and other annotations such as `_this_` will reproduce verbatim and should not be used. One adjustment `godoc` does do is to display indented text in a fixed-width font, suitable for program snippets. The package comment for the [fmt package](https://golang.org/pkg/fmt/) uses this to good effect.
+コメントには、星のバナーのような余分なフォーマットは必要ありません。生成される出力は、固定幅のフォントで表示されないこともありますので、アライメントをスペーシングに依存してはいけません。`godoc`は、`gofmt`と同様に、そのような処理を行います。コメントは解釈されないプレーンテキストですので、HTMLや `_this_` のような注釈はそのまま再現されますので、使わないようにしてください。`godoc`が行う調整の一つは、インデントされたテキストを固定幅のフォントで表示することで、プログラムのスニペットに適しています。[fmt パッケージ](https://golang.org/pkg/fmt/)のパッケージコメントでは、これが効果的に使われています。
 
-Depending on the context, `godoc` might not even reformat comments, so make sure they look good straight up: use correct spelling, punctuation, and sentence structure, fold long lines, and so on.
+文脈によっては、`godoc` はコメントを再フォーマットしないかもしれませんので、 正しいスペル、句読点、文の構造を使い、長い行を折りたたむなどして、 コメントが正しく見えるようにしてください。
 
-Inside a package, any comment immediately preceding a top-level declaration serves as a doc comment for that declaration. Every exported (capitalized) name in a program should have a doc comment.
+パッケージ内では、トップレベルの宣言の直前にあるコメントは、その宣言のdocコメントとして機能します。プログラムの中でエクスポートされる（大文字の）名前には、必ず doc コメントを付ける必要があります。
 
-Doc comments work best as complete sentences, which allow a wide variety of automated presentations. The first sentence should be a one-sentence summary that starts with the name being declared.
+doc コメントは完全な文として使うのが最も効果的で、さまざまな自動プレゼンテーションが可能になります。最初の文は、宣言される名前で始まる1文の要約でなければなりません。
 
 ```go
 // Compile parses a regular expression and returns, if successful,
@@ -101,13 +102,13 @@ Doc comments work best as complete sentences, which allow a wide variety of auto
 func Compile(str string) (*Regexp, error) {
 ```
 
-If every doc comment begins with the name of the item it describes, you can use the [doc](https://golang.org/cmd/go/#hdr-Show_documentation_for_package_or_symbol) subcommand of the [go](https://golang.org/cmd/go/) tool and run the output through `grep`. Imagine you couldn't remember the name "Compile" but were looking for the parsing function for regular expressions, so you ran the command,
+すべてのdocコメントが説明する項目の名前で始まる場合、[go](https://golang.org/cmd/go/)ツールの[doc](https://golang.org/cmd/go/#hdr-Show_documentation_for_package_or_symbol)サブコマンドを使用して、出力を`grep`で実行することができます。「Compile」という名前は覚えていないが、正規表現の解析機能を探していたので、次のようなコマンドを実行したと想像してみてください。
 
 ```sh
 $ go doc -all regexp | grep -i parse
 ```
 
-If all the doc comments in the package began, "This function...", `grep` wouldn't help you remember the name. But because the package starts each doc comment with the name, you'd see something like this, which recalls the word you're looking for.
+パッケージ内のすべてのdocコメントが「この関数は...」で始まっていたら、`grep`では名前を覚えることができません。しかし、パッケージはそれぞれのドキュメントコメントを名前で始めているので、次のようなものが表示され、探している単語を思い出すことができます。
 
 ```
 $ go doc -all regexp | grep -i parse
@@ -117,7 +118,7 @@ $ go doc -all regexp | grep -i parse
 $
 ```
 
-Go's declaration syntax allows grouping of declarations. A single doc comment can introduce a group of related constants or variables. Since the whole declaration is presented, such a comment can often be perfunctory.
+Goの宣言構文では、宣言をグループ化することができます。1つのdocコメントで、関連する定数や変数のグループを紹介することができます。宣言全体が提示されるので、このようなコメントはしばしばその場しのぎになってしまいます。
 
 ```go
 // Error codes returned by failures to parse an expression.
@@ -129,7 +130,7 @@ var (
 )
 ```
 
-Grouping can also indicate relationships between items, such as the fact that a set of variables is protected by a mutex.
+グループ化は、変数のセットがミューテックスで保護されていることなど、アイテム間の関係を示すこともできます。
 
 ```go
 var (
@@ -141,13 +142,13 @@ var (
 ```
 
 
-## Names
+## 名前
 
-Names are as important in Go as in any other language. They even have semantic effect: the visibility of a name outside a package is determined by whether its first character is upper case. It's therefore worth spending a little time talking about naming conventions in Go programs.
+名前は、他の言語と同様、Goにおいても重要です。名前には意味上の効果もあります。パッケージの外にある名前の可視性は、その最初の文字が大文字かどうかで決まります。そのため、Goプログラムの命名規則について少し時間を割いてみましょう。
 
-### Package names
+### パッケージ名
 
-When a package is imported, the package name becomes an accessor for the contents. After
+パッケージがインポートされると、パッケージ名がコンテンツへのアクセッサとなります。以降は
 
 ```go
 import "bytes"
