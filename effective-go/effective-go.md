@@ -185,28 +185,28 @@ if owner != user {
 
 最後に、Goでは、マルチワードの名前を書くときには、アンダースコアではなく、`MixedCaps`または`mixedCaps`を使うのが慣例となっています。
 
-## Semicolons
+## セミコロン
 
 
-Like C, Go's formal grammar uses semicolons to terminate statements, but unlike in C, those semicolons do not appear in the source. Instead the lexer uses a simple rule to insert semicolons automatically as it scans, so the input text is mostly free of them.
+C言語と同様に、Goの形式文法では文の終わりにセミコロンを使用しますが、C言語とは異なり、セミコロンはソースには表示されません。その代わり、レキサーは簡単なルールを使って、スキャン時にセミコロンを自動的に挿入するので、入力テキストにはほとんどセミコロンが含まれません。
 
-The rule is this. If the last token before a newline is an identifier (which includes words like `int` and `float64`), a basic literal such as a number or string constant, or one of the tokens
+そのルールとは次のようなものです。改行前の最後のトークンが、識別子（`int`や`float64`など）、数値や文字列定数などの基本的なリテラル、または以下のトークンのいずれかである場合
 
 ```go
 break continue fallthrough return ++ -- ) }
 ```
 
-the lexer always inserts a semicolon after the token. This could be summarized as, “if the newline comes after a token that could end a statement, insert a semicolon”.
+の場合、レキサーは常にそのトークンの後にセミコロンを挿入します。これは要約すると、「文を終わらせる可能性のあるトークンの後に改行が来たら、セミコロンを挿入する」ということです。
 
-A semicolon can also be omitted immediately before a closing brace, so a statement such as
+セミコロンは閉じ括弧の直前でも省略できるので、次のような文は
 
 ```go
     go func() { for { dst <- <-src } }()
 ```
 
-needs no semicolons. Idiomatic Go programs have semicolons only in places such as `for` loop clauses, to separate the initializer, condition, and continuation elements. They are also necessary to separate multiple statements on a line, should you write code that way.
+はセミコロンを必要としません。慣用的なGoプログラムでは、セミコロンは、初期化子、条件、継続の各要素を分けるために、`for`ループ節などの場所でのみ使用されます。セミコロンは、一行にある複数のステートメントを分離するためにも必要ですが、そのようにコードを書く必要があります。
 
-One consequence of the semicolon insertion rules is that you cannot put the opening brace of a control structure (`if`, `for`, `switch`, or `select`) on the next line. If you do, a semicolon will be inserted before the brace, which could cause unwanted effects. Write them like this
+セミコロンの挿入規則の結果として、制御構造（`if`、`for`、`switch`、`select`）の開始波括弧を次の行に置くことができません。これは、制御構造の開始波括弧（`if`、`for`、`switch`、`select`）を次の行に置いてはいけないということです。次のように書いてください。
 
 ```go
 if i < f() {
@@ -214,7 +214,7 @@ if i < f() {
 }
 ```
 
-not like this
+こうじゃない
 
 ```go
 if i < f()  // wrong!
