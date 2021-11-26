@@ -165,7 +165,7 @@ import "bytes"
 
 ### Getters
 
-Go doesn't provide automatic support for getters and setters. There's nothing wrong with providing getters and setters yourself, and it's often appropriate to do so, but it's neither idiomatic nor necessary to put `Get` into the getter's name. If you have a field called `owner` (lower case, unexported), the getter method should be called `Owner` (upper case, exported), not `GetOwner`. The use of upper-case names for export provides the hook to discriminate the field from the method. A setter function, if needed, will likely be called `SetOwner`. Both names read well in practice:
+Go はゲッターとセッターを自動的にはサポートしません。自分でゲッターやセッターを用意することは悪いことではありませんし、そうすることが適切な場合もありますが、ゲッターの名前に `Get` を入れることは慣用的でも必要でもありません。`owner`（小文字、unexported）というフィールドがある場合、ゲッターメソッドの名前は `GetOwner` ではなく `Owner`（大文字、exported）でなければなりません。エクスポート時に大文字の名前を使用することで、フィールドとメソッドを区別するためのフックとなります。セッター関数が必要な場合は、おそらく `SetOwner` と呼ばれるでしょう。どちらの名前も実際にはよく読めます。
 
 ```go
 owner := obj.Owner()
@@ -176,13 +176,14 @@ if owner != user {
 
 ### Interface names
 
-By convention, one-method interfaces are named by the method name plus an -er suffix or similar modification to construct an agent noun: `Reader`, `Writer`, `Formatter`, `CloseNotifier` etc.
+慣習的に、ワンメソッドのインターフェースは、メソッド名に-erの接尾辞をつけるか、または同様の修飾をしてエージェント名詞を構成して命名されます。
+ 例えば、`Reader`, `Writer`, `Formatter`, `CloseNotifier`などです。
 
-There are a number of such names and it's productive to honor them and the function names they capture. `Read`, `Write`, `Close`, `Flush`, `String` and so on have canonical signatures and meanings. To avoid confusion, don't give your method one of those names unless it has the same signature and meaning. Conversely, if your type implements a method with the same meaning as a method on a well-known type, give it the same name and signature; call your string-converter method `String` not `ToString`.
+このような名前は数多くありますが、これらの名前とそれらが捉える関数名を尊重することは生産的です。`Read`, `Write`, `Close`, `Flush`, `String` などは正規のシグネチャと意味を持っています。混乱を避けるために、同じ署名と意味を持たない限り、自分のメソッドにこれらの名前を付けないでください。逆に、よく知られた型のメソッドと同じ意味を持つメソッドを自分の型が実装している場合は、同じ名前とシグネチャを与えます。文字列変換メソッドを `ToString` ではなく `String` と呼びます。
 
 ### MixedCaps
 
-Finally, the convention in Go is to use `MixedCaps` or `mixedCaps` rather than underscores to write multiword names.
+最後に、Goでは、マルチワードの名前を書くときには、アンダースコアではなく、`MixedCaps`または`mixedCaps`を使うのが慣例となっています。
 
 ## Semicolons
 
