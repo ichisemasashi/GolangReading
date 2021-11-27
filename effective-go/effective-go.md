@@ -224,13 +224,17 @@ if i < f()  // wrong!
 ```
 
 
-## Control structures
+## 制御構造
 
-The control structures of Go are related to those of C but differ in important ways. There is no `do` or `while` loop, only a slightly generalized `for`; `switch` is more flexible; `if` and `switch` accept an optional initialization statement like that of `for`; `break` and `continue` statements take an optional label to identify what to break or continue; and there are new control structures including a type switch and a multiway communications multiplexer, `select`. The syntax is also slightly different: there are no parentheses and the bodies must always be brace-delimited.
+Goの制御構造はC言語のそれと関連していますが、重要な点で異なります。`do`や`while`のループはなく、わずかに一般化された`for`があるだけです。
+ また、`switch` はより柔軟です。
+ `if` と `switch` は、`for` のようなオプションの初期化文を受け入れます。
+ `break` と `continue` ステートメントには、break やcontinue を識別するためのオプションのラベルを指定します。
+ また、タイプスイッチや多方向通信マルチプレクサである`select`などの新しい制御構造もあります。構文も若干異なり、括弧はなく、ボディは常にブレースで区切られています。
 
 ### If
 
-In Go a simple `if` looks like this:
+Goではシンプルな`if`は次のようになります。
 
 ```go
 if x > 0 {
@@ -238,9 +242,9 @@ if x > 0 {
 }
 ```
 
-Mandatory braces encourage writing simple `if` statements on multiple lines. It's good style to do so anyway, especially when the body contains a control statement such as a `return` or `break`.
+中括弧を必須とすることで、単純な `if` 文を複数行に渡って書くことを推奨しています。特に、本文に `return` や `break` などの制御文が含まれている場合には、そのように書くのが良いスタイルです。
 
-Since `if` and `switch` accept an initialization statement, it's common to see one used to set up a local variable.
+`if` や `switch` は初期化文を受け付けるので、ローカル変数を設定するために使われることがよくあります。
 
 
 ```go
@@ -250,7 +254,7 @@ if err := file.Chmod(0664); err != nil {
 }
 ```
 
-In the Go libraries, you'll find that when an `if` statement doesn't flow into the next statement — that is, the body ends in `break`, `continue`, `goto`, or `return` — the unnecessary `else` is omitted.
+Goのライブラリでは、`if`文が次の文に流れない場合、つまり、本体が`break`、`continue`、`goto`、`return`で終わっている場合には、不要な`else`が省略されています。
 
 ```go
 f, err := os.Open(name)
@@ -260,7 +264,7 @@ if err != nil {
 codeUsing(f)
 ```
 
-This is an example of a common situation where code must guard against a sequence of error conditions. The code reads well if the successful flow of control runs down the page, eliminating error cases as they arise. Since error cases tend to end in `return` statements, the resulting code needs no `else` statements.
+これは、コードが一連のエラー条件に対してガードしなければならない、よくある状況の例です。このコードは、正常な制御の流れがページを流れていき、エラーケースが発生するたびにそれを排除していく場合によく読まれます。エラーケースは `return` ステートメントで終わることが多いので、結果として得られるコードには `else` ステートメントは必要ありません。
 
 ```go
 f, err := os.Open(name)
@@ -275,31 +279,31 @@ if err != nil {
 codeUsing(f, d)
 ```
 
-### Redeclaration and reassignment
+### 再宣言と再配置
 
-An aside: The last example in the previous section demonstrates a detail of how the `:=` short declaration form works. The declaration that calls `os.Open` reads,
+余談です。前節の最後の例では、`:=`という短い宣言形式がどのように機能するかを詳しく説明しています。os.Open`を呼び出す宣言は次のようになります。
 
 ```go
 f, err := os.Open(name)
 ```
 
-This statement declares two variables, `f` and `err`. A few lines later, the call to `f.Stat` reads,
+このステートメントでは、2つの変数 `f` と `err` を宣言しています。数行後、`f.Stat`への呼び出しは次のようになります。
 
 ```go
 d, err := f.Stat()
 ```
 
-which looks as if it declares `d` and `err`. Notice, though, that `err` appears in both statements. This duplication is legal: `err` is declared by the first statement, but only re-assigned in the second. This means that the call to `f.Stat` uses the existing `err` variable declared above, and just gives it a new value.
+と書かれていて、あたかも`d`と`err`を宣言しているように見えます。しかし、`err`は両方のステートメントに現れていることに注意してください。この重複は合法です。`err`は最初のステートメントで宣言されますが、2番目のステートメントで再割り当てされるだけです。つまり、`f.Stat`の呼び出しは、上で宣言された既存の `err` 変数を使用して、新しい値を与えるだけなのです。
 
-In a `:=` declaration a variable `v` may appear even if it has already been declared, provided:
+`:=`の宣言では、変数`v`がすでに宣言されていても、以下の条件で出現させることができます。
 
-- this declaration is in the same scope as the existing declaration of `v` (if `v` is already declared in an outer scope, the declaration will create a new variable §),
-- the corresponding value in the initialization is assignable to `v`, and
-- there is at least one other variable that is created by the declaration.
+- この宣言が、既存の `v` の宣言と同じスコープ内にあること（`v` が外部のスコープで既に宣言されている場合は、宣言によって新しい変数§が作成されます）。
+- 初期化で対応する値が `v` に割り当て可能であること。
+- 宣言によって作成される他の変数が少なくとも1つある。
 
-This unusual property is pure pragmatism, making it easy to use a single `err` value, for example, in a long `if-else` chain. You'll see it used often.
+この変わったプロパティは純粋なプラグマティズムで、例えば、長い `if-else` チェーンの中で単一の `err` 値を簡単に使用することができます。よく使われているのを見かけると思います。
 
-§ It's worth noting here that in Go the scope of function parameters and return values is the same as the function body, even though they appear lexically outside the braces that enclose the body.
+§ Goでは、関数のパラメータと戻り値のスコープは、関数本体を囲む中括弧の外側に語彙的に現れていても、関数本体と同じであることをここで指摘しておきます。
 
 
 
