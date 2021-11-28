@@ -309,7 +309,7 @@ d, err := f.Stat()
 
 ### For
 
-The Go `for` loop is similar to—but not the same as—C's. It unifies `for` and `while` and there is no `do-while`. There are three forms, only one of which has semicolons.
+Goの`for`ループはC言語のものと似ていますが、同じではありません。これは`for`と`while`を統合したもので、`do-while`はありません。3つの形式があり、そのうち1つだけがセミコロンを持っています。
 
 
 ```go
@@ -323,7 +323,7 @@ for condition { }
 for { }
 ```
 
-Short declarations make it easy to declare the index variable right in the loop.
+短く宣言することで、ループの中ですぐにインデックス変数を宣言することができます。
 
 ```go
 sum := 0
@@ -332,7 +332,7 @@ for i := 0; i < 10; i++ {
 }
 ```
 
-If you're looping over an array, slice, string, or map, or reading from a channel, a `range` clause can manage the loop.
+配列、スライス、文字列、マップをループさせたり、チャネルから読み込んだりする場合は、`range`句でループを管理することができます。
 
 ```go
 for key, value := range oldMap {
@@ -340,7 +340,7 @@ for key, value := range oldMap {
 }
 ```
 
-If you only need the first item in the range (the key or index), drop the second:
+範囲内の最初の項目（キーまたはインデックス）だけが必要な場合は、2番目の項目を削除します。
 
 ```go
 for key := range m {
@@ -350,7 +350,7 @@ for key := range m {
 }
 ```
 
-If you only need the second item in the range (the value), use the blank identifier, an underscore, to discard the first:
+範囲内の2番目の項目（値）だけが必要な場合は、空白の識別子であるアンダースコアを使用して、1番目の項目を破棄します。
 
 ```go
 sum := 0
@@ -359,9 +359,9 @@ for _, value := range array {
 }
 ```
 
-The blank identifier has many uses, as described in [a later section](https://golang.org/doc/effective_go#blank).
+空白の識別子は、[後のセクション](https://golang.org/doc/effective_go#blank)で説明するように、多くの用途があります。
 
-For strings, the `range` does more work for you, breaking out individual Unicode code points by parsing the UTF-8. Erroneous encodings consume one byte and produce the replacement rune U+FFFD. (The name (with associated builtin type) `rune` is Go terminology for a single Unicode code point. See [the language specification](https://golang.org/ref/spec#Rune_literals) for details.) The loop
+文字列の場合は、UTF-8を解析して個々のUnicodeコードポイントを分割するなど、`range`がより多くの仕事をしてくれます。誤ったエンコーディングは1バイトを消費し、置換ルーンU+FFFDを生成します。(名前(および関連する組み込み型) `rune` は、単一の Unicode コードポイントに対する Go の用語です。詳細は[言語仕様](https://golang.org/ref/spec#Rune_literals)を参照してください)。ループは
 
 ```go
 for pos, char := range "日本\x80語" { // \x80 is an illegal UTF-8 encoding
@@ -369,7 +369,7 @@ for pos, char := range "日本\x80語" { // \x80 is an illegal UTF-8 encoding
 }
 ```
 
-prints
+による表示は
 
 ```go
 character U+65E5 '日' starts at byte position 0
@@ -378,7 +378,7 @@ character U+FFFD '�' starts at byte position 6
 character U+8A9E '語' starts at byte position 7
 ```
 
-Finally, Go has no comma operator and `++` and `--` are statements not expressions. Thus if you want to run multiple variables in a `for` you should use parallel assignment (although that precludes `++` and `--`).
+最後に、Goにはコンマ演算子がなく、`++`と`--`は式ではなく文です。したがって、複数の変数を `for` で実行したい場合は、並列割り当てを使用する必要があります (ただし、`++` と `--` は除外されます)。
 
 ```go
 // Reverse a
