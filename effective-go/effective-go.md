@@ -389,7 +389,7 @@ for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
 
 ### Switch
 
-Go's `switch` is more general than C's. The expressions need not be constants or even integers, the cases are evaluated top to bottom until a match is found, and if the `switch` has no expression it switches on `true`. It's therefore possible—and idiomatic—to write an `if`-`else`-`if`-`else` chain as a `switch`.
+Goの`switch`はCのものよりも一般的です。式は定数や整数である必要はなく、ケースはマッチするものが見つかるまで上から下へと評価され、`switch`に式がない場合は`true`に切り替わります。したがって、`if`-`else`-`if`-`else`の連鎖を`switch`として書くことが可能であり、慣用的でもあります。
 
 ```go
 func unhex(c byte) byte {
@@ -405,7 +405,7 @@ func unhex(c byte) byte {
 }
 ```
 
-There is no automatic fall through, but cases can be presented in comma-separated lists.
+自動的にフォールスルーことはありませんが、ケースはコンマで区切られたリストで提示することができます。
 
 ```go
 func shouldEscape(c byte) bool {
@@ -417,7 +417,7 @@ func shouldEscape(c byte) bool {
 }
 ```
 
-Although they are not nearly as common in Go as some other C-like languages, `break` statements can be used to terminate a `switch` early. Sometimes, though, it's necessary to break out of a surrounding loop, not the switch, and in Go that can be accomplished by putting a label on the loop and "breaking" to that label. This example shows both uses.
+Goでは、他のC言語のように一般的ではありませんが、`break`文を使って`switch`を早期に終了させることができます。しかし、スイッチではなく、周囲のループから抜け出す必要がある場合もあります。Goでは、ループにラベルを付けて、そのラベルに向かって「break」することで実現できます。この例では、両方の使い方を示しています。
 
 ```go
 Loop:
@@ -444,14 +444,13 @@ Loop:
 	}
 ```
 
-Of course, the `continue` statement also accepts an optional label but it applies only to loops.
+もちろん、`continue`文にもオプションのラベルを付けることができますが、これはループにのみ適用されます。
 
-To close this section, here's a comparison routine for byte slices that uses two `switch` statements:
+このセクションの最後に、2つの`switch`文を使ったバイトスライスの比較ルーチンを紹介します。
 
 ```go
-// Compare returns an integer comparing the two byte slices,
-// lexicographically.
-// The result will be 0 if a == b, -1 if a < b, and +1 if a > b
+// Compareは、2つのバイトスライスを辞書的に比較する整数を返します。
+// 結果は、a == bの場合は0、a < bの場合は-1、a > bの場合は+1となります。
 func Compare(a, b []byte) int {
     for i := 0; i < len(a) && i < len(b); i++ {
         switch {
@@ -472,9 +471,9 @@ func Compare(a, b []byte) int {
 ```
 
 
-### Type switch
+### タイプスイッチ
 
-A switch can also be used to discover the dynamic type of an interface variable. Such a type switch uses the syntax of a type assertion with the keyword `type` inside the parentheses. If the switch declares a variable in the expression, the variable will have the corresponding type in each clause. It's also idiomatic to reuse the name in such cases, in effect declaring a new variable with the same name but a different type in each case.
+インターフェース変数の動的な型を知るためにスイッチを使うこともできます。このようなタイプスイッチは、キーワード `type` を括弧の中に入れたタイプアサーションの構文を使用します。スイッチが式の中で変数を宣言した場合、その変数は各節で対応する型を持つことになります。このような場合、名前を再利用することも慣用的で、事実上、同じ名前でタイプの異なる新しい変数を各ケースで宣言することになります。
 
 ```go
 var t interface{}
