@@ -492,20 +492,20 @@ case *int:
 }
 ```
 
-## Functions
-### Multiple return values
+## 関数
+### 複数の戻り値
 
-One of Go's unusual features is that functions and methods can return multiple values. This form can be used to improve on a couple of clumsy idioms in C programs: in-band error returns such as `-1` for `EOF` and modifying an argument passed by address.
+Goの珍しい機能のひとつに、関数やメソッドが複数の値を返せることがあります。この形式は、Cプログラムの不器用なイディオムを改善するために使用することができます。例えば、`EOF`に対する`-1`のような帯域内エラーの戻り値や、アドレスで渡された引数の修正です。
 
-In C, a write error is signaled by a negative count with the error code secreted away in a volatile location. In Go, `Write` can return a count and an error: “Yes, you wrote some bytes but not all of them because you filled the device”. The signature of the `Write` method on files from package `os` is:
+Cでは、書き込みエラーは負のカウントで通知され、エラーコードは揮発性の場所に隠されます。Goでは、`Write`はカウントとエラーを返すことができます。「はい、何バイトか書きましたが、デバイスがいっぱいになってしまったので、全部は書きませんでした」。パッケージ `os` のファイルに対する `Write` メソッドのシグネチャは次のとおりです。
 
 ```go
 func (file *File) Write(b []byte) (n int, err error)
 ```
 
-and as the documentation says, it returns the number of bytes written and a non-nil `error` when `n` `!=` `len(b)`. This is a common style; see the section on error handling for more examples.
+ドキュメントに書かれているように、書き込まれたバイト数を返し、`n` `!=` `len(b)` のときには非nilの `エラー` を返します。これは一般的なスタイルです。その他の例については、エラー処理のセクションを参照してください。
 
-A similar approach obviates the need to pass a pointer to a return value to simulate a reference parameter. Here's a simple-minded function to grab a number from a position in a byte slice, returning the number and the next position.
+同様の方法で，参照パラメータを模擬した戻り値へのポインタを渡す必要はありません．以下は，バイトスライスのある位置から数値を取り出し，その数値と次の位置を返す，単純な関数です．
 
 ```go
 func nextInt(b []byte, i int) (int, int) {
@@ -519,7 +519,7 @@ func nextInt(b []byte, i int) (int, int) {
 }
 ```
 
-You could use it to scan the numbers in an input slice `b` like this:
+これを使って、入力スライス `b` の中の数字をスキャンすると、次のようになります。
 
 ```go
     for i := 0; i < len(b); {
@@ -529,17 +529,17 @@ You could use it to scan the numbers in an input slice `b` like this:
 ```
 
 
-### Named result parameters
+### 名前付きの結果パラメータ
 
-The return or result "parameters" of a Go function can be given names and used as regular variables, just like the incoming parameters. When named, they are initialized to the zero values for their types when the function begins; if the function executes a `return` statement with no arguments, the current values of the result parameters are used as the returned values.
+Go 関数の戻り値または結果の「パラメータ」には名前を付けて、入力パラメータと同様に通常の変数として使用することができます。関数が引数なしで `return` 文を実行した場合、結果パラメーターの現在の値が戻り値として使用されます。
 
-The names are not mandatory but they can make code shorter and clearer: they're documentation. If we name the results of `nextInt` it becomes obvious which returned `int` is which.
+名前は必須ではありませんが、コードを短く、明確にすることができます。これはドキュメントです。`nextInt`の結果に名前を付ければ、どの戻り値の`int`がどれなのかが明らかになります。
 
 ```go
 func nextInt(b []byte, pos int) (value, nextPos int) {
 ```
 
-Because named results are initialized and tied to an unadorned return, they can simplify as well as clarify. Here's a version of `io.ReadFull` that uses them well:
+名前付きの結果は初期化され、飾り気のない戻り値に結びついているので、明確にするだけでなく単純化することもできます。以下は、名前付き結果をうまく使った `io.ReadFull` のバージョンです:
 
 ```go
 func ReadFull(r Reader, buf []byte) (n int, err error) {
@@ -555,16 +555,16 @@ func ReadFull(r Reader, buf []byte) (n int, err error) {
 
 ### Defer
 
-Go's `defer` statement schedules a function call (the deferred function) to be run immediately before the function executing the `defer` returns. It's an unusual but effective way to deal with situations such as resources that must be released regardless of which path a function takes to return. The canonical examples are unlocking a mutex or closing a file.
+Goの`defer`文は、`defer`を実行する関数が戻る直前に、関数呼び出し（遅延関数）を実行するようにスケジュールします。これは変わった方法ですが、関数がどのような経路で戻ってきても解放しなければならないリソースなどの状況に対処するための効果的な方法です。典型的な例としては、mutexのロック解除やファイルのクローズなどが挙げられます。
 
 ```go
-// Contents returns the file's contents as a string.
+// Contentsはファイルの内容を文字列で返します。
 func Contents(filename string) (string, error) {
     f, err := os.Open(filename)
     if err != nil {
         return "", err
     }
-    defer f.Close()  // f.Close will run when we're finished.
+    // defer f.Close()  // f.Closeは終了時に実行されます。
 
     var result []byte
     buf := make([]byte, 100)
@@ -582,9 +582,9 @@ func Contents(filename string) (string, error) {
 }
 ```
 
-Deferring a call to a function such as `Close` has two advantages. First, it guarantees that you will never forget to close the file, a mistake that's easy to make if you later edit the function to add a new return path. Second, it means that the close sits near the open, which is much clearer than placing it at the end of the function.
+`Close`のような関数の呼び出しを延期することには、2つの利点があります。まず、ファイルを閉じることを忘れないことが保証されます。これは、後に関数を編集して新しいリターンパスを追加した場合に陥りやすいミスです。2つ目は、closeがopenの近くに配置されているということで、関数の最後に配置するよりもはるかにわかりやすいということです。
 
-The arguments to the deferred function (which include the receiver if the function is a method) are evaluated when the defer executes, not when the call executes. Besides avoiding worries about variables changing values as the function executes, this means that a single deferred call site can defer multiple function executions. Here's a silly example.
+遅延された関数の引数（関数がメソッドの場合はレシーバーも含む）は、呼び出しが実行されたときではなく、遅延が実行されたときに評価されます。これは、関数の実行中に変数の値が変化する心配がないだけでなく、1つの遅延呼び出しサイトで複数の関数の実行を遅延させることができることを意味します。くだらない例を挙げてみましょう。
 
 ```go
 for i := 0; i < 5; i++ {
@@ -592,7 +592,7 @@ for i := 0; i < 5; i++ {
 }
 ```
 
-Deferred functions are executed in LIFO order, so this code will cause `4 3 2 1 0` to be printed when the function returns. A more plausible example is a simple way to trace function execution through the program. We could write a couple of simple tracing routines like this:
+遅延関数はLIFO順に実行されるので、このコードでは関数が戻ってきたときに`4 3 2 1 0`が出力されることになります。もっと妥当な例としては、プログラム中の関数実行をトレースする簡単な方法があります。次のような簡単なトレースルーチンをいくつか書いてみましょう。
 
 
 ```go
@@ -607,7 +607,7 @@ func a() {
 }
 ```
 
-We can do better by exploiting the fact that arguments to deferred functions are evaluated when the `defer` executes. The tracing routine can set up the argument to the untracing routine. This example:
+遅延関数への引数は `defer` が実行されたときに評価されるという事実を利用することで、より良い結果を得ることができます。トレースルーチンは、アントレースルーチンへの引数を設定することができます。この例では
 
 ```go
 func trace(s string) string {
@@ -646,16 +646,16 @@ leaving: a
 leaving: b
 ```
 
-For programmers accustomed to block-level resource management from other languages, `defer` may seem peculiar, but its most interesting and powerful applications come precisely from the fact that it's not block-based but function-based. In the section on `panic` and `recover` we'll see another example of its possibilities.
+他の言語でブロックレベルのリソース管理に慣れているプログラマにとっては、 `defer` は奇妙に思えるかもしれませんが、その最も興味深く強力なアプリケーションは、 まさにブロックベースではなく、関数ベースであるという事実から来ています。`panic`と`recover`のセクションでは、その可能性の別の例を見てみましょう。
 
-## Data
-### Allocation with `new`
+## データ
+### `new`によるアロケーション
 
-Go has two allocation primitives, the built-in functions `new` and `make`. They do different things and apply to different types, which can be confusing, but the rules are simple. Let's talk about `new` first. It's a built-in function that allocates memory, but unlike its namesakes in some other languages it does not initialize the memory, it only zeros it. That is, `new(T)` allocates zeroed storage for a new item of type `T` and returns its address, a value of type `*T`. In Go terminology, it returns a pointer to a newly allocated zero value of type `T`.
+Goには、組み込み関数の`new`と`make`という2つのアロケーションプリミティブがあります。これらはそれぞれ異なる機能を持ち、異なる型に適用されるので、混乱するかもしれませんが、ルールは簡単です。まず`new`について説明します。これはメモリを確保する組み込み関数ですが、他の言語の同名の関数とは異なり、メモリを初期化せず、ゼロにするだけです。つまり、`new(T)`は、`T`型の新しいアイテム用にゼロのストレージを割り当て、そのアドレス（`*T`型の値）を返します。Goの用語では、`T`型の新しく割り当てられたゼロの値へのポインタを返します。
 
-Since the memory returned by `new` is zeroed, it's helpful to arrange when designing your data structures that the zero value of each type can be used without further initialization. This means a user of the data structure can create one with `new` and get right to work. For example, the documentation for `bytes.Buffer` states that "the zero value for `Buffer` is an empty buffer ready to use." Similarly, `sync.Mutex` does not have an explicit constructor or `Init` method. Instead, the zero value for a `sync.Mutex` is defined to be an unlocked mutex.
+`new`が返すメモリはゼロになっているので、データ構造を設計するときに、各型のゼロ値がさらなる初期化なしに使用できるように手配すると便利です。これは、データ構造のユーザが `new` を使ってデータ構造を作成し、すぐに作業を開始できることを意味します。例えば、`bytes.Buffer`のドキュメントには、"`Buffer`のゼロ値は、すぐに使える空のバッファである "と記載されています。同様に、`sync.Mutex` には、明示的なコンストラクタや `Init` メソッドはありません。代わりに、`sync.Mutex` のゼロ値は、ロックされていないミューテックスであると定義されます。
 
-The zero-value-is-useful property works transitively. Consider this type declaration.
+zero-value-is-usefulプロパティは、過渡的に動作します。以下の型宣言を考えてみましょう。
 
 ```go
 type SyncedBuffer struct {
@@ -664,7 +664,7 @@ type SyncedBuffer struct {
 }
 ```
 
-Values of type `SyncedBuffer` are also ready to use immediately upon allocation or just declaration. In the next snippet, both `p` and `v` will work correctly without further arrangement.
+また、`SyncedBuffer`型の値は、割り当てや宣言だけですぐに使用できます。次のスニペットでは、`p`と`v`の両方が、さらなるアレンジなしに正しく動作します。
 
 ```go
 p := new(SyncedBuffer)  // type *SyncedBuffer
@@ -672,9 +672,9 @@ var v SyncedBuffer      // type  SyncedBuffer
 ```
 
 
-### Constructors and composite literals
+### コンストラクタと複合リテラル
 
-Sometimes the zero value isn't good enough and an initializing constructor is necessary, as in this example derived from package `os`.
+パッケージ `os` から派生したこの例のように、ゼロ値では十分ではなく、初期化コンストラクタが必要な場合があります。
 
 ```go
 func NewFile(fd int, name string) *File {
@@ -690,7 +690,7 @@ func NewFile(fd int, name string) *File {
 }
 ```
 
-There's a lot of boiler plate in there. We can simplify it using a composite literal, which is an expression that creates a new instance each time it is evaluated.
+そこにはたくさんの決まり文句があります。複合リテラルとは、評価されるたびに新しいインスタンスを生成する式のことで、これを単純化することができます。
 
 ```go
 func NewFile(fd int, name string) *File {
@@ -702,21 +702,21 @@ func NewFile(fd int, name string) *File {
 }
 ```
 
-Note that, unlike in C, it's perfectly OK to return the address of a local variable; the storage associated with the variable survives after the function returns. In fact, taking the address of a composite literal allocates a fresh instance each time it is evaluated, so we can combine these last two lines.
+C言語とは異なり、ローカル変数のアドレスを返すことは全く問題ありません。変数に関連付けられたストレージは、関数が戻った後も存続します。実際、複合リテラルのアドレスを取得すると、評価されるたびに新しいインスタンスが割り当てられるので、最後の2行を組み合わせることができます。
 
 ```go
     return &File{fd, name, nil, 0}
 ```
 
-The fields of a composite literal are laid out in order and must all be present. However, by labeling the elements explicitly as field`:`value pairs, the initializers can appear in any order, with the missing ones left as their respective zero values. Thus we could say
+複合リテラルのフィールドは順番に並べられ、すべて存在しなければなりません。しかし、要素をfield`:`valueのペアとして明示的にラベル付けすることで、初期化子はどのような順序でも現れ、欠けているものはそれぞれのゼロ値として残されます。このようにすると、
 
 ```go
     return &File{fd: fd, name: name}
 ```
 
-As a limiting case, if a composite literal contains no fields at all, it creates a zero value for the type. The expressions `new(File)` and `&File{}` are equivalent.
+限定的なケースとして，複合リテラルにフィールドがまったく含まれていない場合，その型の値はゼロになります。`new(File)` と `&File{}` という表現は同等です。
 
-Composite literals can also be created for arrays, slices, and maps, with the field labels being indices or map keys as appropriate. In these examples, the initializations work regardless of the values of `Enone`, `Eio`, and `Einval`, as long as they are distinct.
+複合リテラルは，配列，スライス，マップに対しても作成することができ，フィールドラベルは適宜インデックスやマップのキーになります．これらの例では，初期化は，`Enone`，`Eio`，`Einval`の値が異なっていても，動作します．
 
 ```go
 a := [...]string   {Enone: "no error", Eio: "Eio", Einval: "invalid argument"}
@@ -725,17 +725,17 @@ m := map[int]string{Enone: "no error", Eio: "Eio", Einval: "invalid argument"}
 ```
 
 
-### Allocation with `make`
+### アロケーションと `make` の関係
 
-Back to allocation. The built-in function `make(T, args)` serves a purpose different from `new(T)`. It creates slices, maps, and channels only, and it returns an initialized (not zeroed) value of type `T` (not `*T`). The reason for the distinction is that these three types represent, under the covers, references to data structures that must be initialized before use. A slice, for example, is a three-item descriptor containing a pointer to the data (inside an array), the length, and the capacity, and until those items are initialized, the slice is `nil`. For slices, maps, and channels, `make` initializes the internal data structure and prepares the value for use. For instance,
+アロケーションの話に戻ります。組み込み関数 `make(T, args)` は `new(T)` とは異なる目的を持っています．スライス，マップ，チャンネルのみを作成し，`T`型（`*T`型ではない）の初期化された（ゼロになっていない）値を返します．このように区別する理由は，これらの3つの型が，使用前に初期化されなければならないデータ構造への参照を表向きに表しているからです．例えば，スライスは，データ（配列内）へのポインタ，長さ，容量の3つの項目を含む記述子であり，これらの項目が初期化されるまで，スライスは`nil`となります．スライス，マップ，チャンネルについては，`make`によって内部のデータ構造が初期化され，値が使用できるようになります．例えば，以下のようになります．
 
 ```go
 make([]int, 10, 100)
 ```
 
-allocates an array of 100 ints and then creates a slice structure with length 10 and a capacity of 100 pointing at the first 10 elements of the array. (When making a slice, the capacity can be omitted; see the section on slices for more information.) In contrast, `new([]int)` returns a pointer to a newly allocated, zeroed slice structure, that is, a pointer to a `nil` slice value.
+これは，100個のintの配列を確保し，配列の最初の10個の要素を指す長さ10，容量100のスライス構造体を作成します（スライスを作成する際には，容量を省略することができます。(スライスを作成する際には，容量を省略することができます。詳しくはスライスのセクションをご覧ください。) 一方，`new([]int)` は，新しく確保され，ゼロになったスライス構造体へのポインタ，すなわち，`nil` のスライス値へのポインタを返します．
 
-These examples illustrate the difference between `new` and `make`.
+これらの例は、`new`と`make`の違いを示しています。
 
 
 ```go
@@ -750,19 +750,19 @@ var p *[]int = new([]int)
 v := make([]int, 100)
 ```
 
-Remember that `make` applies only to maps, slices and channels and does not return a pointer. To obtain an explicit pointer allocate with `new` or take the address of a variable explicitly.
+`make`は、マップ、スライス、チャンネルにのみ適用され、ポインタを返さないことに注意してください。明示的なポインタを得るためには、`new`で割り当てるか、明示的に変数のアドレスを取得してください。
 
-### Arrays
+### 配列
 
-Arrays are useful when planning the detailed layout of memory and sometimes can help avoid allocation, but primarily they are a building block for slices, the subject of the next section. To lay the foundation for that topic, here are a few words about arrays.
+配列は、メモリの詳細なレイアウトを計画する際に便利で、時には割り当てを回避するのに役立つこともありますが、主に次のセクションで扱うスライスのための構成要素です。そのための基礎知識として、ここでは配列についていくつか説明します。
 
-There are major differences between the ways arrays work in Go and C. In Go,
+GoとCでは、配列の動作に大きな違いがあります。
 
-- Arrays are values. Assigning one array to another copies all the elements.
-- In particular, if you pass an array to a function, it will receive a copy of the array, not a pointer to it.
-- The size of an array is part of its type. The types `[10]int` and `[20]int` are distinct.
+- 配列は値です。ある配列を別の配列に代入すると、すべての要素がコピーされます。
+- 特に、関数に配列を渡した場合、関数は配列へのポインタではなく、配列のコピーを受け取ります。
+- 配列のサイズはその型の一部である。10]int`と`[20]int`はそれぞれ異なる型です。
 
-The value property can be useful but also expensive; if you want C-like behavior and efficiency, you can pass a pointer to the array.
+C言語のような動作と効率性を求める場合は，配列へのポインタを渡すことができます。
 
 ```go
 func Sum(a *[3]float64) (sum float64) {
@@ -773,10 +773,10 @@ func Sum(a *[3]float64) (sum float64) {
 }
 
 array := [...]float64{7.0, 8.5, 9.1}
-x := Sum(&array)  // Note the explicit address-of operator
+x := Sum(&array)  // 明示的な address-of 演算子に注意してください。
 ```
 
-But even this style isn't idiomatic Go. Use slices instead.
+しかし、このスタイルでもイディオム的なGoではありません。代わりにスライスを使いましょう。
 
 
 ### Slices
