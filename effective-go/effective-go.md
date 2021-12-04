@@ -779,23 +779,23 @@ x := Sum(&array)  // 明示的な address-of 演算子に注意してくださ�
 しかし、このスタイルでもイディオム的なGoではありません。代わりにスライスを使いましょう。
 
 
-### Slices
+### スライス
 
-Slices wrap arrays to give a more general, powerful, and convenient interface to sequences of data. Except for items with explicit dimension such as transformation matrices, most array programming in Go is done with slices rather than simple arrays.
+スライスは、配列をラップして、データのシーケンスに対するより一般的で強力かつ便利なインターフェースを提供します。変換行列のような明示的な次元を持つアイテムを除き、Goのほとんどの配列プログラミングは、単純な配列ではなくスライスを使って行われます。
 
-Slices hold references to an underlying array, and if you assign one slice to another, both refer to the same array. If a function takes a slice argument, changes it makes to the elements of the slice will be visible to the caller, analogous to passing a pointer to the underlying array. A `Read` function can therefore accept a slice argument rather than a pointer and a count; the length within the slice sets an upper limit of how much data to read. Here is the signature of the `Read` method of the `File` type in package `os`:
+スライスは、基礎となる配列への参照を保持しており、あるスライスを別のスライスに割り当てると、両方とも同じ配列を参照します。関数がスライスの引数を取る場合、スライスの要素に加えた変更は呼び出し元から見えることになり、基礎となる配列へのポインタを渡すのと同様になります。したがって、`Read`関数は、ポインタとカウントではなく、スライス引数を受け取ることができます。スライス内の長さは、読み込むデータ量の上限を設定します。パッケージ `os` の `File` 型の `Read` メソッドのシグネチャを以下に示します．
 
 ```go
 func (f *File) Read(buf []byte) (n int, err error)
 ```
 
-The method returns the number of bytes read and an error value, if any. To read into the first 32 bytes of a larger buffer `buf`, slice (here used as a verb) the buffer.
+このメソッドは，読み込んだバイト数と，エラーがあればエラー値を返します。大きなバッファ `buf` の最初の 32 バイトを読み込むには、バッファをスライスします。
 
 ```go
     n, err := f.Read(buf[0:32])
 ```
 
-Such slicing is common and efficient. In fact, leaving efficiency aside for the moment, the following snippet would also read the first 32 bytes of the buffer.
+このようなスライスは一般的で効率的です。実際、効率の良さはさておき、次のスニペットでもバッファの最初の32バイトを読み取ることができます。
 
 
 ```go
@@ -811,7 +811,7 @@ Such slicing is common and efficient. In fact, leaving efficiency aside for the 
     }
 ```
 
-The length of a slice may be changed as long as it still fits within the limits of the underlying array; just assign it to a slice of itself. The capacity of a slice, accessible by the built-in function `cap`, reports the maximum length the slice may assume. Here is a function to append data to a slice. If the data exceeds the capacity, the slice is reallocated. The resulting slice is returned. The function uses the fact that `len` and `cap` are legal when applied to the `nil` slice, and return 0.
+スライスの長さは，基礎となる配列の制限内に収まる限り，変更することができ，それを自分自身のスライスに割り当てるだけです．組み込み関数 `cap` でアクセスできるスライスの容量は、そのスライスが想定できる最大の長さを報告します。ここでは，スライスにデータを追加する関数を示します。データが容量を超えた場合には、スライスが再割り当てされます。結果として、スライスが返されます。この関数は、`len`と`cap`が`nil`のスライスに適用されたときに合法であることを利用して、0を返します。
 
 ```go
 func Append(slice, data []byte) []byte {
@@ -829,20 +829,20 @@ func Append(slice, data []byte) []byte {
 }
 ```
 
-We must return the slice afterwards because, although `Append` can modify the elements of `slice`, the slice itself (the run-time data structure holding the pointer, length, and capacity) is passed by value.
+なぜなら、`Append` は `slice` の要素を変更することができますが、スライス自体 (ポインタ、長さ、容量を保持するランタイムデータ構造) は値で渡されるからです。
 
-The idea of appending to a slice is so useful it's captured by the `append` built-in function. To understand that function's design, though, we need a little more information, so we'll return to it later.
+スライスに追記するというアイデアは非常に便利なので、組み込み関数の `append` で表現されています。しかし、この関数の設計を理解するには、もう少し情報が必要なので、後で説明します。
 
-### Two-dimensional slices
+### 二次元のスライス
 
-Go's arrays and slices are one-dimensional. To create the equivalent of a 2D array or slice, it is necessary to define an array-of-arrays or slice-of-slices, like this:
+Goの配列やスライスは一次元です。2次元の配列やスライスに相当するものを作るには、次のように配列-of-配列やスライス-of-スライスを定義する必要があります。
 
 ```go
-type Transform [3][3]float64  // A 3x3 array, really an array of arrays.
-type LinesOfText [][]byte     // A slice of byte slices.
+type Transform [3][3]float64  // 3×3の配列で、まさに配列の配列です。
+type LinesOfText [][]byte     // バイトスライスのスライスです。
 ```
 
-Because slices are variable-length, it is possible to have each inner slice be a different length. That can be a common situation, as in our `LinesOfText` example: each line has an independent length.
+スライスは可変長なので、内側のスライスをそれぞれ異なる長さにすることが可能です。これはよくある状況で、例えば `LinesOfText` の例では、各行が独立した長さを持つことになります。
 
 ```go
 text := LinesOfText{
@@ -852,25 +852,25 @@ text := LinesOfText{
 }
 ```
 
-Sometimes it's necessary to allocate a 2D slice, a situation that can arise when processing scan lines of pixels, for instance. There are two ways to achieve this. One is to allocate each slice independently; the other is to allocate a single array and point the individual slices into it. Which to use depends on your application. If the slices might grow or shrink, they should be allocated independently to avoid overwriting the next line; if not, it can be more efficient to construct the object with a single allocation. For reference, here are sketches of the two methods. First, a line at a time:
+例えば、ピクセルのスキャンラインを処理する際に、2Dスライスを割り当てる必要がある場合があります。これを実現するには2つの方法があります。1つは、各スライスを個別に割り当てる方法、もう1つは、1つの配列を割り当てて、その中に各スライスを入れる方法です。どちらを採用するかは、アプリケーションによって異なります。スライスが大きくなったり小さくなったりする可能性がある場合は，次の行を上書きしないように独立して割り当てるべきですが，そうでない場合は，単一の割り当てでオブジェクトを構築する方が効率的です。参考までに、この2つの方法の概要を説明します。まず、1行ずつの場合。
 
 ```go
-// Allocate the top-level slice.
-picture := make([][]uint8, YSize) // One row per unit of y.
-// Loop over the rows, allocating the slice for each row.
+// トップレベルのスライスを割り当てます。
+picture := make([][]uint8, YSize) // yの単位につき、1列。
+// 行をループして、各行にスライスを割り当てます。
 for i := range picture {
 	picture[i] = make([]uint8, XSize)
 }
 ```
 
-And now as one allocation, sliced into lines:
+そして、今では1つの配分として、線状にスライスされています。
 
 ```go
-// Allocate the top-level slice, the same as before.
-picture := make([][]uint8, YSize) // One row per unit of y.
-// Allocate one large slice to hold all the pixels.
-pixels := make([]uint8, XSize*YSize) // Has type []uint8 even though picture is [][]uint8.
-// Loop over the rows, slicing each row from the front of the remaining pixels slice.
+// 先ほどと同じように、トップレベルのスライスを割り当てます。
+picture := make([][]uint8, YSize) // yの単位で1列。
+// すべてのピクセルを保持するために、1つの大きなスライスを割り当てます。
+pixels := make([]uint8, XSize*YSize) // ピクチャが[][]uint8であるにもかかわらず、[]uint8型を持つ。
+// 各列をループさせ、残りのピクセルスライスの前から各列をスライスします。
 for i := range picture {
 	picture[i], pixels = pixels[:XSize], pixels[XSize:]
 }
