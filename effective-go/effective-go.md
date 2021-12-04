@@ -878,9 +878,9 @@ for i := range picture {
 
 ### Maps
 
-Maps are a convenient and powerful built-in data structure that associate values of one type (the key) with values of another type (the element or value). The key can be of any type for which the equality operator is defined, such as integers, floating point and complex numbers, strings, pointers, interfaces (as long as the dynamic type supports equality), structs and arrays. Slices cannot be used as map keys, because equality is not defined on them. Like slices, maps hold references to an underlying data structure. If you pass a map to a function that changes the contents of the map, the changes will be visible in the caller.
+マップは、ある型の値（キー）と別の型の値（要素または値）を関連付ける、便利で強力な組み込みデータ構造です。キーには、整数、浮動小数点数、複素数、文字列、ポインター、インターフェース（動的型が等式をサポートしている場合）、構造体、配列など、等式演算子が定義されている任意の型を使用できます。スライスには等値性が定義されていないため、マップのキーとしては使用できません。スライスと同様に、マップは基礎となるデータ構造への参照を保持します。マップの内容を変更する関数にマップを渡した場合、その変更は呼び出し元にも表示されます。
 
-Maps can be constructed using the usual composite literal syntax with colon-separated key-value pairs, so it's easy to build them during initialization.
+マップは、コロンで区切られたキーと値のペアを持つ通常の複合リテラル構文を使って構築することができるので、初期化時に簡単に構築することができます。
 
 ```go
 var timeZone = map[string]int{
@@ -892,14 +892,14 @@ var timeZone = map[string]int{
 }
 ```
 
-Assigning and fetching map values looks syntactically just like doing the same for arrays and slices except that the index doesn't need to be an integer.
+マップの値を割り当てたり取得したりする構文は、インデックスが整数である必要がないことを除けば、配列やスライスの場合と同じです。
 
 
 ```go
 offset := timeZone["EST"]
 ```
 
-An attempt to fetch a map value with a key that is not present in the map will return the zero value for the type of the entries in the map. For instance, if the map contains integers, looking up a non-existent key will return `0`. A set can be implemented as a map with value type `bool`. Set the map entry to `true` to put the value in the set, and then test it by simple indexing.
+マップに存在しないキーでマップの値を取得しようとすると、マップのエントリの型に応じたゼロの値が返されます。例えば，マップに整数が含まれている場合，存在しないキーを検索すると，`0`が返されます。セットは値の型が `bool` のマップとして実装できます。マップのエントリを `true` に設定して値をセットに入れ、単純なインデックスでそれをテストします。
 
 ```go
 attended := map[string]bool{
@@ -908,12 +908,12 @@ attended := map[string]bool{
     ...
 }
 
-if attended[person] { // will be false if person is not in the map
+if attended[person] { // マップにpersonがない場合はfalseになります。
     fmt.Println(person, "was at the meeting")
 }
 ```
 
-Sometimes you need to distinguish a missing entry from a zero value. Is there an entry for `"UTC"` or is that 0 because it's not in the map at all? You can discriminate with a form of multiple assignment.
+時には、エントリの欠落とゼロの値を区別する必要があります。`"UTC"`のエントリがあるのか、それともマップに全くないので0なのか。多重割り当ての形で区別することができます。
 
 ```go
 var seconds int
@@ -921,7 +921,7 @@ var ok bool
 seconds, ok = timeZone[tz]
 ```
 
-For obvious reasons this is called the “comma ok” idiom. In this example, if `tz` is present, `seconds` will be set appropriately and `ok` will be true; if not, `seconds` will be set to zero and `ok` will be false. Here's a function that puts it together with a nice error report:
+明らかな理由により、これは「コンマok」イディオムと呼ばれます。この例では、もし `tz` があれば、`seconds` が適切に設定され、`ok` が真となり、そうでなければ、`seconds` はゼロに設定され、`ok` は偽となります。これをエラーレポートとともに出力する関数があります。
 
 ```go
 func offset(tz string) int {
@@ -933,14 +933,14 @@ func offset(tz string) int {
 }
 ```
 
-To test for presence in the map without worrying about the actual value, you can use the blank identifier (`_`) in place of the usual variable for the value.
+実際の値を気にせずにマップ内の存在をテストするには、通常の値を表す変数の代わりに空白の識別子（`_`）を使用することができます。
 
 
 ```go
 _, present := timeZone[tz]
 ```
 
-To delete a map entry, use the `delete` built-in function, whose arguments are the map and the key to be deleted. It's safe to do this even if the key is already absent from the map.
+マップのエントリを削除するには、`delete`という組み込み関数を使います。この関数の引数は、マップと削除するキーです。そのキーがすでにマップに存在しない場合でも、この操作は安全です。
 
 ```go
 delete(timeZone, "PDT")  // Now on Standard Time
