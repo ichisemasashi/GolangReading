@@ -1102,15 +1102,15 @@ func Min(a ...int) int {
 
 ### Append
 
-Now we have the missing piece we needed to explain the design of the `append` built-in function. The signature of `append` is different from our custom `Append` function above. Schematically, it's like this:
+これで、組み込み関数 `append` の設計を説明するのに必要な、欠けていた部分ができました。この `append` のシグネチャは、上で説明したカスタムの `Append` 関数とは異なります。図式的には次のようになります。
 
 ```go
 func append(slice []T, elements ...T) []T
 ```
 
-where T is a placeholder for any given type. You can't actually write a function in Go where the type `T` is determined by the caller. That's why `append` is built in: it needs support from the compiler.
+ここで、Tは任意の型を表すプレースホルダーです。実際には、型 `T` が呼び出し側で決定されるような関数を Go で書くことはできません。これが `append` が組み込まれている理由で、コンパイラのサポートが必要です。
 
-What `append` does is append the elements to the end of the slice and return the result. The result needs to be returned because, as with our hand-written `Append`, the underlying array may change. This simple example
+`append`が行うことは、要素をスライスの最後に追加し、その結果を返すことです。結果を返す必要があるのは、手書きの `Append` と同様に、基礎となる配列が変更される可能性があるからです。次の簡単な例
 
 ```go
 x := []int{1,2,3}
@@ -1118,9 +1118,9 @@ x = append(x, 4, 5, 6)
 fmt.Println(x)
 ```
 
-prints `[1 2 3 4 5 6]`. So `append` works a little like `Printf`, collecting an arbitrary number of arguments.
+は `[1 2 3 4 5 6]` を出力します。つまり、`append` は `Printf` と同じように、任意の数の引数を集めて動作します。
 
-But what if we wanted to do what our `Append` does and append a slice to a slice? Easy: use `...` at the call site, just as we did in the call to `Output` above. This snippet produces identical output to the one above.
+しかし、`Append`が行うことを実行して、スライスにスライスを追加したいとしたらどうでしょう? 簡単です。上の `Output` の呼び出しと同じように、呼び出しサイトで `...` を使用します。このスニペットは上のものと同じ出力をします。
 
 ```go
 x := []int{1,2,3}
@@ -1129,7 +1129,7 @@ x = append(x, y...)
 fmt.Println(x)
 ```
 
-Without that `...`, it wouldn't compile because the types would be wrong; `y` is not of type `int`.
+この `...` がないと、型が間違っているのでコンパイルできません。`y` は `int` 型ではありません。
 
 ## Initialization
 
