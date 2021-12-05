@@ -948,9 +948,9 @@ delete(timeZone, "PDT")  // Now on Standard Time
 
 ### Printing
 
-Formatted printing in Go uses a style similar to C's `printf` family but is richer and more general. The functions live in the `fmt` package and have capitalized names: `fmt.Printf`, `fmt.Fprintf`, `fmt.Sprintf` and so on. The string functions (`Sprintf` etc.) return a string rather than filling in a provided buffer.
+Goのフォーマット表示は、C言語の `printf` ファミリーに似たスタイルを採用していますが、より豊富で一般的です。関数は `fmt` パッケージに含まれており、`fmt.Printf`, `fmt.Fprintf`, `fmt.Sprintf` などのように大文字の名前が付いています。文字列関数（`Sprintf`など）は，与えられたバッファを埋めるのではなく，文字列を返します。
 
-You don't need to provide a format string. For each of `Printf`, `Fprintf` and `Sprintf` there is another pair of functions, for instance `Print` and `Println`. These functions do not take a format string but instead generate a default format for each argument. The `Println` versions also insert a blank between arguments and append a newline to the output while the `Print` versions add blanks only if the operand on neither side is a string. In this example each line produces the same output.
+フォーマット文字列を用意する必要はありません。`Printf`, `Fprintf`, `Sprintf` のそれぞれに対して、例えば `Print` と `Println` のような別の関数のペアがあります。これらの関数はフォーマット文字列を受け取りませんが、代わりに各引数に対してデフォルトのフォーマットを生成します。また、`Println`バージョンでは、引数間に空白を挿入し、出力に改行を追加しますが、`Print`バージョンでは、どちらの側のオペランドも文字列でない場合にのみ空白を追加します。この例では、各行が同じ出力を生成します。
 
 ```go
 fmt.Printf("Hello %d\n", 23)
@@ -959,36 +959,36 @@ fmt.Println("Hello", 23)
 fmt.Println(fmt.Sprint("Hello ", 23))
 ```
 
-The formatted print functions `fmt.Fprint` and friends take as a first argument any object that implements the `io.Writer` interface; the variables `os.Stdout` and `os.Stderr` are familiar instances.
+書式付き表示関数 `fmt.Fprint` とその仲間たちは、`io.Writer` インターフェースを実装したオブジェクトを第一引数にとります。
 
-Here things start to diverge from C. First, the numeric formats such as `%d` do not take flags for signedness or size; instead, the printing routines use the type of the argument to decide these properties.
+まず、`%d`のような数値フォーマットでは、符号化やサイズのフラグを取りません。
 
 ```go
 var x uint64 = 1<<64 - 1
 fmt.Printf("%d %x; %d %x\n", x, x, int64(x), int64(x))
 ```
 
-prints
+この表示は以下のようになる。
 
 ```sh
 18446744073709551615 ffffffffffffffff; -1 -1
 ```
 
-If you just want the default conversion, such as decimal for integers, you can use the catchall format `%v` (for “value”); the result is exactly what `Print` and `Println` would produce. Moreover, that format can print any value, even arrays, slices, structs, and maps. Here is a print statement for the time zone map defined in the previous section.
+整数を10進数に変換するなど、デフォルトの変換が必要な場合は、`%v`(for "value")というキャッチオールフォーマットを使用できます。結果は、`Print`や`Println`が生成するものとまったく同じです。さらに、このフォーマットは、配列、スライス、構造体、マップなど、あらゆる値を表示できます。以下は、前のセクションで定義したタイムゾーンマップのprint文です。
 
 ```go
 fmt.Printf("%v\n", timeZone)  // or just fmt.Println(timeZone)
 ```
 
-which gives output:
+以下が出力されます。
 
 ```sh
 map[CST:-21600 EST:-18000 MST:-25200 PST:-28800 UTC:0]
 ```
 
-For maps, `Printf` and friends sort the output lexicographically by key.
+マップの場合、`Printf`とその仲間たちは、キーによって出力を辞書的にソートします。
 
-When printing a struct, the modified format `%+v` annotates the fields of the structure with their names, and for any value the alternate format `%#v` prints the value in full Go syntax.
+構造体を印刷する場合、修正されたフォーマット `%+v` は構造体のフィールドに名前を付け、任意の値に対しては代替フォーマット `%#v` が完全な Go 構文で値を印刷します。
 
 ```go
 type T struct {
@@ -1003,7 +1003,7 @@ fmt.Printf("%#v\n", t)
 fmt.Printf("%#v\n", timeZone)
 ```
 
-prints
+以下を表示します。
 
 ```sh
 &{7 -2.35 abc   def}
@@ -1012,22 +1012,22 @@ prints
 map[string]int{"CST":-21600, "EST":-18000, "MST":-25200, "PST":-28800, "UTC":0}
 ```
 
-(Note the ampersands.) That quoted string format is also available through `%q` when applied to a value of type `string` or `[]byte`. The alternate format `%#q` will use backquotes instead if possible. (The `%q` format also applies to integers and runes, producing a single-quoted rune constant.) Also, `%x` works on strings, byte arrays and byte slices as well as on integers, generating a long hexadecimal string, and with a space in the format (`% x`) it puts spaces between the bytes.
+(この引用符付き文字列のフォーマットは、`string` または `[]byte` 型の値に適用される場合、`%q` でも利用できます。代替フォーマットである `%#q` では、可能な限りバッククォートを使用します。(`%q` フォーマットは整数とルーンにも適用され、シングルクォートのルーン定数を生成します)。また、`%x` は整数だけでなく、文字列、バイト配列、バイトスライスにも対応しており、長い16進数の文字列を生成し、フォーマットにスペースを入れると (`% x`) バイト間にスペースが入ります。
 
-Another handy format is `%T`, which prints the type of a value.
+もうひとつの便利なフォーマットは `%T` で、これは値の型を表示します。
 
 
 ```go
 fmt.Printf("%T\n", timeZone)
 ```
 
-prints
+これは以下を表示する。
 
 ```sh
 map[string]int
 ```
 
-If you want to control the default format for a custom type, all that's required is to define a method with the signature `String() string` on the type. For our simple type `T`, that might look like this.
+カスタムタイプのデフォルトフォーマットを制御したい場合、必要なのはそのタイプに `String() string` というシグネチャを持つメソッドを定義することだけです。単純な型である `T` の場合は、次のようになります。
 
 ```go
 func (t *T) String() string {
@@ -1036,15 +1036,15 @@ func (t *T) String() string {
 fmt.Printf("%v\n", t)
 ```
 
-to print in the format
+の形式で表示することができます。
 
 ```sh
 7/-2.35/"abc\tdef"
 ```
 
-(If you need to print values of type `T` as well as pointers to T, the receiver for `String` must be of value type; this example used a pointer because that's more efficient and idiomatic for struct types. See the section below on [pointers vs. value receivers](https://golang.org/doc/effective_go#pointers_vs_values) for more information.)
+(この例ではポインタを使用していますが、これは構造体型の場合にはポインタの方が効率的で慣用的だからです。この例ではポインタを使用していますが、これは構造体型ではより効率的で慣用的だからです。詳細は後述の [ポインタ vs. 値のレシーバ](https://golang.org/doc/effective_go#pointers_vs_values) のセクションを参照してください。）
 
-Our `String` method is able to call `Sprintf` because the print routines are fully reentrant and can be wrapped this way. There is one important detail to understand about this approach, however: don't construct a `String` method by calling `Sprintf` in a way that will recur into your String method indefinitely. This can happen if the `Sprintf` call attempts to print the receiver directly as a string, which in turn will invoke the method again. It's a common and easy mistake to make, as this example shows.
+この `String` メソッドは `Sprintf` を呼び出すことができます。これは print ルーチンが完全にリエントラントで、このようにラップできるからです。ただし、この方法について理解しておくべき重要な点が 1 つあります。それは、`Sprintf` を呼び出して `String` メソッドを構築し、String メソッドの中に無限に再帰するような方法を取らないことです。これは、`Sprintf` の呼び出しが、レシーバを直接文字列として出力しようとし、その結果、このメソッドが再び呼び出される場合に起こります。この例が示すように、これはよくある簡単な間違いです。
 
 ```go
 type MyString string
@@ -1054,7 +1054,7 @@ func (m MyString) String() string {
 }
 ```
 
-It's also easy to fix: convert the argument to the basic string type, which does not have the method.
+これを修正するのも簡単です。引数を、このメソッドを持たない基本的な文字列型に変換します。
 
 ```go
 type MyString string
@@ -1063,29 +1063,29 @@ func (m MyString) String() string {
 }
 ```
 
-In the [initialization section](https://golang.org/doc/effective_go#initialization) we'll see another technique that avoids this recursion.
+[初期化セクション](https://golang.org/doc/effective_go#initialization)では、この再帰を避けるための別のテクニックを紹介します。
 
-Another printing technique is to pass a print routine's arguments directly to another such routine. The signature of `Printf` uses the type `...interface{}` for its final argument to specify that an arbitrary number of parameters (of arbitrary type) can appear after the format.
+もう一つの表示技術は、表示ルーチンの引数を別の表示ルーチンに直接渡すことです。Printf`のシグネチャでは、最終引数に`...interface{}`という型を使用して、フォーマットの後に任意の数のパラメータ（任意の型）を表示できることを指定しています。
 
 ```go
 func Printf(format string, v ...interface{}) (n int, err error) {
 ```
 
-Within the function `Printf`, `v` acts like a variable of type `[]interface{}` but if it is passed to another variadic function, it acts like a regular list of arguments. Here is the implementation of the function `log.Println` we used above. It passes its arguments directly to `fmt.Sprintln` for the actual formatting.
+関数 `Printf` の中では、`v` は `[]interface{}` 型の変数のように振る舞いますが、他の可変長の関数に渡した場合は、通常の引数リストのように振る舞います。ここでは，上記で使用した関数 `log.Println` の実装を示します．この関数は、引数を直接 `fmt.Sprintln` に渡して、実際の書式設定を行います。
 
 
 ```go
-// Println prints to the standard logger in the manner of fmt.Println.
+// Printlnは、fmt.Printlnの要領で標準ロガーに印字します。
 func Println(v ...interface{}) {
     std.Output(2, fmt.Sprintln(v...))  // Output takes parameters (int, string)
 }
 ```
 
-We write `...` after `v` in the nested call to `Sprintln` to tell the compiler to treat `v` as a list of arguments; otherwise it would just pass `v` as a single slice argument.
+`Sprintln` のネストした呼び出しの中で `v` の後に `...` と書いているのは、コンパイラに `v` を引数のリストとして扱うように指示するためです。そうしないと、`v` を単一のスライス引数として渡してしまいます。
 
-There's even more to printing than we've covered here. See the `godoc` documentation for package `fmt` for the details.
+ここで説明した以外にも、印刷には様々な機能があります。詳しくは，パッケージ `fmt` の `godoc` ドキュメントを参照してください．
 
-By the way, a `...` parameter can be of a specific type, for instance `...int` for a min function that chooses the least of a list of integers:
+ところで，`...`のパラメータは，特定の型にすることができます．例えば，整数のリストの中から最小のものを選ぶmin関数の場合，`...int`となります．
 
 ```go
 func Min(a ...int) int {
