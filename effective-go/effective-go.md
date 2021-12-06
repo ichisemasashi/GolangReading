@@ -1131,22 +1131,22 @@ fmt.Println(x)
 
 この `...` がないと、型が間違っているのでコンパイルできません。`y` は `int` 型ではありません。
 
-## Initialization
+## 初期化
 
-Although it doesn't look superficially very different from initialization in C or C++, initialization in Go is more powerful. Complex structures can be built during initialization and the ordering issues among initialized objects, even among different packages, are handled correctly.
+CやC++の初期化と表面的にはあまり変わらないように見えますが、Goの初期化はより強力です。初期化中に複雑な構造を構築することができ、初期化されたオブジェクト間の順序問題は、異なるパッケージ間であっても、正しく処理されます。
 
 
-### Constants
+### 定数
 
-Constants in Go are just that—constant. They are created at compile time, even when defined as locals in functions, and can only be numbers, characters (runes), strings or booleans. Because of the compile-time restriction, the expressions that define them must be constant expressions, evaluatable by the compiler. For instance, `1<<3` is a constant expression, while `math.Sin(math.Pi/4)` is not because the function call to `math.Sin` needs to happen at run time.
+Goの定数はただの定数です。定数はコンパイル時に作成され、関数内でローカルとして定義されている場合でも、数字、文字（ルーン）、文字列、ブーリアンのみとなります。コンパイル時の制限のため、定数を定義する式は、コンパイラで評価可能な定数式でなければなりません。例えば、`1<<3`は定数式ですが、`math.Sin(math.Pi/4)`は定数式ではありません。`math.Sin`の関数呼び出しは実行時に行われる必要があるからです。
 
-In Go, enumerated constants are created using the `iota` enumerator. Since `iota` can be part of an expression and expressions can be implicitly repeated, it is easy to build intricate sets of values.
+Goでは、列挙型の定数は `iota` という列挙子を使って作成します。`iota` は式の一部にすることができ、式は暗黙的に繰り返すことができるので、複雑な値のセットを簡単に作ることができます。
 
 ```go
 type ByteSize float64
 
 const (
-    _           = iota // ignore first value by assigning to blank identifier
+    _           = iota // 空白の識別子に割り当てて最初の値を無視する
     KB ByteSize = 1 << (10 * iota)
     MB
     GB
@@ -1158,7 +1158,7 @@ const (
 )
 ```
 
-The ability to attach a method such as `String` to any user-defined type makes it possible for arbitrary values to format themselves automatically for printing. Although you'll see it most often applied to structs, this technique is also useful for scalar types such as floating-point types like `ByteSize`.
+任意のユーザ定義型に `String` などのメソッドを付加することで、任意の値を印刷時に自動的に整形することができます。構造体に適用されることが多いのですが、このテクニックは `ByteSize` のような浮動小数点型などのスカラ型にも有効です。
 
 ```go
 func (b ByteSize) String() string {
@@ -1184,13 +1184,13 @@ func (b ByteSize) String() string {
 }
 ```
 
-The expression `YB` prints as `1.00YB`, while `ByteSize(1e13)` prints as `9.09TB`.
+式 `YB` は `1.00YB` と表示されますが，`ByteSize(1e13)` は `9.09TB` と表示されます．
 
-The use here of `Sprintf` to implement `ByteSize`'s `String` method is safe (avoids recurring indefinitely) not because of a conversion but because it calls `Sprintf` with `%f`, which is not a string format: `Sprintf` will only call the `String` method when it wants a string, and `%f` wants a floating-point value.
+ここで `ByteSize` の `String` メソッドを実装するために `Sprintf` を使用していますが、これが安全 (無限に繰り返すことを避ける) なのは、変換のためではなく、文字列形式ではない `%f` で `Sprintf` を呼び出しているためです。`Sprintf` が `String` メソッドを呼び出すのは，文字列を必要とするときだけであり，`%f` は浮動小数点値を必要とします．
 
-### Variables
+### 変数
 
-Variables can be initialized just like constants but the initializer can be a general expression computed at run time.
+変数は、定数と同様に初期化することができますが、初期化子は、実行時に計算される一般的な式にすることができます。
 
 ```go
 var (
@@ -1201,11 +1201,11 @@ var (
 ```
 
 
-### The init function
+### init関数
 
-Finally, each source file can define its own niladic `init` function to set up whatever state is required. (Actually each file can have multiple `init` functions.) And finally means finally: `init` is called after all the variable declarations in the package have evaluated their initializers, and those are evaluated only after all the imported packages have been initialized.
+最後に、各ソースファイルは独自の niladic `init` 関数を定義して、必要な状態をセットアップすることができます。(実際には、各ファイルは複数の`init`関数を持つことができます。) そして、finallyとは最後のことです。パッケージ内のすべての変数宣言が初期化子を評価した後に `init` が呼ばれ、それらはインポートされたすべてのパッケージが初期化された後に評価されます。
 
-Besides initializations that cannot be expressed as declarations, a common use of `init` functions is to verify or repair correctness of the program state before real execution begins.
+宣言として表現できない初期化の他に、`init`関数の一般的な使い方は、実際の実行が始まる前にプログラムの状態の正しさを検証したり修復したりすることです。
 
 
 ```go
