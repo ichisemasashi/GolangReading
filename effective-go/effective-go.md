@@ -1274,16 +1274,18 @@ func (p *ByteSlice) Write(data []byte) (n int, err error) {
 ところで、バイトのスライスに対して `Write` を使用するというアイデアは、`bytes.Buffer` の実装の中心となっています。
 
 ## Interfaces and other types
-### Interfaces
+### インターフェイス
 
-Interfaces in Go provide a way to specify the behavior of an object: if something can do this, then it can be used here. We've seen a couple of simple examples already; custom printers can be implemented by a `String` method while `Fprintf` can generate output to anything with a `Write` method. Interfaces with only one or two methods are common in Go code, and are usually given a name derived from the method, such as `io.Writer` for something that implements `Write`.
+Goのインターフェイスは、オブジェクトの動作を指定する方法を提供します。つまり、何かができるのであれば、それをここで使用することができます。カスタムプリンタは `String` メソッドで実装できますし、`Fprintf` は `Write` メソッドであらゆるものに出力を生成できます。
 
-A type can implement multiple interfaces. For instance, a collection can be sorted by the routines in package `sort` if it implements `sort.Interface`, which contains `Len()`, `Less(i, j int) bool`, and `Swap(i, j int)`, and it could also have a custom formatter. In this contrived example `Sequence` satisfies both.
+ 1つまたは2つのメソッドしかないインターフェイスは、Goのコードではよく見られます。例えば、`Write`を実装しているものには`io.Writer`のように。通常、メソッドから派生した名前が付けられます。
+
+1つの型が複数のインターフェースを実装することも可能です。例えば、コレクションは `sort.Interface` を実装していれば、`sort` パッケージのルーチンによってソートすることができます。このルーチンには `Len()`, `Less(i, j int) bool`, `Swap(i, j int)` が含まれており、また、カスタムのフォーマッタを持つこともできます。この例では、 `Sequence` がその両方を満たしています。
 
 ```go
 type Sequence []int
 
-// Methods required by sort.Interface.
+// sort.Interfaceで必要なメソッドです。
 func (s Sequence) Len() int {
     return len(s)
 }
@@ -1294,15 +1296,15 @@ func (s Sequence) Swap(i, j int) {
     s[i], s[j] = s[j], s[i]
 }
 
-// Copy returns a copy of the Sequence.
+// Copyは、Sequenceのコピーを返します。
 func (s Sequence) Copy() Sequence {
     copy := make(Sequence, 0, len(s))
     return append(copy, s...)
 }
 
-// Method for printing - sorts the elements before printing.
+// 印刷のためのメソッド - 印刷前に要素をソートします。
 func (s Sequence) String() string {
-    s = s.Copy() // Make a copy; don't overwrite argument.
+    s = s.Copy() // コピーをして、引数を上書きしないようにしましょう。
     sort.Sort(s)
     str := "["
     for i, elem := range s { // Loop is O(N²); will fix that in next example.
@@ -1315,9 +1317,9 @@ func (s Sequence) String() string {
 }
 ```
 
-### Conversions
+### 変換について
 
-The `String` method of `Sequence` is recreating the work that `Sprint` already does for slices. (It also has complexity O(N^2), which is poor.) We can share the effort (and also speed it up) if we convert the `Sequence` to a plain `[]int` before calling `Sprint`.
+Sequence` の `String` メソッドは，`Sprint` がすでにスライスに対して行っている作業を再現しています．(また，複雑さは O(N^2) で，これは貧弱です)．`Sprint` を呼び出す前に `Sequence` をプレーンな `[]int` に変換すれば，この作業を分担することができます（また，高速化することもできます）．
 
 ```go
 func (s Sequence) String() string {
@@ -1327,15 +1329,15 @@ func (s Sequence) String() string {
 }
 ```
 
-This method is another example of the conversion technique for calling `Sprintf` safely from a `String` method. Because the two types (`Sequence` and `[]int`) are the same if we ignore the type name, it's legal to convert between them. The conversion doesn't create a new value, it just temporarily acts as though the existing value has a new type. (There are other legal conversions, such as from integer to floating point, that do create a new value.)
+このメソッドは、`String`メソッドから`Sprintf`を安全に呼び出すための変換テクニックのもう一つの例です。2つの型（`Sequence`と`[]int`）は型名を無視すれば同じものなので、それらの間で変換することは合法です。この変換は新しい値を生成するのではなく，一時的に既存の値が新しい型を持っているかのように振る舞うだけです。(整数から浮動小数点への変換のように、新しい値を作る合法的な変換は他にもあります)
 
-It's an idiom in Go programs to convert the type of an expression to access a different set of methods. As an example, we could use the existing type `sort.IntSlice` to reduce the entire example to this:
+Goプログラムでは、式の型を変換して別のメソッド群にアクセスすることが慣用的に行われています。例として、既存の型 `sort.IntSlice` を使って、例題全体を次のように減らすことができます。
 
 
 ```go
 type Sequence []int
 
-// Method for printing - sorts the elements before printing
+// 印刷のためのメソッド - 印刷前に要素をソートする
 func (s Sequence) String() string {
     s = s.Copy()
     sort.IntSlice(s).Sort()
@@ -1343,7 +1345,7 @@ func (s Sequence) String() string {
 }
 ```
 
-Now, instead of having `Sequence` implement multiple interfaces (sorting and printing), we're using the ability of a data item to be converted to multiple types (`Sequence`, `sort.IntSlice` and `[]int`), each of which does some part of the job. That's more unusual in practice but can be effective.
+ここでは、`Sequence`に複数のインターフェース（ソートと印刷）を実装させるのではなく、データアイテムを複数の型（`Sequence`、`sort.IntSlice`、`[]int`）に変換できる機能を利用して、それぞれが仕事の一部を行うようにしています。これは実際にはもっと珍しいことですが、効果的です。
 
 
 ### Interface conversions and type assertions
