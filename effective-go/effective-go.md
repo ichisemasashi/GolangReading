@@ -1224,22 +1224,22 @@ func init() {
 }
 ```
 
-## Methods
-### Pointers vs. Values
+## メソッド
+### ポインタと値の比較
 
-As we saw with `ByteSize`, methods can be defined for any named type (except a pointer or an interface); the receiver does not have to be a struct.
+`ByteSize`で見たように、メソッドは任意の名前の付いた型（ポインタやインターフェースを除く）に対して定義することができ、レシーバは構造体である必要はありません。
 
-In the discussion of slices above, we wrote an `Append` function. We can define it as a method on slices instead. To do this, we first declare a named type to which we can bind the method, and then make the receiver for the method a value of that type.
+先ほどのスライスの説明では、`Append`という関数を書きました。これをスライスのメソッドとして定義することができます．そのためには、まず、メソッドをバインドできる名前付きの型を宣言し、メソッドのレシーバをその型の値にします。
 
 ```go
 type ByteSlice []byte
 
 func (slice ByteSlice) Append(data []byte) []byte {
-    // Body exactly the same as the Append function defined above.
+    // 本体は上記のAppend関数と全く同じです。
 }
 ```
 
-This still requires the method to return the updated slice. We can eliminate that clumsiness by redefining the method to take a pointer to a `ByteSlice` as its receiver, so the method can overwrite the caller's slice.
+この場合でも、メソッドは更新されたスライスを返す必要があります。メソッドを再定義して、`ByteSlice`へのポインタをレシーバとして受け取り、メソッドが呼び出し元のスライスを上書きできるようにすることで、この不便さを解消できます。
 
 ```go
 func (p *ByteSlice) Append(data []byte) {
@@ -1249,7 +1249,7 @@ func (p *ByteSlice) Append(data []byte) {
 }
 ```
 
-In fact, we can do even better. If we modify our function so it looks like a standard `Write` method, like this,
+実際には、もっと良い方法があります。この関数を次のように修正して、標準的な `Write` メソッドのようにしてみましょう。
 
 ```go
 func (p *ByteSlice) Write(data []byte) (n int, err error) {
@@ -1260,18 +1260,18 @@ func (p *ByteSlice) Write(data []byte) (n int, err error) {
 }
 ```
 
-then the type `*ByteSlice` satisfies the standard interface `io.Writer`, which is handy. For instance, we can print into one.
+とすると、`*ByteSlice`という型は、標準的なインターフェイスである`io.Writer`を満たすことになり、これは便利なことです。例えば、1つにプリントすることができます。
 
 ```go
     var b ByteSlice
     fmt.Fprintf(&b, "This hour has %d days\n", 7)
 ```
 
-We pass the address of a `ByteSlice` because only `*ByteSlice` satisfies `io.Writer`. The rule about pointers vs. values for receivers is that value methods can be invoked on pointers and values, but pointer methods can only be invoked on pointers.
+ここでは，`*ByteSlice`のみが`io.Writer`を満たすので，`ByteSlice`のアドレスを渡しています．レシーバーのポインタと値に関するルールは、値のメソッドはポインタと値の両方に呼び出すことができますが、ポインタのメソッドはポインタにしか呼び出すことができません。
 
-This rule arises because pointer methods can modify the receiver; invoking them on a value would cause the method to receive a copy of the value, so any modifications would be discarded. The language therefore disallows this mistake. There is a handy exception, though. When the value is addressable, the language takes care of the common case of invoking a pointer method on a value by inserting the address operator automatically. In our example, the variable `b` is addressable, so we can call its `Write` method with just `b.Write`. The compiler will rewrite that to `(&b).Write` for us.
+ポインタメソッドはレシーバを変更することができるので、このルールが発生します。値に対してポインタメソッドを呼び出すと、メソッドは値のコピーを受け取ることになるので、変更された部分は破棄されます。そのため、言語ではこのようなミスを禁止しています。しかし、便利な例外があります。値がアドレス可能な場合，言語はアドレス演算子を自動的に挿入することで，値に対してポインタメソッドを呼び出すという一般的なケースに対処します。今回の例では、変数 `b` がアドレス指定可能なので、その `Write` メソッドを `b.Write` だけで呼び出すことができます。コンパイラはこれを `(&b).Write` と書き換えてくれます。
 
-By the way, the idea of using `Write` on a slice of bytes is central to the implementation of `bytes.Buffer`.
+ところで、バイトのスライスに対して `Write` を使用するというアイデアは、`bytes.Buffer` の実装の中心となっています。
 
 ## Interfaces and other types
 ### Interfaces
