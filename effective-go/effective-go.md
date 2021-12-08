@@ -1404,15 +1404,15 @@ if str, ok := value.(string); ok {
 ```
 
 
-### Generality
+### 一般性
 
-If a type exists only to implement an interface and will never have exported methods beyond that interface, there is no need to export the type itself. Exporting just the interface makes it clear the value has no interesting behavior beyond what is described in the interface. It also avoids the need to repeat the documentation on every instance of a common method.
+ある型がインターフェイスを実装するためだけに存在し、そのインターフェイスを超えてエクスポートされたメソッドを持つことがない場合、その型自体をエクスポートする必要はありません。インターフェイスだけをエクスポートすることで、その値がインターフェイスに記述されている以上の興味深い動作を持たないことが明確になります。また、共通のメソッドのインスタンスごとにドキュメントを繰り返す必要もありません。
 
-In such cases, the constructor should return an interface value rather than the implementing type. As an example, in the hash libraries both `crc32.NewIEEE` and `adler32.New` return the interface type `hash.Hash32`. Substituting the CRC-32 algorithm for Adler-32 in a Go program requires only changing the constructor call; the rest of the code is unaffected by the change of algorithm.
+このような場合、コンストラクタは実装型ではなくインターフェイスの値を返すべきです。例えば，ハッシュライブラリでは，`crc32.NewIEEE`と`adler32.New`の両方がインタフェース型である`hash.Hash32`を返します．GoプログラムでCRC-32アルゴリズムをAdler-32に置き換えるには、コンストラクタの呼び出しを変更するだけで、残りのコードはアルゴリズムの変更による影響を受けません。
 
-A similar approach allows the streaming cipher algorithms in the various `crypto` packages to be separated from the block ciphers they chain together. The `Block` interface in the `crypto/cipher` package specifies the behavior of a block cipher, which provides encryption of a single block of data. Then, by analogy with the `bufio` package, cipher packages that implement this interface can be used to construct streaming ciphers, represented by the `Stream` interface, without knowing the details of the block encryption.
+同様のアプローチにより、さまざまな `crypto` パッケージのストリーミング暗号アルゴリズムを、それらが連鎖するブロック暗号から分離することができます。crypto/cipher`パッケージの`Block`インターフェースは、ブロック暗号の動作を指定するもので、1つのデータブロックの暗号化を行います。また、`bufio`パッケージと同様に、このインタフェースを実装した暗号パッケージは、ブロック暗号の詳細を知らなくても、`Stream`インタフェースで表されるストリーミング暗号を構築することができます。
 
-The `crypto/cipher` interfaces look like this:
+crypto/cipher`インターフェースは以下のようになります。
 
 ```go
 type Block interface {
@@ -1426,16 +1426,16 @@ type Stream interface {
 }
 ```
 
-Here's the definition of the counter mode (CTR) stream, which turns a block cipher into a streaming cipher; notice that the block cipher's details are abstracted away:
+カウンターモード（CTR）ストリームの定義は、ブロック暗号をストリーミング暗号に変えるもので、ブロック暗号の詳細は抽象化されていることに注意してください。
 
 
 ```go
-// NewCTR returns a Stream that encrypts/decrypts using the given Block in
-// counter mode. The length of iv must be the same as the Block's block size.
+// NewCTRは、指定されたBlockをカウンターモードで使用して暗号化/復号化を行うStreamを
+// 返します。ivの長さは、Blockのブロックサイズと同じでなければなりません。
 func NewCTR(block Block, iv []byte) Stream
 ```
 
-`NewCTR` applies not just to one specific encryption algorithm and data source but to any implementation of the `Block` interface and any `Stream`. Because they return interface values, replacing CTR encryption with other encryption modes is a localized change. The constructor calls must be edited, but because the surrounding code must treat the result only as a `Stream`, it won't notice the difference.
+`NewCTR`は、ある特定の暗号化アルゴリズムやデータソースだけでなく、`Block`インターフェースのあらゆる実装や、あらゆる`Stream`にも適用されます。インターフェイスの値を返すので、CTRの暗号化を他の暗号化モードに置き換えることは、局所的な変更になります。コンストラクタの呼び出しを編集する必要がありますが、周囲のコードは結果を `Stream` としてのみ扱わなければならないので、その違いに気づくことはありません。
 
 
 
