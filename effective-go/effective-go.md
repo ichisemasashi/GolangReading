@@ -1348,9 +1348,9 @@ func (s Sequence) String() string {
 ここでは、`Sequence`に複数のインターフェース（ソートと印刷）を実装させるのではなく、データアイテムを複数の型（`Sequence`、`sort.IntSlice`、`[]int`）に変換できる機能を利用して、それぞれが仕事の一部を行うようにしています。これは実際にはもっと珍しいことですが、効果的です。
 
 
-### Interface conversions and type assertions
+### インターフェース変換と型アサーション
 
-[Type switches](https://golang.org/doc/effective_go#type_switch) are a form of conversion: they take an interface and, for each case in the switch, in a sense convert it to the type of that case. Here's a simplified version of how the code under `fmt.Printf` turns a value into a string using a type switch. If it's already a string, we want the actual string value held by the interface, while if it has a `String` method we want the result of calling the method.
+[タイプスイッチ](https://golang.org/doc/effective_go#type_switch)は変換の一種です。インターフェイスを受け取り、switch内の各caseについて、ある意味でそのcaseの型に変換します。ここでは，`fmt.Printf`のコードがタイプスイッチを使って値を文字列に変換する様子を簡略化して説明します．すでに文字列であれば、インターフェイスが保持する実際の文字列の値が必要となり、`String`メソッドがあれば、そのメソッドを呼び出した結果が必要となります。
 
 ```go
 type Stringer interface {
@@ -1366,21 +1366,21 @@ case Stringer:
 }
 ```
 
-The first case finds a concrete value; the second converts the interface into another interface. It's perfectly fine to mix types this way.
+最初のcaseは具体的な値を見つけ、2番目のcaseはインターフェイスを別のインターフェイスに変換します。このように型を混在させることは全く問題ありません。
 
-What if there's only one type we care about? If we know the value holds a `string` and we just want to extract it? A one-case type switch would do, but so would a type assertion. A type assertion takes an interface value and extracts from it a value of the specified explicit type. The syntax borrows from the clause opening a type switch, but with an explicit type rather than the `type` keyword:
+しかし，気になる型が1つしかない場合はどうでしょうか？値が「文字列」を保持していることがわかっていて、それを取り出したいだけだったら？このような場合には、ワンケースのタイプスイッチで対応できますが、型アサーションでも対応できます。型アサーションはインターフェイスの値を受け取り、そこから指定された明示的な型の値を抽出します。構文は型スイッチを開く節を参考にしていますが、`type`キーワードではなく明示的な型を使用しています。
 
 ```go
 value.(typeName)
 ```
 
-and the result is a new value with the static type `typeName`. That type must either be the concrete type held by the interface, or a second interface type that the value can be converted to. To extract the string we know is in the value, we could write:
+と入力すると、結果として静的な型`typeName`を持つ新しい値が得られます。この型は，インターフェイスが持つ具象型か，値が変換できる第2のインターフェイス型でなければなりません．値の中にあるとわかっている文字列を取り出すには、次のように書きます。
 
 ```go
 str := value.(string)
 ```
 
-But if it turns out that the value does not contain a string, the program will crash with a run-time error. To guard against that, use the "comma, ok" idiom to test, safely, whether the value is a string:
+しかし、値に文字列が含まれていないことが判明した場合、プログラムはランタイムエラーでクラッシュします。これを防ぐために、"comma, ok "というイディオムを使って、値が文字列であるかどうかを安全にテストします： 
 
 ```go
 str, ok := value.(string)
@@ -1391,9 +1391,9 @@ if ok {
 }
 ```
 
-If the type assertion fails, `str` will still exist and be of type string, but it will have the zero value, an empty string.
+型の主張が失敗した場合、`str` は依然として存在し、文字列型となりますが、その値はゼロで、空の文字列となります。
 
-As an illustration of the capability, here's an `if`-`else` statement that's equivalent to the type switch that opened this section.
+この機能を説明するために、このセクションの最初に出てきたタイプスイッチと同等の `if`-`else` ステートメントを示します。
 
 ```go
 if str, ok := value.(string); ok {
