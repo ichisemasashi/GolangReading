@@ -1439,9 +1439,9 @@ func NewCTR(block Block, iv []byte) Stream
 
 
 
-### Interfaces and methods
+### インターフェイスとメソッド
 
-Since almost anything can have methods attached, almost anything can satisfy an interface. One illustrative example is in the `http` package, which defines the `Handler` interface. Any object that implements `Handler` can serve HTTP requests.
+ほとんどのものにメソッドを付けることができるので、ほとんどのものがインターフェイスを満たすことができます。例えば、`http`パッケージには`Handler`というインタフェースが定義されています。`Handler`を実装したオブジェクトはHTTPリクエストに対応できます。
 
 ```go
 type Handler interface {
@@ -1449,9 +1449,9 @@ type Handler interface {
 }
 ```
 
-`ResponseWriter` is itself an interface that provides access to the methods needed to return the response to the client. Those methods include the standard `Write` method, so an `http.ResponseWriter` can be used wherever an `io.Writer` can be used. `Request` is a struct containing a parsed representation of the request from the client.
+`ResponseWriter`はそれ自体がインターフェイスで、クライアントにレスポンスを返すために必要なメソッドへのアクセスを提供します。これらのメソッドには標準の `Write` メソッドが含まれているので、 `io.Writer` が使える場所であれば `http.ResponseWriter` を使うことができます。`Request`は、クライアントからのリクエストを解析した表現を含む構造体です。
 
-For brevity, let's ignore POSTs and assume HTTP requests are always GETs; that simplification does not affect the way the handlers are set up. Here's a trivial implementation of a handler to count the number of times the page is visited.
+簡潔にするために、POSTを無視して、HTTPリクエストは常にGETであると仮定します。この単純化は、ハンドラの設定方法には影響しません。ここでは、ページの訪問回数をカウントするハンドラの簡単な実装を紹介します。
 
 ```go
 // Simple counter server.
@@ -1465,9 +1465,9 @@ func (ctr *Counter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 ```
 
-(Keeping with our theme, note how `Fprintf` can print to an `http.ResponseWriter`.) In a real server, access to `ctr.n` would need protection from concurrent access. See the `sync` and `atomic` packages for suggestions.
+(テーマに沿って、`Fprintf` が `http.ResponseWriter` に出力できることに注目してください。) 実際のサーバでは、`ctr.n` へのアクセスは、同時アクセスから保護する必要があります。提案としては，`sync`と`atomic`のパッケージを参照してください．
 
-For reference, here's how to attach such a server to a node on the URL tree.
+参考までに，このようなサーバをURLツリーのノードにアタッチする方法を示します．
 
 ```go
 import "net/http"
@@ -1476,7 +1476,7 @@ ctr := new(Counter)
 http.Handle("/counter", ctr)
 ```
 
-But why make `Counter` a struct? An integer is all that's needed. (The receiver needs to be a pointer so the increment is visible to the caller.)
+しかし、なぜ `Counter` を構造体にするのでしょうか？必要なのは整数だけです。(レシーバはポインタである必要があるので、インクリメントは呼び出し側から見えるようになっています)。
 
 ```go
 // Simpler counter server.
@@ -1488,11 +1488,11 @@ func (ctr *Counter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 ```
 
-What if your program has some internal state that needs to be notified that a page has been visited? Tie a channel to the web page.
+もしあなたのプログラムに、あるページが訪問されたことを通知する必要のある内部状態があるとしたらどうでしょう？チャネルをWebページに結びつけます。
 
 ```go
-// A channel that sends a notification on each visit.
-// (Probably want the channel to be buffered.)
+// 訪問のたびに通知を送るチャネルです。(おそらく、
+// チャネルをバッファリングしたいのでしょう。)
 type Chan chan *http.Request
 
 func (ch Chan) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -1501,7 +1501,7 @@ func (ch Chan) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 ```
 
-Finally, let's say we wanted to present on `/args` the arguments used when invoking the server binary. It's easy to write a function to print the arguments.
+最後に、`/args`にサーバーバイナリの起動時に使用した引数を表示したいとします。引数を表示する関数を書くのは簡単です。
 
 ```go
 func ArgServer() {
@@ -1509,13 +1509,12 @@ func ArgServer() {
 }
 ```
 
-How do we turn that into an HTTP server? We could make `ArgServer` a method of some type whose value we ignore, but there's a cleaner way. Since we can define a method for any type except pointers and interfaces, we can write a method for a function. The `http` package contains this code:
+これをHTTPサーバにするにはどうしたらいいでしょうか？`ArgServer`を、値を無視する何らかの型のメソッドにすることもできますが、もっと簡単な方法があります。ポインタやインタフェースを除くあらゆる型に対してメソッドを定義できるので、関数に対してメソッドを書くことができます。`http`パッケージにはこのようなコードが含まれています。
 
 ```go
-// The HandlerFunc type is an adapter to allow the use of
-// ordinary functions as HTTP handlers.  If f is a function
-// with the appropriate signature, HandlerFunc(f) is a
-// Handler object that calls f.
+// HandlerFunc型は、通常の関数をHTTPハンドラーとして使用できるようにするための
+// アダプタです。 fが適切なシグネチャを持つ関数の場合、HandlerFunc(f)はfを
+// 呼び出すHandlerオブジェクトです。
 type HandlerFunc func(ResponseWriter, *Request)
 
 // ServeHTTP calls f(w, req).
