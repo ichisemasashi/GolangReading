@@ -1625,15 +1625,15 @@ func main() {
 慣習的に、インポートエラーを防ぐためのグローバル宣言は、インポートの直後に記述し、コメントを付けるべきです。これは、見つけやすくするためでもあり、後の処理を忘れないようにするためでもあります。
 
 
-### Import for side effect
+### 副作用のためのインポート
 
-An unused import like `fmt` or `io` in the previous example should eventually be used or removed: blank assignments identify code as a work in progress. But sometimes it is useful to import a package only for its side effects, without any explicit use. For example, during its `init` function, the [`net/http/pprof`](https://golang.org/pkg/net/http/pprof/) package registers HTTP handlers that provide debugging information. It has an exported API, but most clients need only the handler registration and access the data through a web page. To import the package only for its side effects, rename the package to the blank identifier:
+前述の例で挙げた `fmt` や `io` のような未使用のインポートは、最終的には使用するか削除する必要があります。しかし、明示的な使用をせずに、副作用のためだけにパッケージをインポートすることが有用な場合もあります。たとえば、[`net/http/pprof`](https://golang.org/pkg/net/http/pprof/)パッケージは、その`init`関数の間に、デバッグ情報を提供するHTTPハンドラを登録します。このパッケージにはエクスポートされたAPIがありますが、ほとんどのクライアントが必要とするのはハンドラの登録だけで、データへのアクセスはWebページを介して行われます。副作用のためだけにパッケージをインポートするには、パッケージの名前を空白の識別子に変更します。
 
 ```go
 import _ "net/http/pprof"
 ```
 
-This form of import makes clear that the package is being imported for its side effects, because there is no other possible use of the package: in this file, it doesn't have a name. (If it did, and we didn't use that name, the compiler would reject the program.)
+この形式のインポートでは、パッケージがその副作用のためにインポートされていることが明確になります。というのも、このファイルでは、パッケージには名前がありません。(もし名前があって、その名前を使わなかったら、コンパイラはプログラムを拒絶するでしょう)。
 
 
 ### Interface checks
