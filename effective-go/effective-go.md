@@ -1523,9 +1523,9 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, req *Request) {
 }
 ```
 
-`HandlerFunc` is a type with a method, `ServeHTTP`, so values of that type can serve HTTP requests. Look at the implementation of the method: the receiver is a function, `f`, and the method calls `f`. That may seem odd but it's not that different from, say, the receiver being a channel and the method sending on the channel.
+`HandlerFunc`は、`ServeHTTP`というメソッドを持つ型で、この型の値はHTTPリクエストを処理することができます。このメソッドの実装を見てみましょう。レシーバは関数の `f` で、メソッドは `f` を呼び出します。これは奇妙に思えるかもしれませんが、例えばレシーバがチャネルで、メソッドがそのチャネル上で送信するのとそれほど違いはありません。
 
-To make `ArgServer` into an HTTP server, we first modify it to have the right signature.
+`ArgServer`をHTTPサーバにするには、まず正しいシグネチャを持つように変更します。
 
 ```go
 // Argument server.
@@ -1534,26 +1534,26 @@ func ArgServer(w http.ResponseWriter, req *http.Request) {
 }
 ```
 
-`ArgServer` now has same signature as `HandlerFunc`, so it can be converted to that type to access its methods, just as we converted `Sequence` to `IntSlice` to access `IntSlice.Sort`. The code to set it up is concise:
+`ArgServer` は `HandlerFunc` と同じシグネチャを持っているので、`Sequence` を `IntSlice` に変換して `IntSlice.Sort` にアクセスしたように、この型に変換してそのメソッドにアクセスすることができます。これを設定するためのコードは簡潔です。
 
 ```go
 http.Handle("/args", http.HandlerFunc(ArgServer))
 ```
 
-When someone visits the page `/args`, the handler installed at that page has value `ArgServer` and type `HandlerFunc`. The HTTP server will invoke the method `ServeHTTP` of that type, with `ArgServer` as the receiver, which will in turn call `ArgServer` (via the invocation `f(w, req)` inside `HandlerFunc.ServeHTTP`). The arguments will then be displayed.
+誰かがページ `/args` を訪れたとき、そのページにインストールされているハンドラは値が `ArgServer` でタイプが `HandlerFunc` です。HTTPサーバは`ArgServer`をレシーバとして、そのタイプのメソッド`ServeHTTP`を呼び出し、`ArgServer`は（`HandlerFunc.ServeHTTP`内の呼び出し`f(w, req)`を介して）`ArgServer`を呼び出すことになります。そして、引数が表示されます。
 
-In this section we have made an HTTP server from a struct, an integer, a channel, and a function, all because interfaces are just sets of methods, which can be defined for (almost) any type.
+このセクションでは、構造体、整数、チャネル、そして関数からHTTPサーバを作りましたが、これらはすべて、インターフェースが単なるメソッドのセットであり、（ほとんど）あらゆるタイプに対して定義できるからです。
 
 
-## The blank identifier
+## 空白識別子
 
-We've mentioned the blank identifier a couple of times now, in the context of [`for` `range` `loops`](https://golang.org/doc/effective_go#for) and [maps](https://golang.org/doc/effective_go#maps). The blank identifier can be assigned or declared with any value of any type, with the value discarded harmlessly. It's a bit like writing to the Unix `/dev/null` file: it represents a write-only value to be used as a place-holder where a variable is needed but the actual value is irrelevant. It has uses beyond those we've seen already.
+空白の識別子については、[`for` `range` `loops`](https://golang.org/doc/effective_go#for)や[maps](https://golang.org/doc/effective_go#maps)の文脈で、これまでに何度か触れてきました。空白識別子は、任意の型の任意の値を割り当てたり、宣言したりすることができ、その値は無害に破棄されます。これは、Unix の `/dev/null` ファイルへの書き込みに似ています。これは、変数が必要だが実際の値は関係ない場合のプレースホルダーとして使用される、書き込み専用の値を表します。これまで見てきた用途以外にも使い道があります。
 
-### The blank identifier in multiple assignment
+### マルチプルアサインメントにおけるブランク識別子
 
-The use of a blank identifier in a `for` `range` loop is a special case of a general situation: multiple assignment.
+ブランク識別子を `for` `range` ループで使用するのは、一般的な状況の特殊なケースです。これは、一般的な状況の特殊なケースで、多重割り当てです。
 
-If an assignment requires multiple values on the left side, but one of the values will not be used by the program, a blank identifier on the left-hand-side of the assignment avoids the need to create a dummy variable and makes it clear that the value is to be discarded. For instance, when calling a function that returns a value and an error, but only the error is important, use the blank identifier to discard the irrelevant value.
+代入の左辺に複数の値を必要とするが、そのうちの1つの値がプログラムで使用されない場合、代入の左辺に空白の識別子を使用することで、ダミー変数を作成する必要がなくなり、その値が廃棄されることが明確になる。例えば，値とエラーを返す関数を呼び出したが，重要なのはエラーの方だけだった場合，無関係な値を捨てるためにブランク識別子を使用する．
 
 ```go
 if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -1561,7 +1561,7 @@ if _, err := os.Stat(path); os.IsNotExist(err) {
 }
 ```
 
-Occasionally you'll see code that discards the error value in order to ignore the error; this is terrible practice. Always check error returns; they're provided for a reason.
+たまに、エラーを無視するためにエラー値を捨てるコードを見かけますが、これはひどいやり方です。エラーリターンは必ず確認してください。エラーリターンが用意されているのには理由があります。
 
 ```go
 // Bad! This code will crash if path does not exist.
