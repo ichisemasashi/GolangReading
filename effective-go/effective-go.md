@@ -1636,17 +1636,17 @@ import _ "net/http/pprof"
 この形式のインポートでは、パッケージがその副作用のためにインポートされていることが明確になります。というのも、このファイルでは、パッケージには名前がありません。(もし名前があって、その名前を使わなかったら、コンパイラはプログラムを拒絶するでしょう)。
 
 
-### Interface checks
+### インターフェースのチェック
 
-As we saw in the discussion of [interfaces](https://golang.org/doc/effective_go#interfaces_and_types) above, a type need not declare explicitly that it implements an interface. Instead, a type implements the interface just by implementing the interface's methods. In practice, most interface conversions are static and therefore checked at compile time. For example, passing an `*os.File` to a function expecting an `io.Reader` will not compile unless `*os.File` implements the `io.Reader` interface.
+上記の[interfaces](https://golang.org/doc/effective_go#interfaces_and_types)で見たように、型はインターフェイスを実装していることを明示的に宣言する必要はありません。その代わり、型はインターフェイスのメソッドを実装するだけで、インターフェイスを実装します。実際には，ほとんどのインタフェースの変換は静的であり，したがって，コンパイル時にチェックされる。例えば，`*os.File`を`io.Reader`を期待する関数に渡すと，`*os.File`が`io.Reader`インタフェースを実装していなければ，コンパイルできません．
 
-Some interface checks do happen at run-time, though. One instance is in the [`encoding/json`](https://golang.org/pkg/encoding/json/) package, which defines a [`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler) interface. When the JSON encoder receives a value that implements that interface, the encoder invokes the value's marshaling method to convert it to JSON instead of doing the standard conversion. The encoder checks this property at run time with a [type assertion](https://golang.org/doc/effective_go#interface_conversions) like:
+しかし、いくつかのインターフェイスのチェックは実行時に行われます。一つの例は[`encoding/json`](https://golang.org/pkg/encoding/json/)パッケージで、[`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler)インターフェイスを定義しています。JSONエンコーダーは、そのインターフェイスを実装した値を受け取ると、標準的な変換を行う代わりに、その値のマーシャリング・メソッドを呼び出してJSONに変換します。エンコーダーは実行時にこのプロパティを[type assertion](https://golang.org/doc/effective_go#interface_conversions)のような形でチェックします。
 
 ```go
 m, ok := val.(json.Marshaler)
 ```
 
-If it's necessary only to ask whether a type implements an interface, without actually using the interface itself, perhaps as part of an error check, use the blank identifier to ignore the type-asserted value:
+ある型がインターフェイスを実装しているかどうかを尋ねるだけで、実際にはそのインターフェイス自体を使用しない場合、おそらくエラーチェックの一環として、空白の識別子を使用して、型が保証する値を無視します。
 
 ```go
 if _, ok := val.(json.Marshaler); ok {
@@ -1654,15 +1654,15 @@ if _, ok := val.(json.Marshaler); ok {
 }
 ```
 
-One place this situation arises is when it is necessary to guarantee within the package implementing the type that it actually satisfies the interface. If a type — for example, [`json.RawMessage`](https://golang.org/pkg/encoding/json/#RawMessage) — needs a custom JSON representation, it should implement `json.Marshaler`, but there are no static conversions that would cause the compiler to verify this automatically. If the type inadvertently fails to satisfy the interface, the JSON encoder will still work, but will not use the custom implementation. To guarantee that the implementation is correct, a global declaration using the blank identifier can be used in the package:
+このような状況が発生するのは、型を実装しているパッケージの中で、その型が実際にインターフェイスを満たしていることを保証する必要がある場合です。例えば[`json.RawMessage`](https://golang.org/pkg/encoding/json/#RawMessage)のような型がカスタムのJSON表現を必要とする場合、`json.Marshaler`を実装する必要がありますが、コンパイラがこれを自動的に検証するような静的な変換はありません。型が誤ってインターフェースを満たさなかった場合、JSON エンコーダーはまだ動作しますが、カスタム実装は使用されません。実装が正しいことを保証するために、空白の識別子を使ったグローバル宣言をパッケージ内で使用することができます。
 
 ```go
 var _ json.Marshaler = (*RawMessage)(nil)
 ```
 
-In this declaration, the assignment involving a conversion of a `*RawMessage` to a `Marshaler` requires that `*RawMessage` implements `Marshaler`, and that property will be checked at compile time. Should the `json.Marshaler` interface change, this package will no longer compile and we will be on notice that it needs to be updated.
+この宣言では、`*RawMessage`から`Marshaler`への変換を含む代入には、`*RawMessage`が`Marshaler`を実装していることが必要であり、そのプロパティはコンパイル時にチェックされます。json.Marshaler`のインターフェイスが変更された場合、このパッケージはコンパイルされなくなり、更新が必要であることが通知されます。
 
-The appearance of the blank identifier in this construct indicates that the declaration exists only for the type checking, not to create a variable. Don't do this for every type that satisfies an interface, though. By convention, such declarations are only used when there are no static conversions already present in the code, which is a rare event.
+この構造での空の識別子の出現は、この宣言が変数を作成するためではなく、型のチェックのためだけに存在することを示しています。ただし、インターフェイスを満たすすべての型に対して、このような宣言をしてはいけません。慣習的に、このような宣言は、コード内に既に存在する静的変換がない場合にのみ使用されますが、これは稀なケースです。
 
 
 ## Embedding
