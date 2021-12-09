@@ -1572,11 +1572,11 @@ if fi.IsDir() {
 ```
 
 
-### Unused imports and variables
+### 未使用のインポートおよび変数
 
-It is an error to import a package or to declare a variable without using it. Unused imports bloat the program and slow compilation, while a variable that is initialized but not used is at least a wasted computation and perhaps indicative of a larger bug. When a program is under active development, however, unused imports and variables often arise and it can be annoying to delete them just to have the compilation proceed, only to have them be needed again later. The blank identifier provides a workaround.
+パッケージをインポートしたり、使用しないで変数を宣言したりすることはエラーになります。未使用のインポートはプログラムを肥大化させ、コンパイルに時間がかかります。一方、初期化されているのに使用されていない変数は、少なくとも計算の無駄であり、より大きなバグを示している可能性があります。しかし、プログラムが活発に開発されていると、未使用のインポートや変数が発生することが多く、コンパイルを進めるためにそれらを削除しても、後で再び必要になることがあり、煩わしいものです。空白の識別子があれば、それを回避することができます。
 
-This half-written program has two unused imports (`fmt` and `io`) and an unused variable (`fd`), so it will not compile, but it would be nice to see if the code so far is correct.
+この中途半端なプログラムは、未使用のインポートが2つ（`fmt`と`io`）、未使用の変数が1つ（`fd`）あるので、コンパイルはできませんが、これまでのコードが正しいかどうかを確認するには良いでしょう。
 
 ```go
 package main
@@ -1597,7 +1597,7 @@ func main() {
 }
 ```
 
-To silence complaints about the unused imports, use a blank identifier to refer to a symbol from the imported package. Similarly, assigning the unused variable `fd` to the blank identifier will silence the unused variable error. This version of the program does compile.
+未使用のインポートに対する苦情を黙らせるには、インポートされたパッケージのシンボルを参照するために空白の識別子を使用します。同様に、未使用の変数 `fd` を空白の識別子に割り当てることで、未使用の変数に関するエラーを黙らせることができます。このバージョンのプログラムはコンパイルできます。
 
 ```go
 package main
@@ -1622,7 +1622,7 @@ func main() {
 }
 ```
 
-By convention, the global declarations to silence import errors should come right after the imports and be commented, both to make them easy to find and as a reminder to clean things up later.
+慣習的に、インポートエラーを防ぐためのグローバル宣言は、インポートの直後に記述し、コメントを付けるべきです。これは、見つけやすくするためでもあり、後の処理を忘れないようにするためでもあります。
 
 
 ### Import for side effect
