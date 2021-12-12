@@ -1928,11 +1928,11 @@ func Serve(clientRequests chan *Request, quit chan bool) {
 }
 ```
 
-### Channels of channels
+### チャネルのチャネル
 
-One of the most important properties of Go is that a channel is a first-class value that can be allocated and passed around like any other. A common use of this property is to implement safe, parallel demultiplexing.
+Goの最も重要な特性の1つは、チャネルが他のものと同様に割り当てられたり渡されたりする第一級の値であることです。この特性の一般的な使い方は、安全で並列なデマルチプレクスを実装することです。
 
-In the example in the previous section, `handle` was an idealized handler for a request but we didn't define the type it was handling. If that type includes a channel on which to reply, each client can provide its own path for the answer. Here's a schematic definition of type `Request`.
+前節の例では、`handle` はリクエストを処理する理想的なハンドラでしたが、処理するタイプは定義していませんでした。もしそのタイプが返信するためのチャンネルを含んでいれば、各クライアントは回答のための独自のパスを提供することができます。ここでは、`Request`というタイプの定義を模式的に示します。
 
 ```go
 type Request struct {
@@ -1942,7 +1942,7 @@ type Request struct {
 }
 ```
 
-The client provides a function and its arguments, as well as a channel inside the request object on which to receive the answer.
+クライアントは、関数とその引数、およびリクエストオブジェクト内のチャネルを提供し、そのチャネルで回答を受け取ります。
 
 ```go
 func sum(a []int) (s int) {
@@ -1959,7 +1959,7 @@ clientRequests <- request
 fmt.Printf("answer: %d\n", <-request.resultChan)
 ```
 
-On the server side, the handler function is the only thing that changes.
+サーバー側では、ハンドラー関数が唯一の変更点です。
 
 ```go
 func handle(queue chan *Request) {
@@ -1969,7 +1969,7 @@ func handle(queue chan *Request) {
 }
 ```
 
-There's clearly a lot more to do to make it realistic, but this code is a framework for a rate-limited, parallel, non-blocking RPC system, and there's not a mutex in sight.
+現実的なものにするためにはまだまだやるべきことがありますが、このコードはレート制限のある並列ノンブロッキングRPCシステムのフレームワークであり、ミューテックスは存在しません。
 
 
 ### Parallelization
