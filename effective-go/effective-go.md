@@ -1768,18 +1768,18 @@ func (job *Job) Printf(format string, args ...interface{}) {
 次に、同じ名前が同じ入れ子のレベルで現れた場合、それは通常エラーです。`Job`構造体に`Logger`と呼ばれる別のフィールドやメソッドが含まれていた場合、`log.Logger`を埋め込むのはエラーになります。しかし、型定義の外でプログラム中に重複した名前が出てこない場合はOKです。この資格は、外部から埋め込まれた型に加えられた変更に対してある程度の保護を提供します。どちらのフィールドも使用されることがなければ、別のサブタイプの別のフィールドと衝突するフィールドが追加されても問題はありません。
 
 
-## Concurrency
-### Share by communicating
+## 並行処理
+### 通信による共有
 
-Concurrent programming is a large topic and there is space only for some Go-specific highlights here.
+並行プログラミングは大きなテーマであり、ここではGoに特化したハイライトを紹介するだけのスペースしかありません。
 
-Concurrent programming in many environments is made difficult by the subtleties required to implement correct access to shared variables. Go encourages a different approach in which shared values are passed around on channels and, in fact, never actively shared by separate threads of execution. Only one goroutine has access to the value at any given time. Data races cannot occur, by design. To encourage this way of thinking we have reduced it to a slogan:
+多くの環境での同時進行プログラミングは、共有変数への正しいアクセスを実装するために必要な微妙な技術によって困難になっています。Goでは、共有された値がチャネルで渡され、実際には別々の実行スレッドで積極的に共有されることはないという、異なるアプローチを推奨しています。ある時点では、1つのゴルーチンだけが値にアクセスできます。データレースは起こらないように設計されています。このような考え方を推奨するために、私たちはスローガンを掲げました。
 
-    Do not communicate by sharing memory; instead, share memory by communicating.
+    メモリを共有することで通信するのではなく、通信することでメモリを共有しましょう。
 
-This approach can be taken too far. Reference counts may be best done by putting a mutex around an integer variable, for instance. But as a high-level approach, using channels to control access makes it easier to write clear, correct programs.
+この考え方は行き過ぎかもしれません。例えば、整数型の変数の周りにミューテックスを置くことで、参照カウントを最適化することができます。しかし、ハイレベルなアプローチとして、チャンネルを使ってアクセスを制御することで、明確で正しいプログラムを書くことが容易になります。
 
-One way to think about this model is to consider a typical single-threaded program running on one CPU. It has no need for synchronization primitives. Now run another such instance; it too needs no synchronization. Now let those two communicate; if the communication is the synchronizer, there's still no need for other synchronization. Unix pipelines, for example, fit this model perfectly. Although Go's approach to concurrency originates in Hoare's Communicating Sequential Processes (CSP), it can also be seen as a type-safe generalization of Unix pipes.
+このモデルを考える一つの方法として、1つのCPU上で動作する典型的なシングルスレッドのプログラムを考えてみましょう。このプログラムには同期プリミティブは必要ありません。このようなプログラムをもう一つ走らせます。このプログラムも同期を必要としません。その通信がシンクロナイザーであれば、他の同期は必要ありません。例えば、Unix パイプラインはこのモデルにぴったりです。Go の並行性に対するアプローチは Hoare の Communicating Sequential Processes (CSP) に由来していますが、Unix のパイプを型安全に一般化したものと見ることもできます。
 
 
 
