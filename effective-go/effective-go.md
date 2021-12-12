@@ -1783,16 +1783,16 @@ func (job *Job) Printf(format string, args ...interface{}) {
 
 
 
-### Goroutines
+### ゴルーチン
 
-They're called goroutines because the existing terms—threads, coroutines, processes, and so on—convey inaccurate connotations. A goroutine has a simple model: it is a function executing concurrently with other goroutines in the same address space. It is lightweight, costing little more than the allocation of stack space. And the stacks start small, so they are cheap, and grow by allocating (and freeing) heap storage as required.
+ゴルーチンと呼ばれるのは、スレッド、コルーチン、プロセスなどの既存の用語が不正確な意味合いを持っているからである。ゴルーチンのモデルはシンプルで、同じアドレス空間で他のゴルーチンと同時に実行される関数です。ゴルーチンは軽量で、スタックスペースの割り当て以上のコストはかかりません。また、スタックは小さいので安価であり、必要に応じてヒープストレージを割り当てたり、解放したりすることで大きくなります。
 
-Goroutines are multiplexed onto multiple OS threads so if one should block, such as while waiting for I/O, others continue to run. Their design hides many of the complexities of thread creation and management.
+ゴルーチンは複数のOSスレッドに多重化されており、I/Oの待ち時間などでブロックが発生しても、他のスレッドは継続して実行されます。このような設計により、スレッドの作成や管理の複雑さの多くが隠されています。
 
-Prefix a function or method call with the `go` keyword to run the call in a new goroutine. When the call completes, the goroutine exits, silently. (The effect is similar to the Unix shell's `&` notation for running a command in the background.)
+関数やメソッドの呼び出しの前に `go` キーワードを付けると、その呼び出しが新しいゴルーチンで実行されます。呼び出しが完了すると、ゴアティンは静かに終了します。(この効果は、バックグラウンドでコマンドを実行するUnixシェルの `&` 記法に似ています)。
 
 ```go
-go list.Sort()  // run list.Sort concurrently; don't wait for it.
+go list.Sort()  // list.Sortの実行は同時進行で、待たされることはありません。
 ```
 
 A function literal can be handy in a goroutine invocation.
@@ -1802,13 +1802,13 @@ func Announce(message string, delay time.Duration) {
     go func() {
         time.Sleep(delay)
         fmt.Println(message)
-    }()  // Note the parentheses - must call the function.
+    }()  // 括弧に注意してください - 関数を呼び出す必要があります。
 }
 ```
 
-In Go, function literals are closures: the implementation makes sure the variables referred to by the function survive as long as they are active.
+Goでは、関数リテラルはクロージャです。関数が参照する変数がアクティブである限り、実装はその変数が存続するようにします。
 
-These examples aren't too practical because the functions have no way of signaling completion. For that, we need channels.
+これらの例はあまり実用的ではありません。なぜなら、関数には完了を知らせる手段がないからです。そのためにはチャネルが必要です。
 
 
 ### Channels
