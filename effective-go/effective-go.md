@@ -1811,55 +1811,55 @@ Goでは、関数リテラルはクロージャです。関数が参照する変
 これらの例はあまり実用的ではありません。なぜなら、関数には完了を知らせる手段がないからです。そのためにはチャネルが必要です。
 
 
-### Channels
+### チャネル
 
-Like maps, channels are allocated with `make`, and the resulting value acts as a reference to an underlying data structure. If an optional integer parameter is provided, it sets the buffer size for the channel. The default is zero, for an unbuffered or synchronous channel.
+マップと同様に、チャネルは `make` で割り当てられ、その結果得られる値は、基礎となるデータ構造への参照として機能します。オプションの整数パラメータが指定された場合、チャネルのバッファサイズが設定されます。デフォルトはゼロで、バッファリングされていないチャネルや同期型チャネルの場合です。
 
 ```go
-ci := make(chan int)            // unbuffered channel of integers
-cj := make(chan int, 0)         // unbuffered channel of integers
-cs := make(chan *os.File, 100)  // buffered channel of pointers to Files
+ci := make(chan int)            // 整数のバッファなしチャネル
+cj := make(chan int, 0)         // 整数のバッファなしチャネル
+cs := make(chan *os.File, 100)  // Filesへのポインタのバッファされたチャンネル
 ```
 
-Unbuffered channels combine communication—the exchange of a value—with synchronization—guaranteeing that two calculations (goroutines) are in a known state.
+バッファリングされていないチャンネルは、通信（値の交換）と、2つの計算（ゴルーチン）が既知の状態であることを保証する同期を組み合わせたものです。
 
-There are lots of nice idioms using channels. Here's one to get us started. In the previous section we launched a sort in the background. A channel can allow the launching goroutine to wait for the sort to complete.
+チャンネルを使ったすばらしいイディオムがたくさんあります。ここではその1つを紹介します。前のセクションでは、バックグラウンドでソートを起動しました。チャンネルを使うと、起動したゴルーチンがソートの完了を待つことができます。
 
 ```go
-c := make(chan int)  // Allocate a channel.
-// Start the sort in a goroutine; when it completes, signal on the channel.
+c := make(chan int)  // チャネルを割り当てます。
+// goroutineでソートを開始し、完了したらチャンネルにシグナルを送ります。
 go func() {
     list.Sort()
-    c <- 1  // Send a signal; value does not matter.
+    c <- 1  // シグナルを送る。価値は問わない。
 }()
 doSomethingForAWhile()
-<-c   // Wait for sort to finish; discard sent value.
+<-c   // ソートの終了を待ち、送られてきた値を破棄します。
 ```
 
-Receivers always block until there is data to receive. If the channel is unbuffered, the sender blocks until the receiver has received the value. If the channel has a buffer, the sender blocks only until the value has been copied to the buffer; if the buffer is full, this means waiting until some receiver has retrieved a value.
+受信者は、受信するデータがあるまで常にブロックします。チャネルがバッファリングされていない場合、送信者は受信者が値を受け取るまでブロックします。チャネルにバッファがある場合、送信者は値がバッファにコピーされるまでブロックします。バッファがいっぱいになった場合、これはある受信者が値を取得するまで待つことを意味します。
 
-A buffered channel can be used like a semaphore, for instance to limit throughput. In this example, incoming requests are passed to `handle`, which sends a value into the channel, processes the request, and then receives a value from the channel to ready the “semaphore” for the next consumer. The capacity of the channel buffer limits the number of simultaneous calls to `process`.
+バッファ付きチャネルは、例えば、スループットを制限するためにセマフォのように使用することができます。この例では、入ってきたリクエストは `handle` に渡され、`handle` はチャンネルに値を送り、リクエストを処理した後、チャンネルから値を受け取り、次のコンシューマのために「セマフォ」を準備します。チャンネルバッファの容量によって、`process`の同時呼び出し数が制限されます。
 
 ```go
 var sem = make(chan int, MaxOutstanding)
 
 func handle(r *Request) {
-    sem <- 1    // Wait for active queue to drain.
-    process(r)  // May take a long time.
-    <-sem       // Done; enable next request to run.
+    sem <- 1    // アクティブなキューがなくなるのを待ちます。
+    process(r)  // 時間がかかる場合があります。
+    <-sem       // 次のリクエストを実行できるようにします。
 }
 
 func Serve(queue chan *Request) {
     for {
         req := <-queue
-        go handle(req)  // Don't wait for handle to finish.
+        go handle(req)  // ハンドルが終わるのを待つ必要はありません。
     }
 }
 ```
 
-Once `MaxOutstanding` handlers are executing `process`, any more will block trying to send into the filled channel buffer, until one of the existing handlers finishes and receives from the buffer.
+`MaxOutstanding` 個のハンドラが `process` を実行すると、それ以上のハンドラは、既存のハンドラの一つが終了してバッファから受信するまで、満たされたチャンネルバッファに送信しようとしてブロックされます。
 
-This design has a problem, though: `Serve` creates a new goroutine for every incoming request, even though only `MaxOutstanding` of them can run at any moment. As a result, the program can consume unlimited resources if the requests come in too fast. We can address that deficiency by changing `Serve` to gate the creation of the goroutines. Here's an obvious solution, but beware it has a bug we'll fix subsequently:
+しかし、この設計には問題があります。`Serve`は、入ってくるリクエストごとに新しいゴルーチンを作成しますが、いつでも実行できるのは `MaxOutstanding` 個のゴルーチンだけなのです。その結果、リクエストがあまりにも速く来ると、プログラムは無限のリソースを消費してしまいます。この問題を解決するには、`Serve`を変更して、ゴルーチンの生成をゲートするようにします。ここに明らかな解決策がありますが、後で修正するバグがありますのでご注意ください。
 
 ```go
 func Serve(queue chan *Request) {
@@ -1873,7 +1873,7 @@ func Serve(queue chan *Request) {
 }
 ```
 
-The bug is that in a Go `for` loop, the loop variable is reused for each iteration, so the `req` variable is shared across all goroutines. That's not what we want. We need to make sure that `req` is unique for each goroutine. Here's one way to do that, passing the value of `req` as an argument to the closure in the goroutine:
+このバグは、Go の `for` ループでは、ループ変数が反復ごとに再利用されるため、`req` 変数がすべてのゴルーチンで共有されるというものです。これは私たちが望んでいることではありません。`req`が各goroutineに対して一意であることを確認する必要があります。ゴルーチン内のクロージャの引数として `req` の値を渡すという方法があります。
 
 ```go
 func Serve(queue chan *Request) {
@@ -1887,12 +1887,12 @@ func Serve(queue chan *Request) {
 }
 ```
 
-Compare this version with the previous to see the difference in how the closure is declared and run. Another solution is just to create a new variable with the same name, as in this example:
+このバージョンと前のバージョンを比較すると、クロージャの宣言と実行方法の違いがわかります。別の解決策としては、この例のように同じ名前の新しい変数を作成するだけです。
 
 ```go
 func Serve(queue chan *Request) {
     for req := range queue {
-        req := req // Create new instance of req for the goroutine.
+        req := req // ゴルーチンのためにreqの新しいインスタンスを作成します。
         sem <- 1
         go func() {
             process(req)
@@ -1902,15 +1902,15 @@ func Serve(queue chan *Request) {
 }
 ```
 
-It may seem odd to write
+と書くのはおかしいかもしれません。
 
 ```go
 req := req
 ```
 
-but it's legal and idiomatic in Go to do this. You get a fresh version of the variable with the same name, deliberately shadowing the loop variable locally but unique to each goroutine.
+しかし、これはGoでは合法的かつ慣用的に行われています。同じ名前の新しいバージョンの変数が得られ、ローカルにループ変数を意図的にシャドウイングしていますが、各ゴルーチンに固有のものとなっています。
 
-Going back to the general problem of writing the server, another approach that manages resources well is to start a fixed number of `handle` goroutines all reading from the request channel. The number of goroutines limits the number of simultaneous calls to `process`. This `Serve` function also accepts a channel on which it will be told to exit; after launching the goroutines it blocks receiving from that channel.
+サーバーを書くという一般的な問題に戻りますが、リソースをうまく管理するもう一つのアプローチは、固定数の `handle` ゴルーチンを開始して、すべてリクエストチャネルから読み込むことです。ゴルーチンの数は、`process`の同時呼び出し数を制限します。この `Serve` 関数は、終了するように指示されるチャネルも受け取ります。ゴルーチンを起動した後、そのチャネルからの受信をブロックします。
 
 ```go
 func handle(queue chan *Request) {
