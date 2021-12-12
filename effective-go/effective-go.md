@@ -1972,11 +1972,11 @@ func handle(queue chan *Request) {
 現実的なものにするためにはまだまだやるべきことがありますが、このコードはレート制限のある並列ノンブロッキングRPCシステムのフレームワークであり、ミューテックスは存在しません。
 
 
-### Parallelization
+### 並列化
 
-Another application of these ideas is to parallelize a calculation across multiple CPU cores. If the calculation can be broken into separate pieces that can execute independently, it can be parallelized, with a channel to signal when each piece completes.
+これらのアイデアのもう一つの応用例は、複数のCPUコアで計算を並列化することです。計算を独立して実行できるように分割できれば、並列化することができ、各計算が完了したときに信号を送るチャネルを設けることができます。
 
-Let's say we have an expensive operation to perform on a vector of items, and that the value of the operation on each item is independent, as in this idealized example.
+理想的な例として、アイテムのベクトルに対して高価な演算を行い、各アイテムの演算値が独立しているとします。
 
 ```go
 type Vector []float64
@@ -1990,37 +1990,37 @@ func (v Vector) DoSome(i, n int, u Vector, c chan int) {
 }
 ```
 
-We launch the pieces independently in a loop, one per CPU. They can complete in any order but it doesn't matter; we just count the completion signals by draining the channel after launching all the goroutines.
+CPUごとに1つずつ、ループで独立して起動します。すべてのゴルーチンを起動した後にチャネルを解放することで、完了信号をカウントします。
 
 ```go
-const numCPU = 4 // number of CPU cores
+const numCPU = 4 // CPUコア数
 
 func (v Vector) DoAll(u Vector) {
-    c := make(chan int, numCPU)  // Buffering optional but sensible.
+    c := make(chan int, numCPU)  // バッファリングは任意ですが、賢明な方法です。
     for i := 0; i < numCPU; i++ {
         go v.DoSome(i*len(v)/numCPU, (i+1)*len(v)/numCPU, u, c)
     }
-    // Drain the channel.
+    // チャネルの排水を行う。
     for i := 0; i < numCPU; i++ {
-        <-c    // wait for one task to complete
+        <-c    // 待機中
     }
     // All done.
 }
 ```
 
-Rather than create a constant value for numCPU, we can ask the runtime what value is appropriate. The function [`runtime.NumCPU`](https://golang.org/pkg/runtime#NumCPU) returns the number of hardware CPU cores in the machine, so we could write
+numCPUの定数値を作るのではなく、どの値が適切かランタイムに尋ねることができます。関数[`runtime.NumCPU`](https://golang.org/pkg/runtime#NumCPU)は、マシン内のハードウェアCPUコアの数を返すので、次のように書くことができます。
 
 ```go
 var numCPU = runtime.NumCPU()
 ```
 
-There is also a function [`runtime.GOMAXPROCS`](https://golang.org/pkg/runtime#GOMAXPROCS), which reports (or sets) the user-specified number of cores that a Go program can have running simultaneously. It defaults to the value of `runtime.NumCPU` but can be overridden by setting the similarly named shell environment variable or by calling the function with a positive number. Calling it with zero just queries the value. Therefore if we want to honor the user's resource request, we should write
+また、関数[`runtime.GOMAXPROCS`](https://golang.org/pkg/runtime#GOMAXPROCS)があり、Goプログラムが同時に実行できるコアの数をユーザーが指定した数だけ報告（または設定）します。デフォルトでは、`runtime.NumCPU`の値になりますが、同様の名前のシェル環境変数を設定するか、正の数でこの関数を呼び出すことでオーバーライドできます。ゼロで呼び出すと、単に値を照会します。したがって、ユーザーのリソース要求を尊重したい場合は、次のように記述します。
 
 ```go
 var numCPU = runtime.GOMAXPROCS(0)
 ```
 
-Be sure not to confuse the ideas of concurrency—structuring a program as independently executing components—and parallelism—executing calculations in parallel for efficiency on multiple CPUs. Although the concurrency features of Go can make some problems easy to structure as parallel computations, Go is a concurrent language, not a parallel one, and not all parallelization problems fit Go's model. For a discussion of the distinction, see the talk cited in [this blog post](https://blog.golang.org/2013/01/concurrency-is-not-parallelism.html).
+独立して実行されるコンポーネントとしてプログラムを構成する「同時実行」と、複数のCPUで効率的に計算を行う「並列実行」の考え方を混同しないように注意してください。Goの同時実行機能により、一部の問題は並列計算として構成しやすくなりますが、Goは並列言語ではなく同時実行言語であり、すべての並列化問題がGoのモデルに適合するわけではありません。この違いについては、[このブログ記事](https://blog.golang.org/2013/01/concurrency-is-not-parallelism.html)で引用されている講演を参照してください。
 
 
 
