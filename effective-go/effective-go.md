@@ -2024,9 +2024,9 @@ var numCPU = runtime.GOMAXPROCS(0)
 
 
 
-### A leaky buffer
+### リーキーバッファ
 
-The tools of concurrent programming can even make non-concurrent ideas easier to express. Here's an example abstracted from an RPC package. The client goroutine loops receiving data from some source, perhaps a network. To avoid allocating and freeing buffers, it keeps a free list, and uses a buffered channel to represent it. If the channel is empty, a new buffer gets allocated. Once the message buffer is ready, it's sent to the server on `serverChan`.
+並行プログラミングのツールを使えば、非並行のアイデアも簡単に表現できます。以下は、RPCパッケージから抽象化した例です。クライアントのゴルーチンは、何らかのソース（おそらくネットワーク）からデータを受信してループしています。バッファの割り当てと解放を避けるために、フリーリストを保持し、バッファありチャネルを使用してそれを表現します。チャネルが空になると、新しいバッファが割り当てられます。メッセージバッファの準備ができると、`serverChan` のサーバに送信されます。
 
 ```go
 var freeList = make(chan *Buffer, 100)
@@ -2035,40 +2035,40 @@ var serverChan = make(chan *Buffer)
 func client() {
     for {
         var b *Buffer
-        // Grab a buffer if available; allocate if not.
+        // バッファがあれば取り込み、なければ確保します。
         select {
         case b = <-freeList:
-            // Got one; nothing more to do.
+            // 1つ取得すれば、もう何もしない。
         default:
-            // None free, so allocate a new one.
+            // 空きがないので、新しいものを割り当てます。
             b = new(Buffer)
         }
-        load(b)              // Read next message from the net.
-        serverChan <- b      // Send to server.
+        load(b)              // 次のメッセージをネットから読む。
+        serverChan <- b      // サーバーに送信します。
     }
 }
 ```
 
-The server loop receives each message from the client, processes it, and returns the buffer to the free list.
+サーバーループは、クライアントから各メッセージを受け取り、処理し、バッファをフリーリストに戻します。
 
 
 ```go
 func server() {
     for {
-        b := <-serverChan    // Wait for work.
+        b := <-serverChan    // 仕事を待つ。
         process(b)
-        // Reuse buffer if there's room.
+        // 余裕があればバッファを再利用する。
         select {
         case freeList <- b:
-            // Buffer on free list; nothing more to do.
+            // Bufferはフリーリストに入っているので、これ以上することはありません。
         default:
-            // Free list full, just carry on.
+            // フリーリストが一杯になったので、そのまま続けてください。
         }
     }
 }
 ```
 
-The client attempts to retrieve a buffer from `freeList`; if none is available, it allocates a fresh one. The server's send to `freeList` puts `b` back on the free list unless the list is full, in which case the buffer is dropped on the floor to be reclaimed by the garbage collector. (The `default` clauses in the `select` statements execute when no other case is ready, meaning that the `selects` never block.) This implementation builds a leaky bucket free list in just a few lines, relying on the buffered channel and the garbage collector for bookkeeping.
+クライアントは `freeList` からバッファを取得しようとします。利用可能なバッファがない場合は、新しいバッファを割り当てます。サーバが `freeList` に送信すると、`b` がフリーリストに戻されます。ただし、リストがいっぱいになった場合は、バッファが床に落とされ、ガベージコレクタによって回収されます。(select`文の`default`句は、他のケースの準備ができていないときに実行されるので、`select`がブロックすることはありません)。この実装では、わずか数行でリーキーバケットのフリーリストを構築し、バッファリングされたチャンネルとガベージコレクタにブックキーピングを依存しています。
 
 
 ## Errors
