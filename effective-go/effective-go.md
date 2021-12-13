@@ -2071,11 +2071,11 @@ func server() {
 クライアントは `freeList` からバッファを取得しようとします。利用可能なバッファがない場合は、新しいバッファを割り当てます。サーバが `freeList` に送信すると、`b` がフリーリストに戻されます。ただし、リストがいっぱいになった場合は、バッファが床に落とされ、ガベージコレクタによって回収されます。(select`文の`default`句は、他のケースの準備ができていないときに実行されるので、`select`がブロックすることはありません)。この実装では、わずか数行でリーキーバケットのフリーリストを構築し、バッファリングされたチャンネルとガベージコレクタにブックキーピングを依存しています。
 
 
-## Errors
+## エラー
 
-Library routines must often return some sort of error indication to the caller. As mentioned earlier, Go's multivalue return makes it easy to return a detailed error description alongside the normal return value. It is good style to use this feature to provide detailed error information. For example, as we'll see, `os.Open` doesn't just return a `nil` pointer on failure, it also returns an error value that describes what went wrong.
+ライブラリルーチンは、しばしば何らかのエラー表示を呼び出し側に返さなければなりません。先に述べたように、Goの多値リターンでは、通常のリターン値と一緒に詳細なエラー説明を簡単に返すことができます。この機能を使って、詳細なエラー情報を提供するのが良いスタイルです。例えば、これから説明するように、`os.Open` は失敗すると `nil` ポインタを返すだけでなく、何が悪かったのかを説明するエラー値を返します。
 
-By convention, errors have type `error`, a simple built-in interface.
+規約では，エラーは `error` 型であり，これは単純な組み込みインタフェースです．
 
 ```go
 type error interface {
@@ -2083,15 +2083,14 @@ type error interface {
 }
 ```
 
-A library writer is free to implement this interface with a richer model under the covers, making it possible not only to see the error but also to provide some context. As mentioned, alongside the usual `*os.File` return value, `os.Open` also returns an error value. If the file is opened successfully, the error will be `nil`, but when there is a problem, it will hold an `os.PathError`:
+ライブラリ作成者は、このインターフェースを自由に実装して、よりリッチなモデルをカバーし、エラーを確認するだけでなく、何らかのコンテキストを提供することができます。前述のように、通常の `*os.File` の戻り値の他に、`os.Open` はエラー値も返します。ファイルが正常に開かれた場合、エラー値は `nil` となりますが、問題がある場合は `os.PathError` を保持します。
 
 ```go
-// PathError records an error and the operation and
-// file path that caused it.
+// PathError は，エラーとその原因となった操作と ファイルパスを記録します。
 type PathError struct {
     Op string    // "open", "unlink", etc.
-    Path string  // The associated file.
-    Err error    // Returned by the system call.
+    Path string  // 関連するファイル
+    Err error    // システムコールから返される。
 }
 
 func (e *PathError) Error() string {
@@ -2099,17 +2098,17 @@ func (e *PathError) Error() string {
 }
 ```
 
-PathError's Error generates a string like this:
+PathErrorのErrorは次のような文字列を生成します。
 
 ```sh
 open /etc/passwx: no such file or directory
 ```
 
-Such an error, which includes the problematic file name, the operation, and the operating system error it triggered, is useful even if printed far from the call that caused it; it is much more informative than the plain "no such file or directory".
+このようなエラーには、問題のあるファイル名、操作内容、発生したオペレーティングシステムのエラーなどが含まれており、原因となったコールから離れた場所で出力されたとしても有用です。ただの「no such file or directory」よりもはるかに情報量が多くなります。
 
-When feasible, error strings should identify their origin, such as by having a prefix naming the operation or package that generated the error. For example, in package `image`, the string representation for a decoding error due to an unknown format is "image: unknown format".
+可能であれば、エラー文字列は、エラーを発生させた操作やパッケージを示す接頭辞を付けるなどして、その発生源を明らかにすべきです。例えば、`image`パッケージでは、未知のフォーマットによるデコードエラーの文字列表現は、"image: unknown format "となります。
 
-Callers that care about the precise error details can use a type switch or a type assertion to look for specific errors and extract details. For `PathErrors` this might include examining the internal `Err` field for recoverable failures.
+エラーの詳細を知りたい呼び出し側は、タイプスイッチやタイプアサーションを使って特定のエラーを探し、詳細を抽出することができます。`PathErrors`の場合は、内部の`Err`フィールドを調べて、回復可能な失敗を探すこともできます。
 
 ```go
 for try := 0; try < 2; try++ {
@@ -2125,7 +2124,7 @@ for try := 0; try < 2; try++ {
 }
 ```
 
-The second `if` statement here is another [type assertion](https://golang.org/doc/effective_go#interface_conversions). If it fails, `ok` will be `false`, and `e` will be `nil`. If it succeeds, `ok` will be `true`, which means the error was of type `*os.PathError`, and then so is `e`, which we can examine for more information about the error.
+ここでの2つ目の `if` 文は、もうひとつの [type assertion](https://golang.org/doc/effective_go#interface_conversions)です。失敗すれば `ok` は `false` となり、`e` は `nil` となります。これはエラーが `*os.PathError` 型であることを意味し、`e` も同様にエラーに関する詳細情報を調べることができます。
 
 
 ### Panic
