@@ -2165,11 +2165,11 @@ func init() {
 
 ### Recover
 
-When `panic` is called, including implicitly for run-time errors such as indexing a slice out of bounds or failing a type assertion, it immediately stops execution of the current function and begins unwinding the stack of the goroutine, running any deferred functions along the way. If that unwinding reaches the top of the goroutine's stack, the program dies. However, it is possible to use the built-in function `recover` to regain control of the goroutine and resume normal execution.
+`panic` が呼ばれると、スライスのインデックスが境界外にある場合や型アサーションに失敗した場合などのランタイムエラーに対しても暗黙の了解で、現在の関数の実行を直ちに停止し、goroutine のスタックを巻き戻し始め、途中で遅延した関数をすべて実行するようになります。巻き戻しがゴルーチンのスタックの最上位に到達すると、プログラムは終了します。しかし、ビルトイン関数 `recover` を使って、goroutine の制御を回復し、通常の実行を再開することが可能です。
 
-A call to `recover` stops the unwinding and returns the argument passed to `panic`. Because the only code that runs while unwinding is inside deferred functions, `recover` is only useful inside deferred functions.
+`recover` を呼び出すと巻き戻しが停止し、 `panic` に渡された引数が返されます。巻き戻し中に実行されるコードは遅延した関数の中だけなので、 `recover` はディファード関数の中でしか役に立ちません。
 
-One application of `recover` is to shut down a failing goroutine inside a server without killing the other executing goroutines.
+`recover` のアプリケーションの1つは、サーバー内で失敗したゴルーチンを、他の実行中のゴルーチンを殺すことなくシャットダウンすることです。
 
 ```go
 func server(workChan <-chan *Work) {
@@ -2188,43 +2188,43 @@ func safelyDo(work *Work) {
 }
 ```
 
-In this example, if `do(work)` panics, the result will be logged and the goroutine will exit cleanly without disturbing the others. There's no need to do anything else in the deferred closure; calling `recover` handles the condition completely.
+この例では、もし `do(work)` がパニックに陥った場合、その結果はログに記録され、他のゴルーチンを邪魔することなく、きれいに終了することができます。遅延されたクロージャの中で他に何かをする必要はありません。`recover` を呼び出すことで、その状態を完全に処理することができます。
 
-Because `recover` always returns `nil` unless called directly from a deferred function, deferred code can call library routines that themselves use `panic` and `recover` without failing. As an example, the deferred function in `safelyDo` might call a logging function before calling `recover`, and that logging code would run unaffected by the panicking state.
+`recover` は遅延された関数から直接呼ばれない限り、常に `nil` を返すので、遅延されたコードは `panic` と `recover` を使用するライブラリルーチンを失敗することなく呼び出すことができます。例として、`safelyDo` の遅延された関数は `recover` を呼び出す前にロギング関数を呼び出すかもしれません。そして、ロギングコードはパニック状態の影響を受けずに実行されるでしょう。
 
-With our recovery pattern in place, the `do` function (and anything it calls) can get out of any bad situation cleanly by calling `panic`. We can use that idea to simplify error handling in complex software. Let's look at an idealized version of a `regexp` package, which reports parsing errors by calling `panic` with a local error type. Here's the definition of `Error`, an `error` method, and the `Compile` function.
+この回復パターンがあれば、 `do` 関数 (とそれが呼び出すもの) は `panic` を呼び出すことで、どんな悪い状況からもきれいに抜け出せるようになります。このアイデアを利用して、複雑なソフトウェアのエラー処理を単純化することができます。ここでは、理想化された `regexp` パッケージを見てみましょう。このパッケージは、ローカルなエラータイプで `panic` を呼び出すことで、パースエラーを報告します。ここでは、 `Error` の定義、 `error` メソッド、そして `Compile` 関数を定義しています。
 
 
 ```go
-// Error is the type of a parse error; it satisfies the error interface.
+// Error は解析エラーの型であり、エラーインターフェイスを満たす。
 type Error string
 func (e Error) Error() string {
     return string(e)
 }
 
-// error is a method of *Regexp that reports parsing errors by
-// panicking with an Error.
+// error は *Regexp のメソッドで、
+// パージングエラーを Error でパニックに陥れることで報告します。
 func (regexp *Regexp) error(err string) {
     panic(Error(err))
 }
 
-// Compile returns a parsed representation of the regular expression.
+// Compileは正規表現をパースしたものを返す。
 func Compile(str string) (regexp *Regexp, err error) {
     regexp = new(Regexp)
-    // doParse will panic if there is a parse error.
+    // doParseはパースエラーが発生するとパニックになります。
     defer func() {
         if e := recover(); e != nil {
-            regexp = nil    // Clear return value.
-            err = e.(Error) // Will re-panic if not a parse error.
+            regexp = nil    // 戻り値をクリアする。
+            err = e.(Error) // パースエラーでなければ再パニックします。
         }
     }()
     return regexp.doParse(str), nil
 }
 ```
 
-If `doParse` panics, the recovery block will set the return value to `nil` — deferred functions can modify named return values. It will then check, in the assignment to `err`, that the problem was a parse error by asserting that it has the local type `Error`. If it does not, the type assertion will fail, causing a run-time error that continues the stack unwinding as though nothing had interrupted it. This check means that if something unexpected happens, such as an index out of bounds, the code will fail even though we are using `panic` and `recover` to handle parse errors.
+もし `doParse` がパニックに陥った場合、リカバリブロックは戻り値を `nil` に設定します - 遅延型関数は名前付き戻り値を変更することができます。そして、 `err` への代入で、ローカルタイプ `Error` を持つことを表明して、問題がパースエラーであることをチェックします。もしそうでなければ、型のアサーションは失敗し、ランタイムエラーを引き起こし、何事もなかったかのようにスタックの巻き戻しを継続します。このチェックは、インデックスが範囲外であるなどの予期せぬことが起こった場合、 `panic` と `recover` を使用してパースエラーを処理していても、コードが失敗してしまうことを意味します。
 
-With error handling in place, the `error` method (because it's a method bound to a type, it's fine, even natural, for it to have the same name as the builtin `error` type) makes it easy to report parse errors without worrying about unwinding the parse stack by hand:
+エラー処理を行うことで、 `error` メソッド (これは型にバインドされたメソッドなので、組み込みの `error` 型と同じ名前であっても問題ありません、むしろ自然です) は、手で解析スタックを展開することを気にせずに解析エラーを簡単に報告することができるようになりました。
 
 
 ```go
@@ -2233,9 +2233,9 @@ if pos == 0 {
 }
 ```
 
-Useful though this pattern is, it should be used only within a package. `Parse` turns its internal `panic` calls into `error` values; it does not expose `panics` to its client. That is a good rule to follow.
+このパターンは便利ですが、パッケージ内でのみ使用する必要があります。`Parse` は内部の `panic` 呼び出しを `error` 値に変換します。これは守るべき良いルールです。
 
-By the way, this re-panic idiom changes the panic value if an actual error occurs. However, both the original and new failures will be presented in the crash report, so the root cause of the problem will still be visible. Thus this simple re-panic approach is usually sufficient—it's a crash after all—but if you want to display only the original value, you can write a little more code to filter unexpected problems and re-panic with the original error. That's left as an exercise for the reader.
+ところで、このre-panicイディオムは、実際にエラーが発生した場合にパニックの値を変更します。しかし、クラッシュレポートには元の失敗と新しい失敗の両方が表示されるので、問題の根本的な原因はまだ見えています。しかし、元の値だけを表示したい場合は、もう少しコードを書いて予期しない問題をフィルタリングし、元のエラーで再パニックさせることができます。これは読者のための練習として残しておきます。
 
 ## A web server
 
