@@ -2239,9 +2239,9 @@ if pos == 0 {
 
 ## A web server
 
-Let's finish with a complete Go program, a web server. This one is actually a kind of web re-server. Google provides a service at chart.apis.google.com that does automatic formatting of data into charts and graphs. It's hard to use interactively, though, because you need to put the data into the URL as a query. The program here provides a nicer interface to one form of data: given a short piece of text, it calls on the chart server to produce a QR code, a matrix of boxes that encode the text. That image can be grabbed with your cell phone's camera and interpreted as, for instance, a URL, saving you typing the URL into the phone's tiny keyboard.
+最後に完全なGoプログラムであるWebサーバを紹介しましょう。こちらは実はWebのリサーバーのようなものです。Googleはchart.apis.google.comで、データを自動的にチャートやグラフに整形するサービスを提供しています。しかし、データをクエリとしてURLに入れる必要があるので、対話的に使うのは難しい。このプログラムは、ある形式のデータに対してよりよいインタフェースを提供します。短いテキストを与えると、チャートサーバーを呼び出してQRコード（テキストを符号化したボックスの行列）を生成します。その画像を携帯電話のカメラで撮影し、例えばURLとして解釈することができるので、携帯電話の小さなキーボードにURLを打ち込む手間が省けます。
 
-Here's the complete program. An explanation follows.
+これがそのプログラムです。以下はその説明です。
 
 ```go
 package main
@@ -2292,16 +2292,16 @@ const templateStr = `
 `
 ```
 
-The pieces up to main should be easy to follow. The one flag sets a default HTTP port for our server. The template variable templ is where the fun happens. It builds an HTML template that will be executed by the server to display the page; more about that in a moment.
+mainまでの部分は、簡単に説明できるはずです。one フラグは、サーバーのデフォルトの HTTP ポートを設定します。テンプレート変数templは面白いことが起こるところです。これはページを表示するためにサーバーによって実行されるHTMLテンプレートを構築します; これについては後で詳しく説明します。
 
-The main function parses the flags and, using the mechanism we talked about above, binds the function QR to the root path for the server. Then http.ListenAndServe is called to start the server; it blocks while the server runs.
+main関数はフラグを解析し、上で説明したメカニズムを使って、QR関数をサーバーのルートパスにバインドしています。そして、http.ListenAndServeが呼び出され、サーバーが起動します。
 
-QR just receives the request, which contains form data, and executes the template on the data in the form value named s.
+QRはフォームデータを含むリクエストを受信し、sというフォームの値のデータに対してテンプレートを実行するだけです。
 
-The template package html/template is powerful; this program just touches on its capabilities. In essence, it rewrites a piece of HTML text on the fly by substituting elements derived from data items passed to templ.Execute, in this case the form value. Within the template text (templateStr), double-brace-delimited pieces denote template actions. The piece from {{if .}} to {{end}} executes only if the value of the current data item, called . (dot), is non-empty. That is, when the string is empty, this piece of the template is suppressed.
+html/templateというテンプレート・パッケージは強力なので、このプログラムはその機能に触れただけです。要するに、templ.Executeに渡されたデータ項目（この場合はフォームの値）に由来する要素を代入して、HTMLテキストの一部をその場で書き換えるのです。テンプレート・テキスト（templateStr）内では、二重括弧で区切られた部分がテンプレートのアクションを表します。{{if .}}から{{end}}までの部分は、現在のデータ項目である.(ドット)の値が空でない場合のみ実行されます。つまり、文字列が空の場合、テンプレートのこの部分は抑制されます。
 
-The two snippets {{.}} say to show the data presented to the template—the query string—on the web page. The HTML template package automatically provides appropriate escaping so the text is safe to display.
+2つのスニペット{{.}}は、テンプレートに提示されたデータ（クエリー文字列）をWebページ上に表示することを言います。HTMLテンプレート・パッケージは自動的に適切なエスケープを行うので、テキストは安全に表示されます。
 
-The rest of the template string is just the HTML to show when the page loads. If this is too quick an explanation, see the [documentation](https://golang.org/pkg/html/template/) for the template package for a more thorough discussion.
+テンプレート文字列の残りの部分は、ページが読み込まれたときに表示されるHTMLにすぎません。もしこれが簡単すぎる説明であれば、テンプレートパッケージの[ドキュメント](https://golang.org/pkg/html/template/)を参照して、より詳細な議論をしてください。
 
-And there you have it: a useful web server in a few lines of code plus some data-driven HTML text. Go is powerful enough to make a lot happen in a few lines.
+数行のコードで便利なウェブサーバーと、データ駆動型のHTMLテキストが出来上がりました。Goは数行で多くのことを実現できるほど強力です。
