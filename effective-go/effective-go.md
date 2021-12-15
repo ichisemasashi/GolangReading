@@ -2127,16 +2127,16 @@ for try := 0; try < 2; try++ {
 ここでの2つ目の `if` 文は、もうひとつの [type assertion](https://golang.org/doc/effective_go#interface_conversions)です。失敗すれば `ok` は `false` となり、`e` は `nil` となります。これはエラーが `*os.PathError` 型であることを意味し、`e` も同様にエラーに関する詳細情報を調べることができます。
 
 
-### Panic
+### パニック
 
-The usual way to report an error to a caller is to return an `error` as an extra return value. The canonical `Read` method is a well-known instance; it returns a byte count and an `error`. But what if the error is unrecoverable? Sometimes the program simply cannot continue.
+呼び出し元に対してエラーを報告する通常の方法は、特別な戻り値として `error` を返すことです。典型的な `Read` メソッドはよく知られた例で、バイトカウントと `error` を返します。しかし、もしエラーが回復不可能なものであったらどうでしょうか？時には、単にプログラムを続行できないこともあります。
 
-For this purpose, there is a built-in function `panic` that in effect creates a run-time error that will stop the program (but see the next section). The function takes a single argument of arbitrary type — often a string — to be printed as the program dies. It's also a way to indicate that something impossible has happened, such as exiting an infinite loop.
+この目的のために、実質的にプログラムを停止させるランタイムエラーを生成する組み込み関数 `panic` があります (ただし、次のセクションを参照してください)。この関数は任意の型の引数を1つ取り、多くの場合は文字列です。これはまた、無限ループを抜けるような、何か不可能なことが起こったことを示す方法でもあります。
 
 ```go
-// A toy implementation of cube root using Newton's method.
+// ニュートン法による立方根の実装をおもちゃで再現。
 func CubeRoot(x float64) float64 {
-    z := x/3   // Arbitrary initial value
+    z := x/3   // 任意の初期値
     for i := 0; i < 1e6; i++ {
         prevz := z
         z -= (z*z*z-x) / (3*z*z)
@@ -2144,12 +2144,12 @@ func CubeRoot(x float64) float64 {
             return z
         }
     }
-    // A million iterations has not converged; something is wrong.
+    // 100万回繰り返しても収束しない、何かが間違っている。
     panic(fmt.Sprintf("CubeRoot(%g) did not converge", x))
 }
 ```
 
-This is only an example but real library functions should avoid `panic`. If the problem can be masked or worked around, it's always better to let things continue to run rather than taking down the whole program. One possible counterexample is during initialization: if the library truly cannot set itself up, it might be reasonable to panic, so to speak.
+これはほんの一例ですが、実際のライブラリ関数は `panic` を避けるべきです。もし問題を隠したり回避したりできるのであれば、プログラム全体を停止させるよりも、実行を継続させる方が常に良いことです。もしライブラリが本当に自分自身をセットアップできないのであれば、いわばパニックを起こすのは合理的かもしれません。
 
 
 ```go
