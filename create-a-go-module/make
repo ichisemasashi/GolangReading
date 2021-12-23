@@ -1,0 +1,2 @@
+platex CreateaGoModule.tex
+dvipdfmx CreateaGoModule
