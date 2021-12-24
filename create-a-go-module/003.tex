@@ -1,1 +1,102 @@
 \section{Return and handle an error}
+
+エラー処理は、しっかりしたコードには欠かせない機能です。このセクションでは、\texttt{greetings}モジュールからエラーを返し、呼び出し側でそれを処理するコードを少し追加します。
+
+\begin{enumerate}
+\item \texttt{greetings/greetings.go} に、以下のコードを追加してください。
+
+誰に挨拶すればいいのかわからないのに、挨拶を送り返しても意味がありません。名前が空の場合は発信者にエラーを返します。以下のコードを\texttt{greetings.go}にコピーして、ファイルを保存してください。
+
+\begin{lstlisting}[numbers=none]
+package greetings
+
+import (
+    "errors"
+    "fmt"
+)
+
+// Hello returns a greeting for the named person.
+func Hello(name string) (string, error) {
+    // If no name was given, return an error with a message.
+    if name == "" {
+        return "", errors.New("empty name")
+    }
+
+    // If a name was received, return a value that embeds the name
+    // in a greeting message.
+    message := fmt.Sprintf("Hi, %v. Welcome!", name)
+    return message, nil
+}
+\end{lstlisting}
+
+このコードで、あなたは
+\begin{itemize}
+\item \texttt{string}と\texttt{error}の2つの値を返すように関数を変更する。呼び出し側は、2番目の値をチェックして、エラーが発生したかどうかを確認します。(どんなGo関数でも複数の値を返すことができます。 詳しくは、「Effective Go」を参照してください)。
+\item Go標準ライブラリ\texttt{errors}パッケージをインポートして、\texttt{errors.New}関数を使えるようにします。
+\item \texttt{if}ステートメントを追加して、無効なリクエスト（名前があるべき場所に空の文字列があるかどうか）をチェックし、リクエストが無効な場合はエラーを返します。\texttt{errors.New}関数は、あなたのメッセージを内部に含むエラーを返します。
+\item 成功した返り値の2番目の値として\texttt{nil}（エラーなしという意味）を追加します。そうすれば、呼び出し元は関数が成功したことを確認できます。
+\end{itemize}
+
+
+\item \texttt{hello/hello.go} ファイルで、\texttt{Hello} 関数が現在返しているエラーを、エラーでない値とともに処理します。
+
+次のコードを \texttt{hello.go} に貼り付けます。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "example.com/greetings"
+)
+
+func main() {
+    // Set properties of the predefined Logger, including
+    // the log entry prefix and a flag to disable printing
+    // the time, source file, and line number.
+    log.SetPrefix("greetings: ")
+    log.SetFlags(0)
+
+    // Request a greeting message.
+    message, err := greetings.Hello("")
+    // If an error was returned, print it to the console and
+    // exit the program.
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // If no error was returned, print the returned message
+    // to the console.
+    fmt.Println(message)
+}
+\end{lstlisting}
+
+このコードでは
+
+\begin{itemize}
+\item \texttt{log}パッケージは、ログメッセージの最初にコマンド名\texttt{("greetings: ")}を表示し、タイムスタンプやソースファイル情報を表示しないように設定します。
+\item \texttt{Hello} の戻り値（エラーも含む）を変数に代入する。
+\item \texttt{Hello} の引数を Gladys の名前から空文字列に変更し、エラー処理コードを試せるようにします。
+\item NILでないエラー値を探してください。この場合、続ける意味はありません。
+\item 標準ライブラリの \texttt{log} パッケージの関数を使用して、エラー情報を出力してください。エラーが発生したら、ログパッケージの\texttt{Fatal}関数を使って、エラーを出力し、プログラムを停止させるのです。
+\end{itemize}
+
+\item \texttt{hello}ディレクトリのコマンドラインで、\texttt{hello.go}を実行して、コードが動作することを確認します。
+
+今度は、空の名前を渡すと、エラーが発生します。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+greetings: empty name
+exit status 1
+\end{lstlisting}
+
+\end{enumerate}
+
+
+これはGoの一般的なエラー処理です。エラーを値として返すことで、呼び出し側がエラーを確認することができます。
+
+次に、Goのスライスを使って、ランダムに選ばれた挨拶を返します。
+
