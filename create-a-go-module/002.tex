@@ -1,1 +1,141 @@
 \section{Call your code from another module}
+
+前項では、\texttt{greeting} モジュールを作成しました。この節では、先ほど作成したモジュールの中のHello関数を呼び出すコードを作成します。アプリケーションとして実行可能で、かつ、\texttt{greeting}モジュールのコードを呼び出すコードを記述します。
+
+\begin{enumerate}
+\item Goモジュールのソースコード用に\texttt{hello}ディレクトリを作成します。ここに呼び出し元を書きます。
+
+このディレクトリを作成したら、\texttt{hello}と\texttt{greetings}の両方のディレクトリを、以下のように同じ階層に作成する必要があります。
+
+\begin{lstlisting}[numbers=none]
+<home>/
+ |-- greetings/
+ |-- hello/
+\end{lstlisting}
+
+例えば、コマンドプロンプトが\texttt{greetings}ディレクトリにある場合、次のようなコマンドを使用することができます。
+
+\begin{lstlisting}[numbers=none]
+cd ..
+mkdir hello
+cd hello
+\end{lstlisting}
+
+\item これから書くコードの依存性追跡を有効にする。
+
+あなたのコードの依存性追跡を有効にするには、\texttt{go mod init} コマンドを実行し、あなたのコードが含まれるモジュールの名前を指定します。
+
+このチュートリアルの目的では、モジュールパスに \texttt{example.com/hello} を使用します。
+
+\begin{lstlisting}[numbers=none]
+$ go mod init example.com/hello
+go: creating new go.mod: module example.com/hello
+\end{lstlisting}
+
+
+\item テキストエディタで、\texttt{hello}ディレクトリに、コードを書き込むファイルを作成し、\texttt{hello.go}と名付けます。
+
+\item \texttt{Hello} 関数を呼び出し、関数の戻り値を表示するコードを書いてください。
+
+そのために、次のコードを \texttt{hello.go} に貼り付けます。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+
+    "example.com/greetings"
+)
+
+func main() {
+    // Get a greeting message and print it.
+    message := greetings.Hello("Gladys")
+    fmt.Println(message)
+}
+\end{lstlisting}
+
+
+このコードでは
+
+\begin{itemize}
+\item メインパッケージを宣言する。Goでは、アプリケーションとして実行されるコードは、\texttt{main}パッケージでなければなりません。
+\item \texttt{example.com/greetings} と \texttt{fmt} パッケージの 2 つのパッケージをインポートします。これにより、あなたのコードはこれらのパッケージの関数にアクセスできるようになります。\texttt{example.com/greetings} (先に作成したモジュールに含まれるパッケージ) をインポートすると、\texttt{Hello} 関数にアクセスできるようになります。また、入出力テキストを処理する関数（コンソールへのテキスト出力など）が含まれる \texttt{fmt} もインポートします。
+\item \texttt{greetings}パッケージの\texttt{Hello}関数を呼び出して、挨拶を取得します。
+\end{itemize}
+
+\item \texttt{example.com/hello} モジュールを編集し、ローカルの \texttt{example.com/greetings} モジュールを使用するようにします。
+
+実運用では、\texttt{example.com/greetings} モジュールをリポジトリから公開し、Go ツールがそれを見つけてダウンロードできるようにします（公開場所を反映したモジュールパスで）。今のところ、まだモジュールを公開していないので、\texttt{example.com/hello} モジュールを適応させて、ローカルファイルシステム上の \texttt{example.com/greetings} のコードを見つけられるようにする必要があります。
+
+そのためには、\texttt{go mod edit} コマンドを使って \texttt{example.com/hello} モジュールを編集し、Go tools をそのモジュールパス（モジュールがないところ）からローカルディレクトリ（モジュールがあるところ）にリダイレクトします。
+
+
+\begin{enumerate}
+\item \texttt{hello}ディレクトリのコマンドプロンプトから、以下のコマンドを実行します。
+\begin{lstlisting}[numbers=none]
+$ go mod edit -replace example.com/greetings=../greetings
+\end{lstlisting}
+
+このコマンドは、依存関係を見つける目的で \texttt{example.com/greetings} を \texttt{../greetings} に置き換えるよう指定します。このコマンドを実行した後、\texttt{hello} ディレクトリにある \texttt{go.mod} ファイルは \texttt{replace} ディレクティブを含んでいるはずです。
+
+\begin{lstlisting}[numbers=none]
+module example.com/hello
+
+go 1.16
+
+replace example.com/greetings => ../greetings
+\end{lstlisting}
+
+\item \texttt{hello} ディレクトリのコマンドプロンプトから、\texttt{go mod tidy} コマンドを実行して \texttt{example.com/hello} モジュールの依存関係を同期させ、コードで必要だがまだモジュールで追跡されていないものを追加してください。
+
+\begin{lstlisting}[numbers=none]
+$ go mod tidy
+go: found example.com/greetings in example.com/greetings \\
+v0.0.0-00010101000000-000000000000
+\end{lstlisting}
+
+
+コマンドが完了すると、\texttt{example.com/hello} モジュールの \texttt{go.mod} ファイルは次のようになります。
+
+\begin{lstlisting}[numbers=none]
+module example.com/hello
+
+go 1.16
+
+replace example.com/greetings => ../greetings
+
+require example.com/greetings v0.0.0-00010101000000-000000000000
+\end{lstlisting}
+
+このコマンドは、\texttt{greetings} ディレクトリにあるローカルコードを見つけ、次に \texttt{example.com/hello} が \texttt{example.com/greetings} を必要とすることを指定する \texttt{require} ディレクティブを追加しています。この依存関係は、\texttt{hello.go} で \texttt{greetings} パッケージをインポートしたときに作成されました。
+
+モジュールパスの後に続く数字は擬似バージョン番号で、意味的なバージョン番号（モジュールはまだ持っていません）の代わりに使われる、生成された数字です。
+
+公開されたモジュールを参照するために、\texttt{go.mod} ファイルは通常 \texttt{replace} ディレクティブを省略し、最後にバージョン番号がタグ付けされた \texttt{require} ディレクティブを使用します。
+
+\begin{lstlisting}[numbers=none]
+require example.com/greetings v1.1.0
+\end{lstlisting}
+
+
+バージョン番号の詳細については、「モジュールのバージョン番号付け」を参照してください。
+\end{enumerate}
+
+\item \texttt{hello}ディレクトリのコマンドプロンプトで、作成したコードを実行し、動作を確認します。
+
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+Hi, Gladys. Welcome!
+\end{lstlisting}
+
+\end{enumerate}
+
+
+おめでとうございます。あなたは2つの機能するモジュールを書きました。
+
+次のトピックでは、いくつかのエラー処理を追加します。
+
+
+
