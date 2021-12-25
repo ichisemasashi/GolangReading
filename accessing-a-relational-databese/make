@@ -1,0 +1,2 @@
+platex AccessingDatabase.tex
+dvipdfmx AccessingDatabase
