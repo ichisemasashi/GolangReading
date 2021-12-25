@@ -1,1 +1,115 @@
 \section{Return a random greeting}
+
+このセクションでは、毎回ひとつの挨拶を返すのではなく、あらかじめ定義されたいくつかの挨拶メッセージの中からひとつを返すように、コードを変更します。
+
+
+そのためには、Goのスライスを使います。スライスは配列のようなものですが、項目を追加したり削除したりするとサイズが動的に変化します。スライスは、Goの最も便利な型の1つです。
+
+小さなスライスを追加して3つの挨拶メッセージを格納し、コードがランダムにメッセージの1つを返すようにします。スライスについて詳しくは、Goブログの「Goスライス」をご覧ください。
+
+
+\begin{enumerate}
+\item \texttt{greetings/greetings.go} で、以下のようなコードになるように変更します。
+
+\begin{lstlisting}[numbers=none]
+package greetings
+
+import (
+    "errors"
+    "fmt"
+    "math/rand"
+    "time"
+)
+
+// Hello returns a greeting for the named person.
+func Hello(name string) (string, error) {
+    // 名前が与えられていない場合、メッセージとともにエラーを返す。
+    if name == "" {
+        return name, errors.New("empty name")
+    }
+    // ランダムなフォーマットでメッセージを作成します。
+    message := fmt.Sprintf(randomFormat(), name)
+    return message, nil
+}
+
+// init sets initial values for variables used in the function.
+func init() {
+    rand.Seed(time.Now().UnixNano())
+}
+
+// randomFormat returns one of a set of greeting messages. The returned
+// message is selected at random.
+func randomFormat() string {
+    // メッセージフォーマットのスライス。
+    formats := []string{
+        "Hi, %v. Welcome!",
+        "Great to see you, %v!",
+        "Hail, %v! Well met!",
+    }
+
+    // フォーマットのスライスにランダムなインデックスを指定して、
+    // ランダムに選択されたメッセージフォーマットを返します。
+    return formats[rand.Intn(len(formats))]
+}
+\end{lstlisting}
+このコードでは
+\begin{itemize}
+\item グリーティングメッセージのフォーマットをランダムに返す\texttt{randomFormat}関数を追加する。\texttt{randomFormat} は小文字で始まるので、独自のパッケージ内のコードにのみアクセスできることに注意してください（言い換えれば、エクスポートされません）。
+\item \texttt{randomFormat} では、3 つのメッセージ形式を持つフォーマット・スライスを宣言します。スライスを宣言するときは、[]stringのように括弧の中でサイズを省略します。これは、スライスの基礎となる配列のサイズを動的に変更できることをGoに伝えるものです。
+\item \texttt{math/rand}パッケージを使用して、スライスから項目を選択するための乱数を生成します。
+\item \texttt{init} 関数を追加して、\texttt{rand} パッケージに現在の時刻をシードします。Go はプログラム起動時に、グローバル変数が初期化された後、自動的に \texttt{init} 関数を実行します。\texttt{init} 関数について詳しくは、 Effective Go を参照してください。
+\item \texttt{Hello} では、\texttt{randomFormat} 関数を呼び出して返すメッセージのフォーマットを取得し、フォーマットと名前の値を一緒に使用してメッセージを作成します。
+\item 先ほどと同じように、メッセージ（またはエラー）を返します。
+\end{itemize}
+
+\item \texttt{hello/hello.go}で、以下のようなコードになるように変更します。
+
+これは、\texttt{hello.go} の \texttt{Hello} 関数呼び出しの引数として、Gladysの名前 (別の名前でもかまいません) を追加しているだけです。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "example.com/greetings"
+)
+
+func main() {
+    // ログエントリーのプレフィックスや、時間、ソースファイル、
+    // 行番号の表示を無効にするフラグなど、定義済みLoggerの
+    // プロパティを設定します。
+    log.SetPrefix("greetings: ")
+    log.SetFlags(0)
+
+    // グリーティングメッセージを要求する。
+    message, err := greetings.Hello("Gladys")
+    // エラーが返された場合は、その内容をコンソールに
+    // 表示してプログラムを終了します。
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // エラーが返されない場合、返されたメッセージをコンソールに表示する。
+    fmt.Println(message)
+}
+\end{lstlisting}
+
+\item コマンドラインで、\texttt{hello} ディレクトリで \texttt{hello.go} を実行し、コードが動作することを確認します。複数回実行し、挨拶文が変化することに注意してください。
+\begin{lstlisting}[numbers=none]
+$ go run .
+Great to see you, Gladys!
+
+$ go run .
+Hi, Gladys. Welcome!
+
+$ go run .
+Hail, Gladys! Well met!
+\end{lstlisting}
+\end{enumerate}
+
+
+次に、スライスを使って複数人に挨拶する。
+
+
