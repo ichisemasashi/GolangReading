@@ -60,7 +60,7 @@ $ set PATH=%PATH%;C:\path\to\your\install\directory
 \end{lstlisting}
 \end{itemize}
 
-別の方法として、シェルのパスに既に\texttt{$HOME/bin}のようなディレクトリがあり、そこにGoプログラムをインストールしたい場合、\texttt{go env}コマンドで\texttt{GOBIN}変数を設定することにより、インストール先を変更することができます。
+別の方法として、シェルのパスに既に\texttt{\$HOME/bin}のようなディレクトリがあり、そこにGoプログラムをインストールしたい場合、\texttt{go env}コマンドで\texttt{GOBIN}変数を設定することにより、インストール先を変更することができます。
 
 \begin{lstlisting}[numbers=none]
 $ go env -w GOBIN=/path/to/your/bin
