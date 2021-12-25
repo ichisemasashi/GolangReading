@@ -1,1 +1,94 @@
 \section{Compile and install the application}
+
+この最後のトピックでは、いくつかの新しいgoコマンドを学びます。\texttt{go run} コマンドは、頻繁に変更を加える場合にプログラムをコンパイルして実行するための便利なショートカットですが、バイナリ実行ファイルを生成するわけではありません。
+
+このトピックでは、コードをビルドするための 2 つの追加コマンドを紹介します。
+
+\begin{itemize}
+\item \texttt{go build} コマンドは、パッケージとその依存関係をコンパイルしますが、その結果をインストールすることはありません。
+\item \texttt{go install}コマンドは、パッケージをコンパイルしてインストールします。
+\end{itemize}
+
+\begin{enumerate}
+\item \texttt{hello}ディレクトリのコマンドラインから、\texttt{go build}コマンドを実行して、コードを実行ファイルにコンパイルします。
+\begin{lstlisting}[numbers=none]
+$ go build
+\end{lstlisting}
+
+\item \texttt{hello} ディレクトリのコマンドラインから、新しい \texttt{hello} 実行ファイルを実行し、 コードが動作することを確認します。
+
+ただし、\texttt{greetings.go}のコードをテストした後に変更したかどうかで、結果が異なる場合があります。
+
+LinuxまたはMacの場合。
+\begin{lstlisting}[numbers=none]
+$ ./hello
+map[Darrin:Great to see you, Darrin! Gladys:Hail, Gladys! Well met! Samantha:Hail, Samantha! Well met!]
+\end{lstlisting}
+Windowsの場合。
+\begin{lstlisting}[numbers=none]
+$ hello.exe
+map[Darrin:Great to see you, Darrin! Gladys:Hail, Gladys! Well met! Samantha:Hail, Samantha! Well met!]
+\end{lstlisting}
+
+アプリケーションを実行ファイルにコンパイルして、実行できるようにしました。しかし、現在それを実行するには、プロンプトが実行可能ファイルのディレクトリにあるか、実行可能ファイルのパスを指定する必要があります。
+
+次に、実行ファイルのパスを指定せずに実行できるように、実行ファイルをインストールします。
+
+\item goコマンドで現在のパッケージをインストールするGoインストールパスを検出します。
+
+次の例のように、\texttt{go list}コマンドを実行することでインストールパスを発見することができます。
+
+\begin{lstlisting}[numbers=none]
+$ go list -f '{{.Target}}'
+\end{lstlisting}
+
+例えば、コマンドの出力に \texttt{/home/gopher/bin/hello} と表示された場合、バイナリが \texttt{/home/gopher/bin} にインストールされたことを意味します。次のステップでは、このインストール・ディレクトリが必要になります。
+
+\item システムのシェルパスにGoのインストールディレクトリを追加します。
+
+そうすれば、実行ファイルがある場所を指定せずに、プログラムの実行ファイルを実行できるようになります。
+
+\begin{itemize}
+\item LinuxまたはMacの場合、以下のコマンドを実行します。
+\begin{lstlisting}[numbers=none]
+$ export PATH=$PATH:/path/to/your/install/directory
+\end{lstlisting}
+
+\item Windowsの場合、以下のコマンドを実行します。
+\begin{lstlisting}[numbers=none]
+$ set PATH=%PATH%;C:\path\to\your\install\directory
+\end{lstlisting}
+\end{itemize}
+
+別の方法として、シェルのパスに既に\texttt{$HOME/bin}のようなディレクトリがあり、そこにGoプログラムをインストールしたい場合、\texttt{go env}コマンドで\texttt{GOBIN}変数を設定することにより、インストール先を変更することができます。
+
+\begin{lstlisting}[numbers=none]
+$ go env -w GOBIN=/path/to/your/bin
+\end{lstlisting}
+
+または、
+
+\begin{lstlisting}[numbers=none]
+$ go env -w GOBIN=C:\path\to\your\bin
+\end{lstlisting}
+
+\item シェルのパスを更新したら、\texttt{go install}コマンドを実行して、パッケージをコンパイル・インストールします。
+\begin{lstlisting}[numbers=none]
+$ go install
+\end{lstlisting}
+
+\item アプリケーションの名前を入力するだけで、アプリケーションを実行できます。これを面白くするために、新しいコマンドプロンプトを開いて、どこか他のディレクトリで\texttt{hello}の実行ファイル名を実行してみてください。
+
+\begin{lstlisting}[numbers=none]
+$ hello
+map[Darrin:Hail, Darrin! Well met! Gladys:Great to see you, Gladys! Samantha:Hail, Samantha! Well met!]
+\end{lstlisting}
+\end{enumerate}
+
+
+これで今回のGoチュートリアルは終了です。
+
+
+
+
+
