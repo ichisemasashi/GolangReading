@@ -1,1 +1,115 @@
 \section{Add a test}
+
+さて、コードが安定した状態になったので（よくできました）、テストを追加しましょう。開発中にコードをテストすることで、変更を加える際に混入するバグを発見することができます。このトピックでは、\texttt{Hello} 関数に対するテストを追加します。
+
+Goに組み込まれたユニットテストのサポートにより、実行しながら簡単にテストすることができます。具体的には、命名規則、Go のテストパッケージ、\texttt{go test} コマンドを使うことで、テストを素早く書いて実行することができます。
+
+
+
+
+\begin{enumerate}
+\item \texttt{greetings}ディレクトリに、\texttt{greetings\_test.go}というファイルを作成します。
+
+ファイル名の最後に \texttt{\_test.go} を付けると、\texttt{go test} コマンドに「このファイルにはテスト関数が含まれていますよ」と伝えることができます。
+
+\item \texttt{greetings\_test.go}に、以下のコードを貼り付けて保存してください。
+
+\begin{lstlisting}[numbers=none]
+package greetings
+
+import (
+    "testing"
+    "regexp"
+)
+
+// TestHelloName calls greetings.Hello with a name, checking
+// for a valid return value.
+func TestHelloName(t *testing.T) {
+    name := "Gladys"
+    want := regexp.MustCompile(`\b`+name+`\b`)
+    msg, err := Hello("Gladys")
+    if !want.MatchString(msg) || err != nil {
+        t.Fatalf(`Hello("Gladys") = %q, %v, want match for %#q, nil`, msg, err, want)
+    }
+}
+
+// TestHelloEmpty calls greetings.Hello with an empty string,
+// checking for an error.
+func TestHelloEmpty(t *testing.T) {
+    msg, err := Hello("")
+    if msg != "" || err == nil {
+        t.Fatalf(`Hello("") = %q, %v, want "", error`, msg, err)
+    }
+}
+\end{lstlisting}
+
+このコードでは
+\begin{itemize}
+\item テストするコードと同じパッケージでテスト関数を実装する。
+\item \texttt{greetings.Hello} 関数をテストするために、2つのテスト関数を作成します。テスト関数の名前は \texttt{TestName} という形式で、\texttt{Name} は特定のテストについて何かを表します。また、テスト関数は、パラメータとしてテストパッケージの \texttt{testing.T} 型へのポインタを取ります。このパラメータのメソッドを使用して、テストからのレポートやログを取得します。
+\item 2 つのテストを実装します。
+\begin{itemize}
+\item \texttt{TestHelloName} は \texttt{Hello} 関数を呼び出し、関数が有効な応答メッセージを返すことができるような名前の値を渡します。呼び出しがエラーまたは予期しない応答メッセージ (渡した名前を含まないもの) を返した場合、t パラメータの \texttt{Fatalf} メソッドを使用してコンソールにメッセージを表示し、実行を終了します。
+\item \texttt{TestHelloEmpty} は、Hello関数を空の文字列で呼び出します。このテストは、エラー処理が正常に動作することを確認するためのものです。もし、この呼び出しが空でない文字列を返すか、エラーがなければ、tパラメータのFatalfメソッドを使用して、コンソールにメッセージを表示して、実行を終了します。
+\end{itemize}
+\end{itemize}
+
+\item \texttt{greetings}ディレクトリのコマンドラインで、\texttt{go test}コマンドを実行し、テストを実行します。
+
+\texttt{go test}コマンドは、テストファイル（名前が\texttt{\_test.go}で終わる）内のテスト関数（名前が\texttt{Test}で始まる）を実行します。\texttt{v} フラグを追加すると、すべてのテストとその結果を一覧表示する詳細な出力を得ることができます。
+
+テストは成功するはずです。
+
+\begin{lstlisting}[numbers=none]
+$ go test
+PASS
+ok      example.com/greetings   0.364s
+
+$ go test -v
+=== RUN   TestHelloName
+--- PASS: TestHelloName (0.00s)
+=== RUN   TestHelloEmpty
+--- PASS: TestHelloEmpty (0.00s)
+PASS
+ok      example.com/greetings   0.372s
+\end{lstlisting}
+
+\item \texttt{greetings.Hello}関数を壊して、失敗したテストを表示します。
+
+\texttt{TestHelloName}テスト関数は、\texttt{Hello}関数のパラメータとして指定した名前の戻り値をチェックします。失敗したテスト結果を表示するには、\texttt{greetings.Hello}関数に名前を含めないように変更します。
+
+\texttt{greetings/greetings.go} で、\texttt{Hello}関数の代わりに以下のコードを貼り付けてください。ハイライトされた行は、\texttt{name} 引数が誤って削除されたかのように、関数が返す値を変更することに注意してください。
+
+\begin{lstlisting}[numbers=none]
+// Hello returns a greeting for the named person.
+func Hello(name string) (string, error) {
+    // 名前が与えられていない場合、メッセージとともにエラーを返す。
+    if name == "" {
+        return name, errors.New("empty name")
+    }
+    // ランダムなフォーマットでメッセージを作成します。
+    // message := fmt.Sprintf(randomFormat(), name)
+    message := fmt.Sprint(randomFormat())
+    return message, nil
+}
+\end{lstlisting}
+
+\item \texttt{greetings}ディレクトリのコマンドラインで、\texttt{go test}を実行し、テストを実行します。
+
+今回は、\texttt{-v}フラグを付けずに\texttt{go test}を実行してください。失敗したテストだけの結果が出力されるので、たくさんのテストがある場合に便利です。\texttt{TestHelloName} テストは失敗するはずですが、\texttt{TestHelloEmpty} はまだパスしています。
+
+\begin{lstlisting}[numbers=none]
+$ go test
+--- FAIL: TestHelloName (0.00s)
+    greetings_test.go:15: Hello("Gladys") = "Hail, %v! Well met!", <nil>, want match for `\bGladys\b`, nil
+FAIL
+exit status 1
+FAIL    example.com/greetings   0.182s
+\end{lstlisting}
+
+\end{enumerate}
+
+
+次の（そして最後の）トピックでは、コードをコンパイルしてインストールし、ローカルで実行する方法について説明します。
+
+
