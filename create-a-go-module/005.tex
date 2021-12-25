@@ -1,1 +1,135 @@
 \section{Return greetings for multiple people}
+
+モジュールのコードに加える最後の変更点として、一度のリクエストで複数の人の挨拶を取得するためのサポートを追加します。つまり、複数の値の入力を処理し、その入力の値と複数の値の出力のペアを作成します。そのためには、挨拶文を返す関数に名前の集合を渡す必要があります。
+
+しかし、難点がある。Hello関数のパラメータを単一の名前から一連の名前に変更すると、関数のシグネチャが変更されます。もし、example.com/greetings モジュールを既に公開していて、ユーザーが既に Hello を呼ぶコードを書いていた場合、この変更は彼らのプログラムを壊してしまうでしょう。
+
+このような場合、より良い選択は、異なる名前の新しい関数を書くことです。この新しい関数は複数のパラメータを取ります。これにより、後方互換性のために古い関数が保存されます。
+
+\begin{enumerate}
+\item greetings/greetings.go で、以下のようなコードになるように変更します。
+
+\begin{lstlisting}[numbers=none]
+package greetings
+
+import (
+    "errors"
+    "fmt"
+    "math/rand"
+    "time"
+)
+
+// Hello returns a greeting for the named person.
+func Hello(name string) (string, error) {
+    // 名前が与えられていない場合、メッセージとともにエラーを返す。
+    if name == "" {
+        return name, errors.New("empty name")
+    }
+    // ランダムなフォーマットでメッセージを作成します。
+    message := fmt.Sprintf(randomFormat(), name)
+    return message, nil
+}
+
+// Hellos returns a map that associates each of the named people
+// with a greeting message.
+func Hellos(names []string) (map[string]string, error) {
+    // 名前とメッセージを関連付けるためのマップ。
+    messages := make(map[string]string)
+    // 受信した名前のスライスをループし、Hello関数を呼び出して
+    // 各名前に対応するメッセージを取得します。
+    for _, name := range names {
+        message, err := Hello(name)
+        if err != nil {
+            return nil, err
+        }
+        // マップ内で、取得したメッセージと名前を関連付ける。
+        messages[name] = message
+    }
+    return messages, nil
+}
+
+// Init sets initial values for variables used in the function.
+func init() {
+    rand.Seed(time.Now().UnixNano())
+}
+
+// randomFormat returns one of a set of greeting messages. The returned
+// message is selected at random.
+func randomFormat() string {
+    // メッセージフォーマットのスライス。
+    formats := []string{
+        "Hi, %v. Welcome!",
+        "Great to see you, %v!",
+        "Hail, %v! Well met!",
+    }
+
+    // ランダムに選択されたメッセージフォーマットの一つを返す。
+    return formats[rand.Intn(len(formats))]
+}
+\end{lstlisting}
+
+このコードでは
+\begin{itemize}
+\item パラメータが単一の名前ではなく、名前のスライスである\texttt{Hellos}関数を追加する。また、戻り値の型を文字列からマップに変更し、挨拶メッセージにマッピングされた名前を返すことができるようにしました。
+\item 新しい \texttt{Hellos} 関数は、既存の \texttt{Hello} 関数を呼び出すようにします。こうすることで、重複を減らしつつ、両方の関数を残すことができます。
+\item メッセージマップを作成し、受け取った名前（キー）と生成されたメッセージ（値）を関連付けます。Goでは、次の構文でマップを初期化します： \texttt{make(map[key-type]value-type)}. \texttt{Hellos}関数は、このマップを呼び出し元に返します。マップについて詳しくは、GoブログのGo maps in actionを参照してください。
+\item 関数が受け取った名前をループして、それぞれが空でない値を持っていることをチェックし、それぞれにメッセージを関連付けます。この \texttt{for} ループでは、\texttt{range} はループ内の現在のアイテムのインデックスとアイテムの値のコピーの 2 つの値を返します。インデックスが不要なので、Goの空白識別子（アンダースコア）を使って無視しています。詳しくは、Effective Goの「ブランク識別子」を参照してください。
+\end{itemize}
+
+\item hello/hello.goの呼び出しコードで、名前のスライスを渡し、戻ってきたnames/messagesマップの内容を表示します。
+
+hello.go で、コードを以下のように変更してください。
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "example.com/greetings"
+)
+
+func main() {
+    // ログエントリーのプレフィックスや、時間、ソースファイル、
+    // 行番号の表示を無効にするフラグなど、定義済みLoggerの
+    // プロパティを設定します。
+    log.SetPrefix("greetings: ")
+    log.SetFlags(0)
+
+    // 名前のスライス。
+    names := []string{"Gladys", "Samantha", "Darrin"}
+
+    // 名前に対するグリーティングメッセージを要求する。
+    messages, err := greetings.Hellos(names)
+    if err != nil {
+        log.Fatal(err)
+    }
+    // エラーが返されない場合、返されたメッセージの
+    // マップをコンソールに表示する。
+    fmt.Println(messages)
+}
+\end{lstlisting}
+この変更で、あなたは
+\begin{itemize}
+\item 3つの名前を保持するスライス型として、\texttt{names}変数を作成する。
+\item \texttt{names} 変数を \texttt{Hellos} 関数の引数として渡す。
+\end{itemize}
+
+\item コマンドラインで hello/hello.go のあるディレクトリに移動し、go run でコードが動作することを確認します。
+
+出力は、名前とメッセージを関連づけたマップの文字列表現で、次のようなものです。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+map[Darrin:Hail, Darrin! Well met! Gladys:Hi, Gladys. Welcome! Samantha:Hail, Samantha! Well met!]
+\end{lstlisting}
+
+\end{enumerate}
+
+
+
+このトピックでは、名前と値のペアを表現するためのマップを紹介しました。また、モジュールの新機能や変更機能に対して新しい関数を実装することで、後方互換性を維持する考え方も紹介しました。後方互換性については、Keeping your modules compatibilityを参照してください。
+
+次に、組み込みの Go 機能を使用してコードのユニットテストを作成します。
