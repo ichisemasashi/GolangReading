@@ -1,0 +1,19 @@
+このチュートリアルでは、Goとその標準ライブラリのdatabase/sqlパッケージを使ってリレーショナルデータベースにアクセスするための基本的な方法を紹介します。
+
+Go とそのツールの基本的な知識があれば、このチュートリアルを最大限に活用することができます。Go に初めて触れる方は、「Go を使い始める」チュートリアルをご覧ください。
+
+使用するdatabase/sqlパッケージには、データベースへの接続、トランザクションの実行、実行中の操作のキャンセルなどのための型と関数が含まれています。パッケージの使用方法の詳細については、「データベースへのアクセス」 を参照してください。
+
+このチュートリアルでは、データベースを作成し、そのデータベースにアクセスするためのコードを記述します。サンプルプロジェクトは、ビンテージジャズのレコードに関するデータのリポジトリになります。
+
+このチュートリアルでは、以下のセクションを進めていきます。
+
+\begin{enumerate}
+\item Create a folder for your code.
+\item Set up a database.
+\item Import the database driver.
+\item Get a database handle and connect.
+\item Query for multiple rows.
+\item Query for a single row.
+\item Add data.
+\end{enumerate}
