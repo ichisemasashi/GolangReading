@@ -1,0 +1,93 @@
+\section{Set up a database}
+
+このステップでは、作業対象となるデータベースを作成します。DBMS自体のCLIを使用して、データベースとテーブルを作成し、データを追加していきます。
+
+ここでは、ジャズのビンテージ盤に関するデータを含むデータベースを作成します。
+
+このコードでは MySQL の CLI を使用していますが、ほとんどの DBMS には同様の機能を持つ独自の CLI があります。
+
+\begin{enumerate}
+
+\item 新しいコマンドプロンプトを開きます。
+
+\item コマンドラインで、MySQLの場合は以下の例のように、お使いのDBMSにログインしてください。
+
+\begin{lstlisting}[numbers=none]
+$ mysql -u root -p
+Enter password:
+
+mysql>
+\end{lstlisting}
+
+\item mysqlのコマンドプロンプトで、データベースを作成する。
+
+\begin{lstlisting}[numbers=none]
+mysql> create database recordings;
+\end{lstlisting}
+
+\item 先ほど作成したデータベースに変更し、テーブルを追加できるようにします。
+
+\begin{lstlisting}[numbers=none]
+mysql> use recordings;
+Database changed
+\end{lstlisting}
+
+\item テキストエディタで、\texttt{data-access} フォルダに \texttt{create-tables.sql} というファイルを作成し、テーブルを追加するための SQL スクリプトを格納します。
+
+\item そのファイルに、以下のSQLコードを貼り付けて、保存してください。
+
+\begin{lstlisting}[numbers=none]
+DROP TABLE IF EXISTS album;
+CREATE TABLE album (
+  id         INT AUTO_INCREMENT NOT NULL,
+  title      VARCHAR(128) NOT NULL,
+  artist     VARCHAR(255) NOT NULL,
+  price      DECIMAL(5,2) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO album
+  (title, artist, price)
+VALUES
+  ('Blue Train', 'John Coltrane', 56.99),
+  ('Giant Steps', 'John Coltrane', 63.99),
+  ('Jeru', 'Gerry Mulligan', 17.99),
+  ('Sarah Vaughan', 'Sarah Vaughan', 34.98);
+\end{lstlisting}
+
+このSQLコードでは
+
+\begin{itemize}
+\item \texttt{album}というテーブルを削除（ドロップ）します。このコマンドを最初に実行すると、後でテーブルをやり直したいときにスクリプトを再実行しやすくなります。
+
+\item \texttt{title}、\texttt{artist}、\texttt{price}の4つのカラムを持つアルバム・テーブルを作成します。各行の \texttt{id} 値は、DBMS によって自動的に作成されます。
+
+\item 値を持つ 3 つの行を追加します。
+\end{itemize}
+
+\item mysqlのコマンドプロンプトから、先ほど作成したスクリプトを実行します。
+
+\texttt{source}コマンドを以下のような形で使用します。
+
+\begin{lstlisting}[numbers=none]
+mysql> source /path/to/create-tables.sql
+\end{lstlisting}
+
+\item DBMS のコマンドプロンプトで、\texttt{SELECT} 文を使用して、データ付きのテーブルが正常に作成されたことを確認します。
+
+\begin{lstlisting}[numbers=none]
+mysql> select * from album;
++----+---------------+----------------+-------+
+| id | title         | artist         | price |
++----+---------------+----------------+-------+
+|  1 | Blue Train    | John Coltrane  | 56.99 |
+|  2 | Giant Steps   | John Coltrane  | 63.99 |
+|  3 | Jeru          | Gerry Mulligan | 17.99 |
+|  4 | Sarah Vaughan | Sarah Vaughan  | 34.98 |
++----+---------------+----------------+-------+
+4 rows in set (0.00 sec)
+\end{lstlisting}
+\end{enumerate}
+
+次に、問い合わせができるように、接続するためのGoのコードを書きます。
+
