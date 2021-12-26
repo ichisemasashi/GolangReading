@@ -1,0 +1,40 @@
+\section{Create a folder for your code}
+
+はじめに、これから書くコードのためのフォルダを作成します。
+
+\begin{enumerate}
+\item コマンドプロンプトを開き、自分のホームディレクトリに移動します。
+
+LinuxまたはMacの場合。
+
+\begin{lstlisting}[numbers=none]
+$ cd
+\end{lstlisting}
+
+Windowsの場合
+
+\begin{lstlisting}[numbers=none]
+C:\> cd %HOMEPATH%
+\end{lstlisting}
+
+このチュートリアルの残りの部分では、プロンプトとして$を表示します。使用するコマンドは、Windowsでも動作します。
+
+\item コマンドプロンプトから、data-accessというコード用のディレクトリを作成します。
+
+\begin{lstlisting}[numbers=none]
+$ mkdir data-access
+$ cd data-access
+\end{lstlisting}
+
+\item このチュートリアルで追加する依存関係を管理するためのモジュールを作成します。
+
+\texttt{go mod init}コマンドを実行し、新しいコードのモジュールパスを指定します。
+
+
+このコマンドは\texttt{go.mod}ファイルを作成し、そこにあなたが追加した依存関係をトラッキングするためにリストアップします。詳しくは、依存関係を管理するを参照してください。
+
+**注意**: 実際の開発では、より自分のニーズに合ったモジュールパスを指定することになるでしょう。詳しくは、依存関係の管理を参照してください。
+
+\end{enumerate}
+
+次に、データベースを作成します。
