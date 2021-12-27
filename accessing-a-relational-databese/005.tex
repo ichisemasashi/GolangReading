@@ -1,0 +1,32 @@
+\section{Find and import a database driver}
+
+さて、データベースといくつかのデータを手に入れたら、Goのコードを書き始めましょう。
+
+データベースドライバを見つけてインポートし、 \texttt{database/sql} パッケージの関数を使ったリクエストをデータベースが理解できるリクエストに変換します。
+
+\begin{enumerate}
+\item ブラウザで、SQLDrivers wiki ページにアクセスし、使用できるドライバを確認します。
+
+ページにあるリストを使って、使用するドライバを特定します。このチュートリアルでは、MySQLにアクセスするために、\texttt{Go-MySQL-Driver}を使用します。
+
+\item ドライバのパッケージ名（ここでは\texttt{github.com/go-sql-driver/mysql}）をメモしておきます。
+
+\item テキストエディタでGoのコードを書くファイルを作成し、先ほど作成した\texttt{data-access}ディレクトリに\texttt{main.go}という名前で保存します。
+
+\item \texttt{main.go}に、ドライバパッケージをインポートするための以下のコードを貼り付けます。
+\begin{lstlisting}[numbers=none]
+package main
+
+import "github.com/go-sql-driver/mysql"
+\end{lstlisting}
+
+このコードの中では、
+\begin{itemize}
+\item コードをメインパッケージに追加し、独立して実行できるようにします。
+
+\item MySQL ドライバ \texttt{github.com/go-sql-driver/mysql} をインポートします。
+\end{itemize}
+
+\end{enumerate}
+
+ドライバをインポートしたら、データベースにアクセスするためのコードを書き始めることになります。
