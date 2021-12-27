@@ -1,0 +1,2 @@
+platex effective-go.tex
+dvipdfmx effective-go

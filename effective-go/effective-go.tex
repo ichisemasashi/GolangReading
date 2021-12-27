@@ -1,0 +1,2620 @@
+\documentclass{jsarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings, jlisting}
+{\lstset{
+    frame=single,
+    basicstyle=\ttfamily,
+    numbers=left,
+    numbersep=10pt,
+    tabsize=4,
+    extendedchars=true,
+    xleftmargin=17pt,
+    lineskip=-0.8ex,
+    framexleftmargin=17pt
+}
+
+
+\begin{document}
+\section{Effective Go}
+
+\subsection{はじめに}
+
+Goは新しい言語です。既存の言語からアイデアを借りていますが、特殊な性質を持っているため、効果的なGoプログラムは、親戚の言語で書かれたプログラムとは異なる性質を持っています。C++やJavaのプログラムを単純にGoに翻訳しても、満足のいく結果は得られないでしょう。一方、Goの視点から問題を考えれば、成功するかもしれないが、まったく違うプログラムができるかもしれない。つまり、Goをうまく書くためには、その特性やイディオムを理解することが重要です。また、名前の付け方や書式、プログラムの組み立て方など、Goでプログラミングするための確立された慣習を知っておくことも重要です。そうすれば、あなたが書いたプログラムは、他のGoプログラマーにとって理解しやすいものになるでしょう。
+
+このドキュメントは、明快で慣用的なGoコードを書くためのヒントを提供します。最初に読むべき{言語仕様書}、{Tour
+of Go}、{How to Write Go Code}を補強するものです。
+
+\subsubsection{例}
+
+{Goパッケージソース}は、コアライブラリとしてだけでなく、言語の使い方の例としても役立つことを目的としています。さらに、多くのパッケージには、動作する自己完結型の実行例が含まれており、{golang.org}のウェブサイトから直接実行することができます。例えば、{this
+one}などです（必要に応じて、「Example」をクリックして開いてください）。問題にどのように取り組むか、何かをどのように実装するかについて疑問がある場合、ライブラリのドキュメント、コード、例題、答え、アイデア、背景を提供してくれます。
+
+\subsection{フォーマットについて}
+
+フォーマットの問題は、最も議論の多い問題ですが、最も影響の少ない問題でもあります。人々は異なるフォーマットのスタイルに適応することができますが、その必要がない方が良いでしょうし、皆が同じスタイルを守っていれば、話題に割く時間も少なくて済みます。問題は、長い規定のスタイルガイドなしに、このユートピアにどうアプローチするかです。
+
+Goでは通常とは異なるアプローチをとり、ほとんどのフォーマット問題を機械に任せています。\texttt{gofmt}プログラム（ソースファイルレベルではなくパッケージレベルで動作する\texttt{go\ fmt}としても利用可能）は、Goプログラムを読み、インデントや垂直方向の配置などの標準的なスタイルでソースを出力し、コメントを保持し、必要に応じて再フォーマットします。もし、答えが正しくないようであれば、プログラムを再構成して
+(あるいは、\texttt{gofmt}
+に関するバグを報告して)ください。わざわざ時間をかける必要はありません。
+
+例えば，構造体の各フィールドのコメントを並べるのに時間をかける必要はありません．\texttt{Gofmt}
+がそのようにしてくれます。次のような宣言があるとします。
+
+\begin{lstlisting}[numbers=none]
+type T struct {
+    name string // name of the object
+    value int // its value
+}
+\end{lstlisting}
+
+\texttt{gofmt} は列を並べます。
+
+\begin{lstlisting}[numbers=none]
+type T struct {
+    name    string // name of the object
+    value   int    // its value
+}
+\end{lstlisting}
+
+標準パッケージのすべての Go コードは \texttt{gofmt}
+でフォーマットされています。
+
+いくつかのフォーマットの詳細は残っています。とても簡単に言うと
+
+\begin{itemize}
+\item
+  インデント
+
+  \begin{itemize}
+  \item
+    インデントにはタブを使用します。\texttt{gofmt}
+    はデフォルトでタブを出力します。必要に応じてスペースを使用してください。
+  \end{itemize}
+\item
+  行の長さ
+
+  \begin{itemize}
+  \item
+    Go
+    には行数の制限はありません。パンチカードから溢れてしまう心配はありません。行が長すぎると感じた場合は、行を折り返し、タブでインデントしてください。
+  \end{itemize}
+\item
+  括弧の数
+
+  \begin{itemize}
+  \item
+    制御構造(\texttt{if}, \texttt{for},
+    \texttt{switch})の構文には括弧がありませんので、GoはCやJavaよりも少ない括弧で済みます。また、演算子の優先順位の階層は、より短く、より明確になっています。だから
+
+\begin{lstlisting}[numbers=none]
+x<<8 + y<<16
+\end{lstlisting}
+
+    は、他の言語とは異なり、その間隔が意味するところを意味します。
+  \end{itemize}
+\end{itemize}
+
+\subsection{コメント}
+
+Goには、Cスタイルの \texttt{/*\ */} ブロックコメントとC++スタイルの
+\texttt{//}
+ラインコメントがあります。ブロックコメントは、主にパッケージのコメントとして表示されますが、式の中で使用したり、コードの大部分を無効にするのに便利です。
+
+プログラム（およびウェブサーバー）の \texttt{godoc} は、Go
+のソースファイルを処理して、パッケージの内容に関するドキュメントを抽出します。トップレベルの宣言の前に現れるコメント（間に改行がない）は、宣言と一緒に抽出され、その項目の説明テキストとして使用されます。これらのコメントの性質やスタイルは、\texttt{godoc}
+が作成するドキュメントの品質を決定します。
+
+すべてのパッケージは、パッケージ節の前のブロックコメントであるパッケージコメントを持つべきです。マルチファイルパッケージの場合、パッケージコメントは1つのファイルに存在するだけでよく、どのファイルでも構いません。パッケージコメントは、パッケージを紹介し、パッケージ全体に関連する情報を提供する必要があります。パッケージコメントは
+\texttt{godoc}
+ページで最初に表示され、その後に続く詳細なドキュメントを設定します。
+
+\begin{lstlisting}[numbers=none]
+/*
+Package regexp implements a simple library for regular expressions.
+
+The syntax of the regular expressions accepted is:
+
+    regexp:
+        concatenation { '|' concatenation }
+    concatenation:
+        { closure }
+    closure:
+        term [ '*' | '+' | '?' ]
+    term:
+        '^'
+        '$'
+        '.'
+        character
+        '[' [ '^' ] character-ranges ']'
+        '(' regexp ')'
+*/
+package regexp
+\end{lstlisting}
+
+パッケージがシンプルなものであれば、パッケージのコメントは簡潔で構いません。
+
+\begin{lstlisting}[numbers=none]
+// Package path implements utility routines for
+// manipulating slash-separated filename paths.
+\end{lstlisting}
+
+コメントには、星のバナーのような余分なフォーマットは必要ありません。生成される出力は、固定幅のフォントで表示されないこともありますので、アライメントをスペーシングに依存してはいけません。\texttt{godoc}は、\texttt{gofmt}と同様に、そのような処理を行います。コメントは解釈されないプレーンテキストですので、HTMLや
+\texttt{\_this\_}
+のような注釈はそのまま再現されますので、使わないようにしてください。\texttt{godoc}が行う調整の一つは、インデントされたテキストを固定幅のフォントで表示することで、プログラムのスニペットに適しています。{fmt
+パッケージ}のパッケージコメントでは、これが効果的に使われています。
+
+文脈によっては、\texttt{godoc}
+はコメントを再フォーマットしないかもしれませんので、
+正しいスペル、句読点、文の構造を使い、長い行を折りたたむなどして、
+コメントが正しく見えるようにしてください。
+
+パッケージ内では、トップレベルの宣言の直前にあるコメントは、その宣言のdocコメントとして機能します。プログラムの中でエクスポートされる（大文字の）名前には、必ず
+doc コメントを付ける必要があります。
+
+doc
+コメントは完全な文として使うのが最も効果的で、さまざまな自動プレゼンテーションが可能になります。最初の文は、宣言される名前で始まる1文の要約でなければなりません。
+
+\begin{lstlisting}[numbers=none]
+// Compile parses a regular expression and returns, if successful,
+// a Regexp that can be used to match against text.
+func Compile(str string) (*Regexp, error) {
+\end{lstlisting}
+
+すべてのdocコメントが説明する項目の名前で始まる場合、{go}ツールの{doc}サブコマンドを使用して、出力を\texttt{grep}で実行することができます。「Compile」という名前は覚えていないが、正規表現の解析機能を探していたので、次のようなコマンドを実行したと想像してみてください。
+
+\begin{lstlisting}[numbers=none]
+$ go doc -all regexp | grep -i parse
+\end{lstlisting}
+
+パッケージ内のすべてのdocコメントが「この関数は\ldots」で始まっていたら、\texttt{grep}では名前を覚えることができません。しかし、パッケージはそれぞれのドキュメントコメントを名前で始めているので、次のようなものが表示され、探している単語を思い出すことができます。
+
+\begin{lstlisting}[numbers=none]
+$ go doc -all regexp | grep -i parse
+    Compile parses a regular expression and returns, if successful, a Regexp
+    MustCompile is like Compile but panics if the expression cannot be parsed.
+    parsed. It simplifies safe initialization of global variables holding
+$
+\end{lstlisting}
+
+Goの宣言構文では、宣言をグループ化することができます。1つのdocコメントで、関連する定数や変数のグループを紹介することができます。宣言全体が提示されるので、このようなコメントはしばしばその場しのぎになってしまいます。
+
+\begin{lstlisting}[numbers=none]
+// Error codes returned by failures to parse an expression.
+var (
+    ErrInternal      = errors.New("regexp: internal error")
+    ErrUnmatchedLpar = errors.New("regexp: unmatched '('")
+    ErrUnmatchedRpar = errors.New("regexp: unmatched ')'")
+    ...
+)
+\end{lstlisting}
+
+グループ化は、変数のセットがミューテックスで保護されていることなど、アイテム間の関係を示すこともできます。
+
+\begin{lstlisting}[numbers=none]
+var (
+    countLock   sync.Mutex
+    inputCount  uint32
+    outputCount uint32
+    errorCount  uint32
+)
+\end{lstlisting}
+
+\subsection{名前}
+
+名前は、他の言語と同様、Goにおいても重要です。名前には意味上の効果もあります。パッケージの外にある名前の可視性は、その最初の文字が大文字かどうかで決まります。そのため、Goプログラムの命名規則について少し時間を割いてみましょう。
+
+\subsubsection{パッケージ名}
+
+パッケージがインポートされると、パッケージ名がコンテンツへのアクセッサとなります。以降は
+
+\begin{lstlisting}[numbers=none]
+import "bytes"
+\end{lstlisting}
+
+インポートされたパッケージは、\texttt{bytes.Buffer}について語ることができます。パッケージを使用する全員が、その内容を参照するために同じ名前を使用できると便利です。つまり、パッケージ名は、短く、簡潔で、連想させるような良い名前でなければなりません。慣習的に、パッケージには小文字の単一単語の名前が付けられます。アンダースコアや大文字小文字の混在は必要ありません。あなたのパッケージを使用するすべての人がその名前をタイプすることになるので、簡潔なものを選びましょう。また、先入観で衝突を心配する必要はありません。パッケージ名はインポート時のデフォルト名に過ぎず、すべてのソースコードで一意である必要はありません。また、まれに衝突した場合、インポートするパッケージはローカルで使用する別の名前を選ぶことができます。いずれにしても、インポート時のファイル名でどのパッケージが使われているかが決まるため、混乱することはまずありません。
+
+もうひとつの慣例は、パッケージ名はそのソースディレクトリのベースネームであるということです。\texttt{src/encoding/base64}にあるパッケージは、\texttt{"encoding/base64"}としてインポートされますが、名前は\texttt{base64}であり、\texttt{encoding\_base64}でも\texttt{encodingBase64}でもありません。
+
+パッケージのインポーターはその名前を使ってパッケージの内容を参照するので、パッケージ内でエクスポートされた名前はその事実を利用して繰り返しを避けることができます。(\texttt{import}
+.表記は、テスト対象のパッケージの外で実行しなければならないテストを簡略化することができますが、避けたほうがいいでしょう)。例えば、\texttt{bufio}パッケージのバッファードリーダータイプは、\texttt{BufReader}ではなく\texttt{Reader}と呼ばれていますが、これはユーザーがそれを\texttt{bufio.Reader}と見るからであり、これは明確で簡潔な名前です。さらに，インポートされた実体は常にパッケージ名で表されるので，\texttt{bufio.Reader}は\texttt{io.Reader}と衝突することはありません．同様に、\texttt{ring.Ring}の新しいインスタンスを作成する関数（これはGoにおけるコンストラクタの定義です）は、通常は\texttt{NewRing}と呼ばれますが、\texttt{Ring}はパッケージがエクスポートする唯一の型であり、パッケージは\texttt{ring}と呼ばれるので、単に\texttt{New}と呼ばれ、パッケージのクライアントは\texttt{ring.New}として見ることができます。パッケージのクライアントには
+\texttt{ring.New}
+と表示されます。パッケージの構造を参考にして、良い名前を選んでください。
+
+もう一つの短い例は、\texttt{once.Do}です。\texttt{once.Do(setup)}はよく読めますし、\texttt{once.DoOrWaitUntilDone(setup)}と書いても改善されません。長い名前は自動的に読みやすくなるわけではありません。役に立つドキュメントコメントの方が、余分に長い名前よりも価値がある場合があります。
+
+\subsubsection{Getters}
+
+Go
+はゲッターとセッターを自動的にはサポートしません。自分でゲッターやセッターを用意することは悪いことではありませんし、そうすることが適切な場合もありますが、ゲッターの名前に
+\texttt{Get}
+を入れることは慣用的でも必要でもありません。\texttt{owner}（小文字、unexported）というフィールドがある場合、ゲッターメソッドの名前は
+\texttt{GetOwner} ではなく
+\texttt{Owner}（大文字、exported）でなければなりません。エクスポート時に大文字の名前を使用することで、フィールドとメソッドを区別するためのフックとなります。セッター関数が必要な場合は、おそらく
+\texttt{SetOwner}
+と呼ばれるでしょう。どちらの名前も実際にはよく読めます。
+
+\begin{lstlisting}[numbers=none]
+owner := obj.Owner()
+if owner != user {
+    obj.SetOwner(user)
+}
+\end{lstlisting}
+
+\subsubsection{Interface names}
+
+慣習的に、ワンメソッドのインターフェースは、メソッド名に-erの接尾辞をつけるか、または同様の修飾をしてエージェント名詞を構成して命名されます。
+例えば、\texttt{Reader}, \texttt{Writer}, \texttt{Formatter},
+\texttt{CloseNotifier}などです。
+
+このような名前は数多くありますが、これらの名前とそれらが捉える関数名を尊重することは生産的です。\texttt{Read},
+\texttt{Write}, \texttt{Close}, \texttt{Flush}, \texttt{String}
+などは正規のシグネチャと意味を持っています。混乱を避けるために、同じ署名と意味を持たない限り、自分のメソッドにこれらの名前を付けないでください。逆に、よく知られた型のメソッドと同じ意味を持つメソッドを自分の型が実装している場合は、同じ名前とシグネチャを与えます。文字列変換メソッドを
+\texttt{ToString} ではなく \texttt{String} と呼びます。
+
+\subsubsection{MixedCaps}
+
+最後に、Goでは、マルチワードの名前を書くときには、アンダースコアではなく、\texttt{MixedCaps}または\texttt{mixedCaps}を使うのが慣例となっています。
+
+\subsection{セミコロン}
+
+C言語と同様に、Goの形式文法では文の終わりにセミコロンを使用しますが、C言語とは異なり、セミコロンはソースには表示されません。その代わり、レキサーは簡単なルールを使って、スキャン時にセミコロンを自動的に挿入するので、入力テキストにはほとんどセミコロンが含まれません。
+
+そのルールとは次のようなものです。改行前の最後のトークンが、識別子（\texttt{int}や\texttt{float64}など）、数値や文字列定数などの基本的なリテラル、または以下のトークンのいずれかである場合
+
+\begin{lstlisting}[numbers=none]
+break continue fallthrough return ++ -- ) }
+\end{lstlisting}
+
+の場合、レキサーは常にそのトークンの後にセミコロンを挿入します。これは要約すると、「文を終わらせる可能性のあるトークンの後に改行が来たら、セミコロンを挿入する」ということです。
+
+セミコロンは閉じ括弧の直前でも省略できるので、次のような文は
+
+\begin{lstlisting}[numbers=none]
+    go func() { for { dst <- <-src } }()
+\end{lstlisting}
+
+はセミコロンを必要としません。慣用的なGoプログラムでは、セミコロンは、初期化子、条件、継続の各要素を分けるために、\texttt{for}ループ節などの場所でのみ使用されます。セミコロンは、一行にある複数のステートメントを分離するためにも必要ですが、そのようにコードを書く必要があります。
+
+セミコロンの挿入規則の結果として、制御構造（\texttt{if}、\texttt{for}、\texttt{switch}、\texttt{select}）の開始波括弧を次の行に置くことができません。これは、制御構造の開始波括弧（\texttt{if}、\texttt{for}、\texttt{switch}、\texttt{select}）を次の行に置いてはいけないということです。次のように書いてください。
+
+\begin{lstlisting}[numbers=none]
+if i < f() {
+    g()
+}
+\end{lstlisting}
+
+こうじゃない
+
+\begin{lstlisting}[numbers=none]
+if i < f()  // wrong!
+{           // wrong!
+    g()
+}
+\end{lstlisting}
+
+\subsection{制御構造}
+
+Goの制御構造はC言語のそれと関連していますが、重要な点で異なります。\texttt{do}や\texttt{while}のループはなく、わずかに一般化された\texttt{for}があるだけです。
+また、\texttt{switch} はより柔軟です。 \texttt{if} と \texttt{switch}
+は、\texttt{for} のようなオプションの初期化文を受け入れます。
+\texttt{break} と \texttt{continue} ステートメントには、break やcontinue
+を識別するためのオプションのラベルを指定します。
+また、タイプスイッチや多方向通信マルチプレクサである\texttt{select}などの新しい制御構造もあります。構文も若干異なり、括弧はなく、ボディは常にブレースで区切られています。
+
+\subsubsection{If}
+
+Goではシンプルな\texttt{if}は次のようになります。
+
+\begin{lstlisting}[numbers=none]
+if x > 0 {
+    return y
+}
+\end{lstlisting}
+
+中括弧を必須とすることで、単純な \texttt{if}
+文を複数行に渡って書くことを推奨しています。特に、本文に \texttt{return}
+や \texttt{break}
+などの制御文が含まれている場合には、そのように書くのが良いスタイルです。
+
+\texttt{if} や \texttt{switch}
+は初期化文を受け付けるので、ローカル変数を設定するために使われることがよくあります。
+
+\begin{lstlisting}[numbers=none]
+if err := file.Chmod(0664); err != nil {
+    log.Print(err)
+    return err
+}
+\end{lstlisting}
+
+Goのライブラリでは、\texttt{if}文が次の文に流れない場合、つまり、本体が\texttt{break}、\texttt{continue}、\texttt{goto}、\texttt{return}で終わっている場合には、不要な\texttt{else}が省略されています。
+
+\begin{lstlisting}[numbers=none]
+f, err := os.Open(name)
+if err != nil {
+    return err
+}
+codeUsing(f)
+\end{lstlisting}
+
+これは、コードが一連のエラー条件に対してガードしなければならない、よくある状況の例です。このコードは、正常な制御の流れがページを流れていき、エラーケースが発生するたびにそれを排除していく場合によく読まれます。エラーケースは
+\texttt{return}
+ステートメントで終わることが多いので、結果として得られるコードには
+\texttt{else} ステートメントは必要ありません。
+
+\begin{lstlisting}[numbers=none]
+f, err := os.Open(name)
+if err != nil {
+    return err
+}
+d, err := f.Stat()
+if err != nil {
+    f.Close()
+    return err
+}
+codeUsing(f, d)
+\end{lstlisting}
+
+\subsubsection{再宣言と再配置}
+
+余談です。前節の最後の例では、\texttt{:=}という短い宣言形式がどのように機能するかを詳しく説明しています。\texttt{os.Open}を呼び出す宣言は次のようになります。
+
+\begin{lstlisting}[numbers=none]
+f, err := os.Open(name)
+\end{lstlisting}
+
+このステートメントでは、2つの変数 \texttt{f} と \texttt{err}
+を宣言しています。数行後、\texttt{f.Stat}への呼び出しは次のようになります。
+
+\begin{lstlisting}[numbers=none]
+d, err := f.Stat()
+\end{lstlisting}
+
+と書かれていて、あたかも\texttt{d}と\texttt{err}を宣言しているように見えます。しかし、\texttt{err}は両方のステートメントに現れていることに注意してください。この重複は合法です。\texttt{err}は最初のステートメントで宣言されますが、2番目のステートメントで再割り当てされるだけです。つまり、\texttt{f.Stat}の呼び出しは、上で宣言された既存の
+\texttt{err} 変数を使用して、新しい値を与えるだけなのです。
+
+\texttt{:=}の宣言では、変数\texttt{v}がすでに宣言されていても、以下の条件で出現させることができます。
+
+\begin{itemize}
+\item
+  この宣言が、既存の \texttt{v}
+  の宣言と同じスコープ内にあること（\texttt{v}
+  が外部のスコープで既に宣言されている場合は、宣言によって新しい変数§が作成されます）。
+\item
+  初期化で対応する値が \texttt{v} に割り当て可能であること。
+\item
+  宣言によって作成される他の変数が少なくとも1つある。
+\end{itemize}
+
+この変わったプロパティは純粋なプラグマティズムで、例えば、長い
+\texttt{if-else} チェーンの中で単一の \texttt{err}
+値を簡単に使用することができます。よく使われているのを見かけると思います。
+
+§
+Goでは、関数のパラメータと戻り値のスコープは、関数本体を囲む中括弧の外側に語彙的に現れていても、関数本体と同じであることをここで指摘しておきます。
+
+\subsubsection{For}
+
+Goの\texttt{for}ループはC言語のものと似ていますが、同じではありません。これは\texttt{for}と\texttt{while}を統合したもので、\texttt{do-while}はありません。3つの形式があり、そのうち1つだけがセミコロンを持っています。
+
+\begin{lstlisting}[numbers=none]
+// Like a C for
+for init; condition; post { }
+
+// Like a C while
+for condition { }
+
+// Like a C for(;;)
+for { }
+\end{lstlisting}
+
+短く宣言することで、ループの中ですぐにインデックス変数を宣言することができます。
+
+\begin{lstlisting}[numbers=none]
+sum := 0
+for i := 0; i < 10; i++ {
+    sum += i
+}
+\end{lstlisting}
+
+配列、スライス、文字列、マップをループさせたり、チャネルから読み込んだりする場合は、\texttt{range}句でループを管理することができます。
+
+\begin{lstlisting}[numbers=none]
+for key, value := range oldMap {
+    newMap[key] = value
+}
+\end{lstlisting}
+
+範囲内の最初の項目（キーまたはインデックス）だけが必要な場合は、2番目の項目を削除します。
+
+\begin{lstlisting}[numbers=none]
+for key := range m {
+    if key.expired() {
+        delete(m, key)
+    }
+}
+\end{lstlisting}
+
+範囲内の2番目の項目（値）だけが必要な場合は、空白の識別子であるアンダースコアを使用して、1番目の項目を破棄します。
+
+\begin{lstlisting}[numbers=none]
+sum := 0
+for _, value := range array {
+    sum += value
+}
+\end{lstlisting}
+
+空白の識別子は、{後のセクション}で説明するように、多くの用途があります。
+
+文字列の場合は、UTF-8を解析して個々のUnicodeコードポイントを分割するなど、\texttt{range}がより多くの仕事をしてくれます。誤ったエンコーディングは1バイトを消費し、置換ルーンU+FFFDを生成します。(名前(および関連する組み込み型)
+\texttt{rune} は、単一の Unicode コードポイントに対する Go
+の用語です。詳細は{言語仕様}を参照してください)。ループは
+
+\begin{lstlisting}[numbers=none]
+for pos, char := range "日本\x80語" { // \x80 is an illegal UTF-8 encoding
+    fmt.Printf("character %#U starts at byte position %d\n", char, pos)
+}
+\end{lstlisting}
+
+による表示は
+
+\begin{lstlisting}[numbers=none]
+character U+65E5 '日' starts at byte position 0
+character U+672C '本' starts at byte position 3
+character U+FFFD '�' starts at byte position 6
+character U+8A9E '語' starts at byte position 7
+\end{lstlisting}
+
+最後に、Goにはコンマ演算子がなく、\texttt{++}と\texttt{-\/-}は式ではなく文です。したがって、複数の変数を
+\texttt{for} で実行したい場合は、並列割り当てを使用する必要があります
+(ただし、\texttt{++} と \texttt{-\/-} は除外されます)。
+
+\begin{lstlisting}[numbers=none]
+// Reverse a
+for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
+    a[i], a[j] = a[j], a[i]
+}
+\end{lstlisting}
+
+\subsubsection{Switch}
+
+Goの\texttt{switch}はCのものよりも一般的です。式は定数や整数である必要はなく、ケースはマッチするものが見つかるまで上から下へと評価され、\texttt{switch}に式がない場合は\texttt{true}に切り替わります。したがって、\texttt{if}-\texttt{else}-\texttt{if}-\texttt{else}の連鎖を\texttt{switch}として書くことが可能であり、慣用的でもあります。
+
+\begin{lstlisting}[numbers=none]
+func unhex(c byte) byte {
+    switch {
+    case '0' <= c && c <= '9':
+        return c - '0'
+    case 'a' <= c && c <= 'f':
+        return c - 'a' + 10
+    case 'A' <= c && c <= 'F':
+        return c - 'A' + 10
+    }
+    return 0
+}
+\end{lstlisting}
+
+自動的にフォールスルーことはありませんが、ケースはコンマで区切られたリストで提示することができます。
+
+\begin{lstlisting}[numbers=none]
+func shouldEscape(c byte) bool {
+    switch c {
+    case ' ', '?', '&', '=', '#', '+', '%':
+        return true
+    }
+    return false
+}
+\end{lstlisting}
+
+Goでは、他のC言語のように一般的ではありませんが、\texttt{break}文を使って\texttt{switch}を早期に終了させることができます。しかし、スイッチではなく、周囲のループから抜け出す必要がある場合もあります。Goでは、ループにラベルを付けて、そのラベルに向かって「break」することで実現できます。この例では、両方の使い方を示しています。
+
+\begin{lstlisting}[numbers=none]
+Loop:
+        for n := 0; n < len(src); n += size {
+                switch {
+                case src[n] < sizeOne:
+                        if validateOnly {
+                                break
+                        }
+                        size = 1
+                        update(src[n])
+
+                case src[n] < sizeTwo:
+                        if n+1 >= len(src) {
+                                err = errShortInput
+                                break Loop
+                        }
+                        if validateOnly {
+                                break
+                        }
+                        size = 2
+                        update(src[n] + src[n+1]<<shift)
+                }
+        }
+\end{lstlisting}
+
+もちろん、\texttt{continue}文にもオプションのラベルを付けることができますが、これはループにのみ適用されます。
+
+このセクションの最後に、2つの\texttt{switch}文を使ったバイトスライスの比較ルーチンを紹介します。
+
+\begin{lstlisting}[numbers=none]
+// Compareは、2つのバイトスライスを辞書的に比較する整数を返します。
+// 結果は、a == bの場合は0、a < bの場合は-1、a > bの場合は+1となります。
+func Compare(a, b []byte) int {
+    for i := 0; i < len(a) && i < len(b); i++ {
+        switch {
+        case a[i] > b[i]:
+            return 1
+        case a[i] < b[i]:
+            return -1
+        }
+    }
+    switch {
+    case len(a) > len(b):
+        return 1
+    case len(a) < len(b):
+        return -1
+    }
+    return 0
+}
+\end{lstlisting}
+
+\subsubsection{タイプスイッチ}
+
+インターフェース変数の動的な型を知るためにスイッチを使うこともできます。このようなタイプスイッチは、キーワード
+\texttt{type}
+を括弧の中に入れたタイプアサーションの構文を使用します。スイッチが式の中で変数を宣言した場合、その変数は各節で対応する型を持つことになります。このような場合、名前を再利用することも慣用的で、事実上、同じ名前でタイプの異なる新しい変数を各ケースで宣言することになります。
+
+\begin{lstlisting}[numbers=none]
+var t interface{}
+t = functionOfSomeType()
+switch t := t.(type) {
+default:
+    fmt.Printf("unexpected type %T\n", t)     // %T prints whatever type t has
+case bool:
+    fmt.Printf("boolean %t\n", t)             // t has type bool
+case int:
+    fmt.Printf("integer %d\n", t)             // t has type int
+case *bool:
+    fmt.Printf("pointer to boolean %t\n", *t) // t has type *bool
+case *int:
+    fmt.Printf("pointer to integer %d\n", *t) // t has type *int
+}
+\end{lstlisting}
+
+\subsection{関数}
+
+\subsubsection{複数の戻り値}
+
+Goの珍しい機能のひとつに、関数やメソッドが複数の値を返せることがあります。この形式は、Cプログラムの不器用なイディオムを改善するために使用することができます。例えば、\texttt{EOF}に対する\texttt{-1}のような帯域内エラーの戻り値や、アドレスで渡された引数の修正です。
+
+Cでは、書き込みエラーは負のカウントで通知され、エラーコードは揮発性の場所に隠されます。Goでは、\texttt{Write}はカウントとエラーを返すことができます。「はい、何バイトか書きましたが、デバイスがいっぱいになってしまったので、全部は書きませんでした」。パッケージ
+\texttt{os} のファイルに対する \texttt{Write}
+メソッドのシグネチャは次のとおりです。
+
+\begin{lstlisting}[numbers=none]
+func (file *File) Write(b []byte) (n int, err error)
+\end{lstlisting}
+
+ドキュメントに書かれているように、書き込まれたバイト数を返し、\texttt{n}
+\texttt{!=} \texttt{len(b)} のときには非nilの \texttt{エラー}
+を返します。これは一般的なスタイルです。その他の例については、エラー処理のセクションを参照してください。
+
+同様の方法で，参照パラメータを模擬した戻り値へのポインタを渡す必要はありません．以下は，バイトスライスのある位置から数値を取り出し，その数値と次の位置を返す，単純な関数です．
+
+\begin{lstlisting}[numbers=none]
+func nextInt(b []byte, i int) (int, int) {
+    for ; i < len(b) && !isDigit(b[i]); i++ {
+    }
+    x := 0
+    for ; i < len(b) && isDigit(b[i]); i++ {
+        x = x*10 + int(b[i]) - '0'
+    }
+    return x, i
+}
+\end{lstlisting}
+
+これを使って、入力スライス \texttt{b}
+の中の数字をスキャンすると、次のようになります。
+
+\begin{lstlisting}[numbers=none]
+    for i := 0; i < len(b); {
+        x, i = nextInt(b, i)
+        fmt.Println(x)
+    }
+\end{lstlisting}
+
+\subsubsection{名前付きの結果パラメータ}
+
+Go
+関数の戻り値または結果の「パラメータ」には名前を付けて、入力パラメータと同様に通常の変数として使用することができます。関数が引数なしで
+\texttt{return}
+文を実行した場合、結果パラメーターの現在の値が戻り値として使用されます。
+
+名前は必須ではありませんが、コードを短く、明確にすることができます。これはドキュメントです。\texttt{nextInt}の結果に名前を付ければ、どの戻り値の\texttt{int}がどれなのかが明らかになります。
+
+\begin{lstlisting}[numbers=none]
+func nextInt(b []byte, pos int) (value, nextPos int) {
+\end{lstlisting}
+
+名前付きの結果は初期化され、飾り気のない戻り値に結びついているので、明確にするだけでなく単純化することもできます。以下は、名前付き結果をうまく使った
+\texttt{io.ReadFull} のバージョンです:
+
+\begin{lstlisting}[numbers=none]
+func ReadFull(r Reader, buf []byte) (n int, err error) {
+    for len(buf) > 0 && err == nil {
+        var nr int
+        nr, err = r.Read(buf)
+        n += nr
+        buf = buf[nr:]
+    }
+    return
+}
+\end{lstlisting}
+
+\subsubsection{Defer}
+
+Goの\texttt{defer}文は、\texttt{defer}を実行する関数が戻る直前に、関数呼び出し（遅延関数）を実行するようにスケジュールします。これは変わった方法ですが、関数がどのような経路で戻ってきても解放しなければならないリソースなどの状況に対処するための効果的な方法です。典型的な例としては、mutexのロック解除やファイルのクローズなどが挙げられます。
+
+\begin{lstlisting}[numbers=none]
+// Contentsはファイルの内容を文字列で返します。
+func Contents(filename string) (string, error) {
+    f, err := os.Open(filename)
+    if err != nil {
+        return "", err
+    }
+    // defer f.Close()  // f.Closeは終了時に実行されます。
+
+    var result []byte
+    buf := make([]byte, 100)
+    for {
+        n, err := f.Read(buf[0:])
+        result = append(result, buf[0:n]...) // append is discussed later.
+        if err != nil {
+            if err == io.EOF {
+                break
+            }
+            return "", err  // f will be closed if we return here.
+        }
+    }
+    return string(result), nil // f will be closed if we return here.
+}
+\end{lstlisting}
+
+\texttt{Close}のような関数の呼び出しを延期することには、2つの利点があります。まず、ファイルを閉じることを忘れないことが保証されます。これは、後に関数を編集して新しいリターンパスを追加した場合に陥りやすいミスです。2つ目は、closeがopenの近くに配置されているということで、関数の最後に配置するよりもはるかにわかりやすいということです。
+
+遅延された関数の引数（関数がメソッドの場合はレシーバーも含む）は、呼び出しが実行されたときではなく、遅延が実行されたときに評価されます。これは、関数の実行中に変数の値が変化する心配がないだけでなく、1つの遅延呼び出しサイトで複数の関数の実行を遅延させることができることを意味します。くだらない例を挙げてみましょう。
+
+\begin{lstlisting}[numbers=none]
+for i := 0; i < 5; i++ {
+    defer fmt.Printf("%d ", i)
+}
+\end{lstlisting}
+
+遅延関数はLIFO順に実行されるので、このコードでは関数が戻ってきたときに\texttt{4\ 3\ 2\ 1\ 0}が出力されることになります。もっと妥当な例としては、プログラム中の関数実行をトレースする簡単な方法があります。次のような簡単なトレースルーチンをいくつか書いてみましょう。
+
+\begin{lstlisting}[numbers=none]
+func trace(s string)   { fmt.Println("entering:", s) }
+func untrace(s string) { fmt.Println("leaving:", s) }
+
+// Use them like this:
+func a() {
+    trace("a")
+    defer untrace("a")
+    // do something....
+}
+\end{lstlisting}
+
+遅延関数への引数は \texttt{defer}
+が実行されたときに評価されるという事実を利用することで、より良い結果を得ることができます。トレースルーチンは、アントレースルーチンへの引数を設定することができます。この例では
+
+\begin{lstlisting}[numbers=none]
+func trace(s string) string {
+    fmt.Println("entering:", s)
+    return s
+}
+
+func un(s string) {
+    fmt.Println("leaving:", s)
+}
+
+func a() {
+    defer un(trace("a"))
+    fmt.Println("in a")
+}
+
+func b() {
+    defer un(trace("b"))
+    fmt.Println("in b")
+    a()
+}
+
+func main() {
+    b()
+}
+
+\end{lstlisting}
+
+prints
+
+\begin{lstlisting}[numbers=none]
+entering: b
+in b
+entering: a
+in a
+leaving: a
+leaving: b
+\end{lstlisting}
+
+他の言語でブロックレベルのリソース管理に慣れているプログラマにとっては、
+\texttt{defer}
+は奇妙に思えるかもしれませんが、その最も興味深く強力なアプリケーションは、
+まさにブロックベースではなく、関数ベースであるという事実から来ています。\texttt{panic}と\texttt{recover}のセクションでは、その可能性の別の例を見てみましょう。
+
+\subsection{データ}
+
+\subsubsection{newによるアロケーション}
+
+Goには、組み込み関数の\texttt{new}と\texttt{make}という2つのアロケーションプリミティブがあります。これらはそれぞれ異なる機能を持ち、異なる型に適用されるので、混乱するかもしれませんが、ルールは簡単です。まず\texttt{new}について説明します。これはメモリを確保する組み込み関数ですが、他の言語の同名の関数とは異なり、メモリを初期化せず、ゼロにするだけです。つまり、\texttt{new(T)}は、\texttt{T}型の新しいアイテム用にゼロのストレージを割り当て、そのアドレス（\texttt{*T}型の値）を返します。Goの用語では、\texttt{T}型の新しく割り当てられたゼロの値へのポインタを返します。
+
+\texttt{new}が返すメモリはゼロになっているので、データ構造を設計するときに、各型のゼロ値がさらなる初期化なしに使用できるように手配すると便利です。これは、データ構造のユーザが
+\texttt{new}
+を使ってデータ構造を作成し、すぐに作業を開始できることを意味します。例えば、\texttt{bytes.Buffer}のドキュメントには、``\texttt{Buffer}のゼロ値は、すぐに使える空のバッファである''と記載されています。同様に、\texttt{sync.Mutex}
+には、明示的なコンストラクタや \texttt{Init}
+メソッドはありません。代わりに、\texttt{sync.Mutex}
+のゼロ値は、ロックされていないミューテックスであると定義されます。
+
+zero-value-is-usefulプロパティは、過渡的に動作します。以下の型宣言を考えてみましょう。
+
+\begin{lstlisting}[numbers=none]
+type SyncedBuffer struct {
+    lock    sync.Mutex
+    buffer  bytes.Buffer
+}
+\end{lstlisting}
+
+また、\texttt{SyncedBuffer}型の値は、割り当てや宣言だけですぐに使用できます。次のスニペットでは、\texttt{p}と\texttt{v}の両方が、さらなるアレンジなしに正しく動作します。
+
+\begin{lstlisting}[numbers=none]
+p := new(SyncedBuffer)  // type *SyncedBuffer
+var v SyncedBuffer      // type  SyncedBuffer
+\end{lstlisting}
+
+\subsubsection{コンストラクタと複合リテラル}
+
+パッケージ \texttt{os}
+から派生したこの例のように、ゼロ値では十分ではなく、初期化コンストラクタが必要な場合があります。
+
+\begin{lstlisting}[numbers=none]
+func NewFile(fd int, name string) *File {
+    if fd < 0 {
+        return nil
+    }
+    f := new(File)
+    f.fd = fd
+    f.name = name
+    f.dirinfo = nil
+    f.nepipe = 0
+    return f
+}
+\end{lstlisting}
+
+そこにはたくさんの決まり文句があります。複合リテラルとは、評価されるたびに新しいインスタンスを生成する式のことで、これを単純化することができます。
+
+\begin{lstlisting}[numbers=none]
+func NewFile(fd int, name string) *File {
+    if fd < 0 {
+        return nil
+    }
+    f := File{fd, name, nil, 0}
+    return &f
+}
+\end{lstlisting}
+
+C言語とは異なり、ローカル変数のアドレスを返すことは全く問題ありません。変数に関連付けられたストレージは、関数が戻った後も存続します。実際、複合リテラルのアドレスを取得すると、評価されるたびに新しいインスタンスが割り当てられるので、最後の2行を組み合わせることができます。
+
+\begin{lstlisting}[numbers=none]
+    return &File{fd, name, nil, 0}
+\end{lstlisting}
+
+複合リテラルのフィールドは順番に並べられ、すべて存在しなければなりません。しかし、要素をfield\texttt{:}valueのペアとして明示的にラベル付けすることで、初期化子はどのような順序でも現れ、欠けているものはそれぞれのゼロ値として残されます。このようにすると、
+
+\begin{lstlisting}[numbers=none]
+    return &File{fd: fd, name: name}
+\end{lstlisting}
+
+限定的なケースとして，複合リテラルにフィールドがまったく含まれていない場合，その型の値はゼロになります。\texttt{new(File)}
+と \texttt{\&File\{\}} という表現は同等です。
+
+複合リテラルは，配列，スライス，マップに対しても作成することができ，フィールドラベルは適宜インデックスやマップのキーになります．これらの例では，初期化は，\texttt{Enone}，\texttt{Eio}，\texttt{Einval}の値が異なっていても，動作します．
+
+\begin{lstlisting}[numbers=none]
+a := [...]string   {Enone: "no error", Eio: "Eio", Einval: "invalid argument"}
+s := []string      {Enone: "no error", Eio: "Eio", Einval: "invalid argument"}
+m := map[int]string{Enone: "no error", Eio: "Eio", Einval: "invalid argument"}
+\end{lstlisting}
+
+\subsubsection{アロケーションと make の関係}
+
+アロケーションの話に戻ります。組み込み関数 \texttt{make(T,\ args)} は
+\texttt{new(T)}
+とは異なる目的を持っています．スライス，マップ，チャンネルのみを作成し，\texttt{T}型（\texttt{*T}型ではない）の初期化された（ゼロになっていない）値を返します．このように区別する理由は，これらの3つの型が，使用前に初期化されなければならないデータ構造への参照を表向きに表しているからです．例えば，スライスは，データ（配列内）へのポインタ，長さ，容量の3つの項目を含む記述子であり，これらの項目が初期化されるまで，スライスは\texttt{nil}となります．スライス，マップ，チャンネルについては，\texttt{make}によって内部のデータ構造が初期化され，値が使用できるようになります．例えば，以下のようになります．
+
+\begin{lstlisting}[numbers=none]
+make([]int, 10, 100)
+\end{lstlisting}
+
+これは，100個のintの配列を確保し，配列の最初の10個の要素を指す長さ10，容量100のスライス構造体を作成します（スライスを作成する際には，容量を省略することができます。(スライスを作成する際には，容量を省略することができます。詳しくはスライスのセクションをご覧ください。)
+一方，\texttt{new({[}{]}int)}
+は，新しく確保され，ゼロになったスライス構造体へのポインタ，すなわち，\texttt{nil}
+のスライス値へのポインタを返します．
+
+これらの例は、\texttt{new}と\texttt{make}の違いを示しています。
+
+\begin{lstlisting}[numbers=none]
+// allocates slice structure; *p == nil; rarely useful
+var p *[]int = new([]int)       
+// the slice v now refers to a new array of 100 ints
+var v  []int = make([]int, 100) 
+
+// Unnecessarily complex:
+var p *[]int = new([]int)
+*p = make([]int, 100, 100)
+
+// Idiomatic:
+v := make([]int, 100)
+\end{lstlisting}
+
+\texttt{make}は、マップ、スライス、チャンネルにのみ適用され、ポインタを返さないことに注意してください。明示的なポインタを得るためには、\texttt{new}で割り当てるか、明示的に変数のアドレスを取得してください。
+
+\subsubsection{配列}
+
+配列は、メモリの詳細なレイアウトを計画する際に便利で、時には割り当てを回避するのに役立つこともありますが、主に次のセクションで扱うスライスのための構成要素です。そのための基礎知識として、ここでは配列についていくつか説明します。
+
+GoとCでは、配列の動作に大きな違いがあります。
+
+\begin{itemize}
+\item
+  配列は値です。ある配列を別の配列に代入すると、すべての要素がコピーされます。
+\item
+  特に、関数に配列を渡した場合、関数は配列へのポインタではなく、配列のコピーを受け取ります。
+\item
+  配列のサイズはその型の一部である。\texttt{[10]int}と\texttt{[20]int}はそれぞれ異なる型です。
+\end{itemize}
+
+C言語のような動作と効率性を求める場合は，配列へのポインタを渡すことができます。
+
+\begin{lstlisting}[numbers=none]
+func Sum(a *[3]float64) (sum float64) {
+    for _, v := range *a {
+        sum += v
+    }
+    return
+}
+
+array := [...]float64{7.0, 8.5, 9.1}
+x := Sum(&array)  // 明示的な address-of 演算子に注意してください。
+\end{lstlisting}
+
+しかし、このスタイルでもイディオム的なGoではありません。代わりにスライスを使いましょう。
+
+\subsubsection{スライス}
+
+スライスは、配列をラップして、データのシーケンスに対するより一般的で強力かつ便利なインターフェースを提供します。変換行列のような明示的な次元を持つアイテムを除き、Goのほとんどの配列プログラミングは、単純な配列ではなくスライスを使って行われます。
+
+スライスは、基礎となる配列への参照を保持しており、あるスライスを別のスライスに割り当てると、両方とも同じ配列を参照します。関数がスライスの引数を取る場合、スライスの要素に加えた変更は呼び出し元から見えることになり、基礎となる配列へのポインタを渡すのと同様になります。したがって、\texttt{Read}関数は、ポインタとカウントではなく、スライス引数を受け取ることができます。スライス内の長さは、読み込むデータ量の上限を設定します。パッケージ
+\texttt{os} の \texttt{File} 型の \texttt{Read}
+メソッドのシグネチャを以下に示します．
+
+\begin{lstlisting}[numbers=none]
+func (f *File) Read(buf []byte) (n int, err error)
+\end{lstlisting}
+
+このメソッドは，読み込んだバイト数と，エラーがあればエラー値を返します。大きなバッファ
+\texttt{buf} の最初の 32
+バイトを読み込むには、バッファをスライスします。
+
+\begin{lstlisting}[numbers=none]
+    n, err := f.Read(buf[0:32])
+\end{lstlisting}
+
+このようなスライスは一般的で効率的です。実際、効率の良さはさておき、次のスニペットでもバッファの最初の32バイトを読み取ることができます。
+
+\begin{lstlisting}[numbers=none]
+    var n int
+    var err error
+    for i := 0; i < 32; i++ {
+        nbytes, e := f.Read(buf[i:i+1])  // Read one byte.
+        n += nbytes
+        if nbytes == 0 || e != nil {
+            err = e
+            break
+        }
+    }
+\end{lstlisting}
+
+スライスの長さは，基礎となる配列の制限内に収まる限り，変更することができ，それを自分自身のスライスに割り当てるだけです．組み込み関数
+\texttt{cap}
+でアクセスできるスライスの容量は、そのスライスが想定できる最大の長さを報告します。ここでは，スライスにデータを追加する関数を示します。データが容量を超えた場合には、スライスが再割り当てされます。結果として、スライスが返されます。この関数は、\texttt{len}と\texttt{cap}が\texttt{nil}のスライスに適用されたときに合法であることを利用して、0を返します。
+
+\begin{lstlisting}[numbers=none]
+func Append(slice, data []byte) []byte {
+    l := len(slice)
+    if l + len(data) > cap(slice) {  // reallocate
+        // Allocate double what's needed, for future growth.
+        newSlice := make([]byte, (l+len(data))*2)
+        // The copy function is predeclared and works for any slice type.
+        copy(newSlice, slice)
+        slice = newSlice
+    }
+    slice = slice[0:l+len(data)]
+    copy(slice[l:], data)
+    return slice
+}
+\end{lstlisting}
+
+なぜなら、\texttt{Append} は \texttt{slice}
+の要素を変更することができますが、スライス自体
+(ポインタ、長さ、容量を保持するランタイムデータ構造)
+は値で渡されるからです。
+
+スライスに追記するというアイデアは非常に便利なので、組み込み関数の
+\texttt{append}
+で表現されています。しかし、この関数の設計を理解するには、もう少し情報が必要なので、後で説明します。
+
+\subsubsection{二次元のスライス}
+
+Goの配列やスライスは一次元です。2次元の配列やスライスに相当するものを作るには、次のように配列-of-配列やスライス-of-スライスを定義する必要があります。
+
+\begin{lstlisting}[numbers=none]
+type Transform [3][3]float64  // 3×3の配列で、まさに配列の配列です。
+type LinesOfText [][]byte     // バイトスライスのスライスです。
+\end{lstlisting}
+
+スライスは可変長なので、内側のスライスをそれぞれ異なる長さにすることが可能です。これはよくある状況で、例えば
+\texttt{LinesOfText} の例では、各行が独立した長さを持つことになります。
+
+\begin{lstlisting}[numbers=none]
+text := LinesOfText{
+        []byte("Now is the time"),
+        []byte("for all good gophers"),
+        []byte("to bring some fun to the party."),
+}
+\end{lstlisting}
+
+例えば、ピクセルのスキャンラインを処理する際に、2Dスライスを割り当てる必要がある場合があります。これを実現するには2つの方法があります。1つは、各スライスを個別に割り当てる方法、もう1つは、1つの配列を割り当てて、その中に各スライスを入れる方法です。どちらを採用するかは、アプリケーションによって異なります。スライスが大きくなったり小さくなったりする可能性がある場合は，次の行を上書きしないように独立して割り当てるべきですが，そうでない場合は，単一の割り当てでオブジェクトを構築する方が効率的です。参考までに、この2つの方法の概要を説明します。まず、1行ずつの場合。
+
+\begin{lstlisting}[numbers=none]
+// トップレベルのスライスを割り当てます。
+picture := make([][]uint8, YSize) // yの単位につき、1列。
+// 行をループして、各行にスライスを割り当てます。
+for i := range picture {
+        picture[i] = make([]uint8, XSize)
+}
+\end{lstlisting}
+
+そして、今では1つの配分として、線状にスライスされています。
+
+\begin{lstlisting}[numbers=none]
+// 先ほどと同じように、トップレベルのスライスを割り当てます。
+picture := make([][]uint8, YSize) // yの単位で1列。
+// すべてのピクセルを保持するために、1つの大きなスライスを割り当てます。
+// ピクチャが[][]uint8であるにもかかわらず、[]uint8型を持つ。
+pixels := make([]uint8, XSize*YSize) 
+// 各列をループさせ、残りのピクセルスライスの前から各列をスライスします。
+for i := range picture {
+        picture[i], pixels = pixels[:XSize], pixels[XSize:]
+}
+\end{lstlisting}
+
+\subsubsection{Maps}
+
+マップは、ある型の値（キー）と別の型の値（要素または値）を関連付ける、便利で強力な組み込みデータ構造です。キーには、整数、浮動小数点数、複素数、文字列、ポインター、インターフェース（動的型が等式をサポートしている場合）、構造体、配列など、等式演算子が定義されている任意の型を使用できます。スライスには等値性が定義されていないため、マップのキーとしては使用できません。スライスと同様に、マップは基礎となるデータ構造への参照を保持します。マップの内容を変更する関数にマップを渡した場合、その変更は呼び出し元にも表示されます。
+
+マップは、コロンで区切られたキーと値のペアを持つ通常の複合リテラル構文を使って構築することができるので、初期化時に簡単に構築することができます。
+
+\begin{lstlisting}[numbers=none]
+var timeZone = map[string]int{
+    "UTC":  0*60*60,
+    "EST": -5*60*60,
+    "CST": -6*60*60,
+    "MST": -7*60*60,
+    "PST": -8*60*60,
+}
+\end{lstlisting}
+
+マップの値を割り当てたり取得したりする構文は、インデックスが整数である必要がないことを除けば、配列やスライスの場合と同じです。
+
+\begin{lstlisting}[numbers=none]
+offset := timeZone["EST"]
+\end{lstlisting}
+
+マップに存在しないキーでマップの値を取得しようとすると、マップのエントリの型に応じたゼロの値が返されます。例えば，マップに整数が含まれている場合，存在しないキーを検索すると，\texttt{0}が返されます。セットは値の型が
+\texttt{bool} のマップとして実装できます。マップのエントリを
+\texttt{true}
+に設定して値をセットに入れ、単純なインデックスでそれをテストします。
+
+\begin{lstlisting}[numbers=none]
+attended := map[string]bool{
+    "Ann": true,
+    "Joe": true,
+    ...
+}
+
+if attended[person] { // マップにpersonがない場合はfalseになります。
+    fmt.Println(person, "was at the meeting")
+}
+\end{lstlisting}
+
+時には、エントリの欠落とゼロの値を区別する必要があります。\texttt{"UTC"}のエントリがあるのか、それともマップに全くないので0なのか。多重割り当ての形で区別することができます。
+
+\begin{lstlisting}[numbers=none]
+var seconds int
+var ok bool
+seconds, ok = timeZone[tz]
+\end{lstlisting}
+
+明らかな理由により、これは「コンマok」イディオムと呼ばれます。この例では、もし
+\texttt{tz} があれば、\texttt{seconds} が適切に設定され、\texttt{ok}
+が真となり、そうでなければ、\texttt{seconds}
+はゼロに設定され、\texttt{ok}
+は偽となります。これをエラーレポートとともに出力する関数があります。
+
+\begin{lstlisting}[numbers=none]
+func offset(tz string) int {
+    if seconds, ok := timeZone[tz]; ok {
+        return seconds
+    }
+    log.Println("unknown time zone:", tz)
+    return 0
+}
+\end{lstlisting}
+
+実際の値を気にせずにマップ内の存在をテストするには、通常の値を表す変数の代わりに空白の識別子（\texttt{\_}）を使用することができます。
+
+\begin{lstlisting}[numbers=none]
+_, present := timeZone[tz]
+\end{lstlisting}
+
+マップのエントリを削除するには、\texttt{delete}という組み込み関数を使います。この関数の引数は、マップと削除するキーです。そのキーがすでにマップに存在しない場合でも、この操作は安全です。
+
+\begin{lstlisting}[numbers=none]
+delete(timeZone, "PDT")  // Now on Standard Time
+\end{lstlisting}
+
+\subsubsection{Printing}
+
+Goのフォーマット表示は、C言語の \texttt{printf}
+ファミリーに似たスタイルを採用していますが、より豊富で一般的です。関数は
+\texttt{fmt} パッケージに含まれており、\texttt{fmt.Printf},
+\texttt{fmt.Fprintf}, \texttt{fmt.Sprintf}
+などのように大文字の名前が付いています。文字列関数（\texttt{Sprintf}など）は，与えられたバッファを埋めるのではなく，文字列を返します。
+
+フォーマット文字列を用意する必要はありません。\texttt{Printf},
+\texttt{Fprintf}, \texttt{Sprintf} のそれぞれに対して、例えば
+\texttt{Print} と \texttt{Println}
+のような別の関数のペアがあります。これらの関数はフォーマット文字列を受け取りませんが、代わりに各引数に対してデフォルトのフォーマットを生成します。また、\texttt{Println}バージョンでは、引数間に空白を挿入し、出力に改行を追加しますが、\texttt{Print}バージョンでは、どちらの側のオペランドも文字列でない場合にのみ空白を追加します。この例では、各行が同じ出力を生成します。
+
+\begin{lstlisting}[numbers=none]
+fmt.Printf("Hello %d\n", 23)
+fmt.Fprint(os.Stdout, "Hello ", 23, "\n")
+fmt.Println("Hello", 23)
+fmt.Println(fmt.Sprint("Hello ", 23))
+\end{lstlisting}
+
+書式付き表示関数 \texttt{fmt.Fprint}
+とその仲間たちは、\texttt{io.Writer}
+インターフェースを実装したオブジェクトを第一引数にとります。
+
+まず、\texttt{\%d}のような数値フォーマットでは、符号化やサイズのフラグを取りません。
+
+\begin{lstlisting}[numbers=none]
+var x uint64 = 1<<64 - 1
+fmt.Printf("%d %x; %d %x\n", x, x, int64(x), int64(x))
+\end{lstlisting}
+
+この表示は以下のようになる。
+
+\begin{lstlisting}[numbers=none]
+18446744073709551615 ffffffffffffffff; -1 -1
+\end{lstlisting}
+
+整数を10進数に変換するなど、デフォルトの変換が必要な場合は、\texttt{\%v}(for
+``value'')というキャッチオールフォーマットを使用できます。結果は、\texttt{Print}や\texttt{Println}が生成するものとまったく同じです。さらに、このフォーマットは、配列、スライス、構造体、マップなど、あらゆる値を表示できます。以下は、前のセクションで定義したタイムゾーンマップのprint文です。
+
+\begin{lstlisting}[numbers=none]
+fmt.Printf("%v\n", timeZone)  // or just fmt.Println(timeZone)
+\end{lstlisting}
+
+以下が出力されます。
+
+\begin{lstlisting}[numbers=none]
+map[CST:-21600 EST:-18000 MST:-25200 PST:-28800 UTC:0]
+\end{lstlisting}
+
+マップの場合、\texttt{Printf}とその仲間たちは、キーによって出力を辞書的にソートします。
+
+構造体を印刷する場合、修正されたフォーマット \texttt{\%+v}
+は構造体のフィールドに名前を付け、任意の値に対しては代替フォーマット
+\texttt{\%\#v} が完全な Go 構文で値を印刷します。
+
+\begin{lstlisting}[numbers=none]
+type T struct {
+    a int
+    b float64
+    c string
+}
+t := &T{ 7, -2.35, "abc\tdef" }
+fmt.Printf("%v\n", t)
+fmt.Printf("%+v\n", t)
+fmt.Printf("%#v\n", t)
+fmt.Printf("%#v\n", timeZone)
+\end{lstlisting}
+
+以下を表示します。
+
+\begin{lstlisting}[numbers=none]
+&{7 -2.35 abc   def}
+&{a:7 b:-2.35 c:abc     def}
+&main.T{a:7, b:-2.35, c:"abc\tdef"}
+map[string]int{"CST":-21600, "EST":-18000, "MST":-25200, "PST":-28800, "UTC":0}
+\end{lstlisting}
+
+(この引用符付き文字列のフォーマットは、\texttt{string} または
+\texttt{{[}{]}byte} 型の値に適用される場合、\texttt{\%q}
+でも利用できます。代替フォーマットである \texttt{\%\#q}
+では、可能な限りバッククォートを使用します。(\texttt{\%q}
+フォーマットは整数とルーンにも適用され、シングルクォートのルーン定数を生成します)。また、\texttt{\%x}
+は整数だけでなく、文字列、バイト配列、バイトスライスにも対応しており、長い16進数の文字列を生成し、フォーマットにスペースを入れると
+(\texttt{\%\ x}) バイト間にスペースが入ります。
+
+もうひとつの便利なフォーマットは \texttt{\%T}
+で、これは値の型を表示します。
+
+\begin{lstlisting}[numbers=none]
+fmt.Printf("%T\n", timeZone)
+\end{lstlisting}
+
+これは以下を表示する。
+
+\begin{lstlisting}[numbers=none]
+map[string]int
+\end{lstlisting}
+
+カスタムタイプのデフォルトフォーマットを制御したい場合、必要なのはそのタイプに
+\texttt{String()\ string}
+というシグネチャを持つメソッドを定義することだけです。単純な型である
+\texttt{T} の場合は、次のようになります。
+
+\begin{lstlisting}[numbers=none]
+func (t *T) String() string {
+    return fmt.Sprintf("%d/%g/%q", t.a, t.b, t.c)
+}
+fmt.Printf("%v\n", t)
+\end{lstlisting}
+
+の形式で表示することができます。
+
+\begin{lstlisting}[numbers=none]
+7/-2.35/"abc\tdef"
+\end{lstlisting}
+
+(この例ではポインタを使用していますが、これは構造体型の場合にはポインタの方が効率的で慣用的だからです。この例ではポインタを使用していますが、これは構造体型ではより効率的で慣用的だからです。詳細は後述の
+{ポインタ vs.~値のレシーバ} のセクションを参照してください。）
+
+この \texttt{String} メソッドは \texttt{Sprintf}
+を呼び出すことができます。これは print
+ルーチンが完全にリエントラントで、このようにラップできるからです。ただし、この方法について理解しておくべき重要な点が
+1 つあります。それは、\texttt{Sprintf} を呼び出して \texttt{String}
+メソッドを構築し、String
+メソッドの中に無限に再帰するような方法を取らないことです。これは、\texttt{Sprintf}
+の呼び出しが、レシーバを直接文字列として出力しようとし、その結果、このメソッドが再び呼び出される場合に起こります。この例が示すように、これはよくある簡単な間違いです。
+
+\begin{lstlisting}[numbers=none]
+type MyString string
+
+func (m MyString) String() string {
+    return fmt.Sprintf("MyString=%s", m) // Error: will recur forever.
+}
+\end{lstlisting}
+
+これを修正するのも簡単です。引数を、このメソッドを持たない基本的な文字列型に変換します。
+
+\begin{lstlisting}[numbers=none]
+type MyString string
+func (m MyString) String() string {
+    return fmt.Sprintf("MyString=%s", string(m)) // OK: note conversion.
+}
+\end{lstlisting}
+
+{初期化セクション}では、この再帰を避けるための別のテクニックを紹介します。
+
+もう一つの表示技術は、表示ルーチンの引数を別の表示ルーチンに直接渡すことです。\texttt{Printf}のシグネチャでは、最終引数に\texttt{...interface}という型を使用して、フォーマットの後に任意の数のパラメータ（任意の型）を表示できることを指定しています。
+
+\begin{lstlisting}[numbers=none]
+func Printf(format string, v ...interface{}) (n int, err error) {
+\end{lstlisting}
+
+関数 \texttt{Printf} の中では、\texttt{v} は
+\texttt{{[}{]}interface\{\}}
+型の変数のように振る舞いますが、他の可変長の関数に渡した場合は、通常の引数リストのように振る舞います。ここでは，上記で使用した関数
+\texttt{log.Println} の実装を示します．この関数は、引数を直接
+\texttt{fmt.Sprintln} に渡して、実際の書式設定を行います。
+
+\begin{lstlisting}[numbers=none]
+// Printlnは、fmt.Printlnの要領で標準ロガーに印字します。
+func Println(v ...interface{}) {
+    std.Output(2, fmt.Sprintln(v...))  // Output takes parameters (int, string)
+}
+\end{lstlisting}
+
+\texttt{Sprintln} のネストした呼び出しの中で \texttt{v} の後に
+\texttt{...} と書いているのは、コンパイラに \texttt{v}
+を引数のリストとして扱うように指示するためです。そうしないと、\texttt{v}
+を単一のスライス引数として渡してしまいます。
+
+ここで説明した以外にも、印刷には様々な機能があります。詳しくは，パッケージ
+\texttt{fmt} の \texttt{godoc} ドキュメントを参照してください．
+
+ところで，\texttt{...}のパラメータは，特定の型にすることができます．例えば，整数のリストの中から最小のものを選ぶmin関数の場合，\texttt{...int}となります．
+
+\begin{lstlisting}[numbers=none]
+func Min(a ...int) int {
+    min := int(^uint(0) >> 1)  // largest int
+    for _, i := range a {
+        if i < min {
+            min = i
+        }
+    }
+    return min
+}
+\end{lstlisting}
+
+\subsubsection{Append}
+
+これで、組み込み関数 \texttt{append}
+の設計を説明するのに必要な、欠けていた部分ができました。この
+\texttt{append} のシグネチャは、上で説明したカスタムの \texttt{Append}
+関数とは異なります。図式的には次のようになります。
+
+\begin{lstlisting}[numbers=none]
+func append(slice []T, elements ...T) []T
+\end{lstlisting}
+
+ここで、Tは任意の型を表すプレースホルダーです。実際には、型 \texttt{T}
+が呼び出し側で決定されるような関数を Go で書くことはできません。これが
+\texttt{append}
+が組み込まれている理由で、コンパイラのサポートが必要です。
+
+\texttt{append}が行うことは、要素をスライスの最後に追加し、その結果を返すことです。結果を返す必要があるのは、手書きの
+\texttt{Append}
+と同様に、基礎となる配列が変更される可能性があるからです。次の簡単な例
+
+\begin{lstlisting}[numbers=none]
+x := []int{1,2,3}
+x = append(x, 4, 5, 6)
+fmt.Println(x)
+\end{lstlisting}
+
+は \texttt{{[}1\ 2\ 3\ 4\ 5\ 6{]}} を出力します。つまり、\texttt{append}
+は \texttt{Printf} と同じように、任意の数の引数を集めて動作します。
+
+しかし、\texttt{Append}が行うことを実行して、スライスにスライスを追加したいとしたらどうでしょう?
+簡単です。上の \texttt{Output} の呼び出しと同じように、呼び出しサイトで
+\texttt{...} を使用します。このスニペットは上のものと同じ出力をします。
+
+\begin{lstlisting}[numbers=none]
+x := []int{1,2,3}
+y := []int{4,5,6}
+x = append(x, y...)
+fmt.Println(x)
+\end{lstlisting}
+
+この \texttt{...}
+がないと、型が間違っているのでコンパイルできません。\texttt{y} は
+\texttt{int} 型ではありません。
+
+\subsection{初期化}
+
+CやC++の初期化と表面的にはあまり変わらないように見えますが、Goの初期化はより強力です。初期化中に複雑な構造を構築することができ、初期化されたオブジェクト間の順序問題は、異なるパッケージ間であっても、正しく処理されます。
+
+\subsubsection{定数}
+
+Goの定数はただの定数です。定数はコンパイル時に作成され、関数内でローカルとして定義されている場合でも、数字、文字（ルーン）、文字列、ブーリアンのみとなります。コンパイル時の制限のため、定数を定義する式は、コンパイラで評価可能な定数式でなければなりません。例えば、\texttt{1\textless{}\textless{}3}は定数式ですが、\texttt{math.Sin(math.Pi/4)}は定数式ではありません。\texttt{math.Sin}の関数呼び出しは実行時に行われる必要があるからです。
+
+Goでは、列挙型の定数は \texttt{iota}
+という列挙子を使って作成します。\texttt{iota}
+は式の一部にすることができ、式は暗黙的に繰り返すことができるので、複雑な値のセットを簡単に作ることができます。
+
+\begin{lstlisting}[numbers=none]
+type ByteSize float64
+
+const (
+    _           = iota // 空白の識別子に割り当てて最初の値を無視する
+    KB ByteSize = 1 << (10 * iota)
+    MB
+    GB
+    TB
+    PB
+    EB
+    ZB
+    YB
+)
+\end{lstlisting}
+
+任意のユーザ定義型に \texttt{String}
+などのメソッドを付加することで、任意の値を印刷時に自動的に整形することができます。構造体に適用されることが多いのですが、このテクニックは
+\texttt{ByteSize} のような浮動小数点型などのスカラ型にも有効です。
+
+\begin{lstlisting}[numbers=none]
+func (b ByteSize) String() string {
+    switch {
+    case b >= YB:
+        return fmt.Sprintf("%.2fYB", b/YB)
+    case b >= ZB:
+        return fmt.Sprintf("%.2fZB", b/ZB)
+    case b >= EB:
+        return fmt.Sprintf("%.2fEB", b/EB)
+    case b >= PB:
+        return fmt.Sprintf("%.2fPB", b/PB)
+    case b >= TB:
+        return fmt.Sprintf("%.2fTB", b/TB)
+    case b >= GB:
+        return fmt.Sprintf("%.2fGB", b/GB)
+    case b >= MB:
+        return fmt.Sprintf("%.2fMB", b/MB)
+    case b >= KB:
+        return fmt.Sprintf("%.2fKB", b/KB)
+    }
+    return fmt.Sprintf("%.2fB", b)
+}
+\end{lstlisting}
+
+式 \texttt{YB} は \texttt{1.00YB}
+と表示されますが，\texttt{ByteSize(1e13)} は \texttt{9.09TB}
+と表示されます．
+
+ここで \texttt{ByteSize} の \texttt{String} メソッドを実装するために
+\texttt{Sprintf} を使用していますが、これが安全
+(無限に繰り返すことを避ける)
+なのは、変換のためではなく、文字列形式ではない \texttt{\%f} で
+\texttt{Sprintf} を呼び出しているためです。\texttt{Sprintf} が
+\texttt{String}
+メソッドを呼び出すのは，文字列を必要とするときだけであり，\texttt{\%f}
+は浮動小数点値を必要とします．
+
+\subsubsection{変数}
+
+変数は、定数と同様に初期化することができますが、初期化子は、実行時に計算される一般的な式にすることができます。
+
+\begin{lstlisting}[numbers=none]
+var (
+    home   = os.Getenv("HOME")
+    user   = os.Getenv("USER")
+    gopath = os.Getenv("GOPATH")
+)
+\end{lstlisting}
+
+\subsubsection{init関数}
+
+最後に、各ソースファイルは独自の niladic \texttt{init}
+関数を定義して、必要な状態をセットアップすることができます。(実際には、各ファイルは複数の\texttt{init}関数を持つことができます。)
+そして、finallyとは最後のことです。パッケージ内のすべての変数宣言が初期化子を評価した後に
+\texttt{init}
+が呼ばれ、それらはインポートされたすべてのパッケージが初期化された後に評価されます。
+
+宣言として表現できない初期化の他に、\texttt{init}関数の一般的な使い方は、実際の実行が始まる前にプログラムの状態の正しさを検証したり修復したりすることです。
+
+\begin{lstlisting}[numbers=none]
+func init() {
+    if user == "" {
+        log.Fatal("$USER not set")
+    }
+    if home == "" {
+        home = "/home/" + user
+    }
+    if gopath == "" {
+        gopath = home + "/go"
+    }
+    // gopath may be overridden by --gopath flag on command line.
+    flag.StringVar(&gopath, "gopath", gopath, "override default GOPATH")
+}
+\end{lstlisting}
+
+\subsection{メソッド}
+
+\subsubsection{ポインタと値の比較}
+
+\texttt{ByteSize}で見たように、メソッドは任意の名前の付いた型（ポインタやインターフェースを除く）に対して定義することができ、レシーバは構造体である必要はありません。
+
+先ほどのスライスの説明では、\texttt{Append}という関数を書きました。これをスライスのメソッドとして定義することができます．そのためには、まず、メソッドをバインドできる名前付きの型を宣言し、メソッドのレシーバをその型の値にします。
+
+\begin{lstlisting}[numbers=none]
+type ByteSlice []byte
+
+func (slice ByteSlice) Append(data []byte) []byte {
+    // 本体は上記のAppend関数と全く同じです。
+}
+\end{lstlisting}
+
+この場合でも、メソッドは更新されたスライスを返す必要があります。メソッドを再定義して、\texttt{ByteSlice}へのポインタをレシーバとして受け取り、メソッドが呼び出し元のスライスを上書きできるようにすることで、この不便さを解消できます。
+
+\begin{lstlisting}[numbers=none]
+func (p *ByteSlice) Append(data []byte) {
+    slice := *p
+    // Body as above, without the return.
+    *p = slice
+}
+\end{lstlisting}
+
+実際には、もっと良い方法があります。この関数を次のように修正して、標準的な
+\texttt{Write} メソッドのようにしてみましょう。
+
+\begin{lstlisting}[numbers=none]
+func (p *ByteSlice) Write(data []byte) (n int, err error) {
+    slice := *p
+    // Again as above.
+    *p = slice
+    return len(data), nil
+}
+\end{lstlisting}
+
+とすると、\texttt{*ByteSlice}という型は、標準的なインターフェイスである\texttt{io.Writer}を満たすことになり、これは便利なことです。例えば、1つにプリントすることができます。
+
+\begin{lstlisting}[numbers=none]
+    var b ByteSlice
+    fmt.Fprintf(&b, "This hour has %d days\n", 7)
+\end{lstlisting}
+
+ここでは，\texttt{*ByteSlice}のみが\texttt{io.Writer}を満たすので，\texttt{ByteSlice}のアドレスを渡しています．レシーバーのポインタと値に関するルールは、値のメソッドはポインタと値の両方に呼び出すことができますが、ポインタのメソッドはポインタにしか呼び出すことができません。
+
+ポインタメソッドはレシーバを変更することができるので、このルールが発生します。値に対してポインタメソッドを呼び出すと、メソッドは値のコピーを受け取ることになるので、変更された部分は破棄されます。そのため、言語ではこのようなミスを禁止しています。しかし、便利な例外があります。値がアドレス可能な場合，言語はアドレス演算子を自動的に挿入することで，値に対してポインタメソッドを呼び出すという一般的なケースに対処します。今回の例では、変数
+\texttt{b} がアドレス指定可能なので、その \texttt{Write} メソッドを
+\texttt{b.Write} だけで呼び出すことができます。コンパイラはこれを
+\texttt{(\&b).Write} と書き換えてくれます。
+
+ところで、バイトのスライスに対して \texttt{Write}
+を使用するというアイデアは、\texttt{bytes.Buffer}
+の実装の中心となっています。
+
+\subsection{Interfaces and other types}
+
+\subsubsection{インターフェイス}
+
+Goのインターフェイスは、オブジェクトの動作を指定する方法を提供します。つまり、何かができるのであれば、それをここで使用することができます。カスタムプリンタは
+\texttt{String} メソッドで実装できますし、\texttt{Fprintf} は
+\texttt{Write} メソッドであらゆるものに出力を生成できます。
+
+1つまたは2つのメソッドしかないインターフェイスは、Goのコードではよく見られます。例えば、\texttt{Write}を実装しているものには\texttt{io.Writer}のように。通常、メソッドから派生した名前が付けられます。
+
+1つの型が複数のインターフェースを実装することも可能です。例えば、コレクションは
+\texttt{sort.Interface} を実装していれば、\texttt{sort}
+パッケージのルーチンによってソートすることができます。このルーチンには
+\texttt{Len()}, \texttt{Less(i,\ j\ int)\ bool},
+\texttt{Swap(i,\ j\ int)}
+が含まれており、また、カスタムのフォーマッタを持つこともできます。この例では、
+\texttt{Sequence} がその両方を満たしています。
+
+\begin{lstlisting}[numbers=none]
+type Sequence []int
+
+// sort.Interfaceで必要なメソッドです。
+func (s Sequence) Len() int {
+    return len(s)
+}
+func (s Sequence) Less(i, j int) bool {
+    return s[i] < s[j]
+}
+func (s Sequence) Swap(i, j int) {
+    s[i], s[j] = s[j], s[i]
+}
+
+// Copyは、Sequenceのコピーを返します。
+func (s Sequence) Copy() Sequence {
+    copy := make(Sequence, 0, len(s))
+    return append(copy, s...)
+}
+
+// 印刷のためのメソッド - 印刷前に要素をソートします。
+func (s Sequence) String() string {
+    s = s.Copy() // コピーをして、引数を上書きしないようにしましょう。
+    sort.Sort(s)
+    str := "["
+    for i, elem := range s { // Loop is O(N^2); will fix that in next example.
+        if i > 0 {
+            str += " "
+        }
+        str += fmt.Sprint(elem)
+    }
+    return str + "]"
+}
+\end{lstlisting}
+
+\subsubsection{変換について}
+
+\texttt{Sequence}の\texttt{String}メソッドは，\texttt{Sprint}がすでにスライスに対して行っている作業を再現しています．(また，複雑さは $O(N^2)$ で，これは貧弱です)．\texttt{Sprint}を呼び出す前に\texttt{Sequence}をプレーンな\texttt{[]int}
+に変換すれば，この作業を分担することができます（また，高速化することもできます）．
+
+\begin{lstlisting}[numbers=none]
+func (s Sequence) String() string {
+    s = s.Copy()
+    sort.Sort(s)
+    return fmt.Sprint([]int(s))
+}
+\end{lstlisting}
+
+このメソッドは、\texttt{String}メソッドから\texttt{Sprintf}を安全に呼び出すための変換テクニックのもう一つの例です。2つの型（\texttt{Sequence}と\texttt{{[}{]}int}）は型名を無視すれば同じものなので、それらの間で変換することは合法です。この変換は新しい値を生成するのではなく，一時的に既存の値が新しい型を持っているかのように振る舞うだけです。(整数から浮動小数点への変換のように、新しい値を作る合法的な変換は他にもあります)
+
+Goプログラムでは、式の型を変換して別のメソッド群にアクセスすることが慣用的に行われています。例として、既存の型
+\texttt{sort.IntSlice}
+を使って、例題全体を次のように減らすことができます。
+
+\begin{lstlisting}[numbers=none]
+type Sequence []int
+
+// 印刷のためのメソッド - 印刷前に要素をソートする
+func (s Sequence) String() string {
+    s = s.Copy()
+    sort.IntSlice(s).Sort()
+    return fmt.Sprint([]int(s))
+}
+\end{lstlisting}
+
+ここでは、\texttt{Sequence}に複数のインターフェース（ソートと印刷）を実装させるのではなく、データアイテムを複数の型（\texttt{Sequence}、\texttt{sort.IntSlice}、\texttt{{[}{]}int}）に変換できる機能を利用して、それぞれが仕事の一部を行うようにしています。これは実際にはもっと珍しいことですが、効果的です。
+
+\subsubsection{インターフェース変換と型アサーション}
+
+{タイプスイッチ}は変換の一種です。インターフェイスを受け取り、switch内の各caseについて、ある意味でそのcaseの型に変換します。ここでは，\texttt{fmt.Printf}のコードがタイプスイッチを使って値を文字列に変換する様子を簡略化して説明します．すでに文字列であれば、インターフェイスが保持する実際の文字列の値が必要となり、\texttt{String}メソッドがあれば、そのメソッドを呼び出した結果が必要となります。
+
+\begin{lstlisting}[numbers=none]
+type Stringer interface {
+    String() string
+}
+
+var value interface{} // Value provided by caller.
+switch str := value.(type) {
+case string:
+    return str
+case Stringer:
+    return str.String()
+}
+\end{lstlisting}
+
+最初のcaseは具体的な値を見つけ、2番目のcaseはインターフェイスを別のインターフェイスに変換します。このように型を混在させることは全く問題ありません。
+
+しかし，気になる型が1つしかない場合はどうでしょうか？値が「文字列」を保持していることがわかっていて、それを取り出したいだけだったら？このような場合には、ワンケースのタイプスイッチで対応できますが、型アサーションでも対応できます。型アサーションはインターフェイスの値を受け取り、そこから指定された明示的な型の値を抽出します。構文は型スイッチを開く節を参考にしていますが、\texttt{type}キーワードではなく明示的な型を使用しています。
+
+\begin{lstlisting}[numbers=none]
+value.(typeName)
+\end{lstlisting}
+
+と入力すると、結果として静的な型\texttt{typeName}を持つ新しい値が得られます。この型は，インターフェイスが持つ具象型か，値が変換できる第2のインターフェイス型でなければなりません．値の中にあるとわかっている文字列を取り出すには、次のように書きます。
+
+\begin{lstlisting}[numbers=none]
+str := value.(string)
+\end{lstlisting}
+
+しかし、値に文字列が含まれていないことが判明した場合、プログラムはランタイムエラーでクラッシュします。これを防ぐために、``comma,
+ok''というイディオムを使って、値が文字列であるかどうかを安全にテストします：
+
+\begin{lstlisting}[numbers=none]
+str, ok := value.(string)
+if ok {
+    fmt.Printf("string value is: %q\n", str)
+} else {
+    fmt.Printf("value is not a string\n")
+}
+\end{lstlisting}
+
+型の主張が失敗した場合、\texttt{str}
+は依然として存在し、文字列型となりますが、その値はゼロで、空の文字列となります。
+
+この機能を説明するために、このセクションの最初に出てきたタイプスイッチと同等の
+\texttt{if}-\texttt{else} ステートメントを示します。
+
+\begin{lstlisting}[numbers=none]
+if str, ok := value.(string); ok {
+    return str
+} else if str, ok := value.(Stringer); ok {
+    return str.String()
+}
+\end{lstlisting}
+
+\subsubsection{一般性}
+
+ある型がインターフェイスを実装するためだけに存在し、そのインターフェイスを超えてエクスポートされたメソッドを持つことがない場合、その型自体をエクスポートする必要はありません。インターフェイスだけをエクスポートすることで、その値がインターフェイスに記述されている以上の興味深い動作を持たないことが明確になります。また、共通のメソッドのインスタンスごとにドキュメントを繰り返す必要もありません。
+
+このような場合、コンストラクタは実装型ではなくインターフェイスの値を返すべきです。例えば，ハッシュライブラリでは，\texttt{crc32.NewIEEE}と\texttt{adler32.New}の両方がインタフェース型である\texttt{hash.Hash32}を返します．GoプログラムでCRC-32アルゴリズムをAdler-32に置き換えるには、コンストラクタの呼び出しを変更するだけで、残りのコードはアルゴリズムの変更による影響を受けません。
+
+同様のアプローチにより、さまざまな \texttt{crypto}
+パッケージのストリーミング暗号アルゴリズムを、それらが連鎖するブロック暗号から分離することができます。\texttt{crypto/cipher}パッケージの\texttt{Block}インターフェースは、ブロック暗号の動作を指定するもので、1つのデータブロックの暗号化を行います。また、\texttt{bufio}ッケージと同様に、このインタフェースを実装した暗号パッケージは、ブロック暗号の詳細を知らなくても、\texttt{Stream}インタフェースで表されるストリーミング暗号を構築することができます。
+
+\texttt{crypto/cipher}インターフェースは以下のようになります。
+
+\begin{lstlisting}[numbers=none]
+type Block interface {
+    BlockSize() int
+    Encrypt(dst, src []byte)
+    Decrypt(dst, src []byte)
+}
+
+type Stream interface {
+    XORKeyStream(dst, src []byte)
+}
+\end{lstlisting}
+
+カウンターモード（CTR）ストリームの定義は、ブロック暗号をストリーミング暗号に変えるもので、ブロック暗号の詳細は抽象化されていることに注意してください。
+
+\begin{lstlisting}[numbers=none]
+// NewCTRは、指定されたBlockをカウンターモードで使用して
+// 暗号化/復号化を行うStreamを返します。ivの長さは、
+//Blockのブロックサイズと同じでなければなりません。
+func NewCTR(block Block, iv []byte) Stream
+\end{lstlisting}
+
+\texttt{NewCTR}は、ある特定の暗号化アルゴリズムやデータソースだけでなく、\texttt{Block}インターフェースのあらゆる実装や、あらゆる\texttt{Stream}にも適用されます。インターフェイスの値を返すので、CTRの暗号化を他の暗号化モードに置き換えることは、局所的な変更になります。コンストラクタの呼び出しを編集する必要がありますが、周囲のコードは結果を
+\texttt{Stream}
+としてのみ扱わなければならないので、その違いに気づくことはありません。
+
+\subsubsection{インターフェイスとメソッド}
+
+ほとんどのものにメソッドを付けることができるので、ほとんどのものがインターフェイスを満たすことができます。例えば、\texttt{http}パッケージには\texttt{Handler}というインタフェースが定義されています。\texttt{Handler}を実装したオブジェクトはHTTPリクエストに対応できます。
+
+\begin{lstlisting}[numbers=none]
+type Handler interface {
+    ServeHTTP(ResponseWriter, *Request)
+}
+\end{lstlisting}
+
+\texttt{ResponseWriter}はそれ自体がインターフェイスで、クライアントにレスポンスを返すために必要なメソッドへのアクセスを提供します。これらのメソッドには標準の
+\texttt{Write} メソッドが含まれているので、 \texttt{io.Writer}
+が使える場所であれば \texttt{http.ResponseWriter}
+を使うことができます。\texttt{Request}は、クライアントからのリクエストを解析した表現を含む構造体です。
+
+簡潔にするために、POSTを無視して、HTTPリクエストは常にGETであると仮定します。この単純化は、ハンドラの設定方法には影響しません。ここでは、ページの訪問回数をカウントするハンドラの簡単な実装を紹介します。
+
+\begin{lstlisting}[numbers=none]
+// Simple counter server.
+type Counter struct {
+    n int
+}
+
+func (ctr *Counter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+    ctr.n++
+    fmt.Fprintf(w, "counter = %d\n", ctr.n)
+}
+\end{lstlisting}
+
+(テーマに沿って、\texttt{Fprintf} が \texttt{http.ResponseWriter}
+に出力できることに注目してください。) 実際のサーバでは、\texttt{ctr.n}
+へのアクセスは、同時アクセスから保護する必要があります。提案としては，\texttt{sync}と\texttt{atomic}のパッケージを参照してください．
+
+参考までに，このようなサーバをURLツリーのノードにアタッチする方法を示します．
+
+\begin{lstlisting}[numbers=none]
+import "net/http"
+...
+ctr := new(Counter)
+http.Handle("/counter", ctr)
+\end{lstlisting}
+
+しかし、なぜ \texttt{Counter}
+を構造体にするのでしょうか？必要なのは整数だけです。(レシーバはポインタである必要があるので、インクリメントは呼び出し側から見えるようになっています)。
+
+\begin{lstlisting}[numbers=none]
+// Simpler counter server.
+type Counter int
+
+func (ctr *Counter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+    *ctr++
+    fmt.Fprintf(w, "counter = %d\n", *ctr)
+}
+\end{lstlisting}
+
+もしあなたのプログラムに、あるページが訪問されたことを通知する必要のある内部状態があるとしたらどうでしょう？チャネルをWebページに結びつけます。
+
+\begin{lstlisting}[numbers=none]
+// 訪問のたびに通知を送るチャネルです。(おそらく、
+// チャネルをバッファリングしたいのでしょう。)
+type Chan chan *http.Request
+
+func (ch Chan) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+    ch <- req
+    fmt.Fprint(w, "notification sent")
+}
+\end{lstlisting}
+
+最後に、\texttt{/args}にサーバーバイナリの起動時に使用した引数を表示したいとします。引数を表示する関数を書くのは簡単です。
+
+\begin{lstlisting}[numbers=none]
+func ArgServer() {
+    fmt.Println(os.Args)
+}
+\end{lstlisting}
+
+これをHTTPサーバにするにはどうしたらいいでしょうか？\texttt{ArgServer}を、値を無視する何らかの型のメソッドにすることもできますが、もっと簡単な方法があります。ポインタやインタフェースを除くあらゆる型に対してメソッドを定義できるので、関数に対してメソッドを書くことができます。\texttt{http}パッケージにはこのようなコードが含まれています。
+
+\begin{lstlisting}[numbers=none]
+// HandlerFunc型は、通常の関数をHTTPハンドラーとして使用できるようにするための
+// アダプタです。 fが適切なシグネチャを持つ関数の場合、HandlerFunc(f)はfを
+// 呼び出すHandlerオブジェクトです。
+type HandlerFunc func(ResponseWriter, *Request)
+
+// ServeHTTP calls f(w, req).
+func (f HandlerFunc) ServeHTTP(w ResponseWriter, req *Request) {
+    f(w, req)
+}
+\end{lstlisting}
+
+\texttt{HandlerFunc}は、\texttt{ServeHTTP}というメソッドを持つ型で、この型の値はHTTPリクエストを処理することができます。このメソッドの実装を見てみましょう。レシーバは関数の
+\texttt{f} で、メソッドは \texttt{f}
+を呼び出します。これは奇妙に思えるかもしれませんが、例えばレシーバがチャネルで、メソッドがそのチャネル上で送信するのとそれほど違いはありません。
+
+\texttt{ArgServer}をHTTPサーバにするには、まず正しいシグネチャを持つように変更します。
+
+\begin{lstlisting}[numbers=none]
+// Argument server.
+func ArgServer(w http.ResponseWriter, req *http.Request) {
+    fmt.Fprintln(w, os.Args)
+}
+\end{lstlisting}
+
+\texttt{ArgServer} は \texttt{HandlerFunc}
+と同じシグネチャを持っているので、\texttt{Sequence} を \texttt{IntSlice}
+に変換して \texttt{IntSlice.Sort}
+にアクセスしたように、この型に変換してそのメソッドにアクセスすることができます。これを設定するためのコードは簡潔です。
+
+\begin{lstlisting}[numbers=none]
+http.Handle("/args", http.HandlerFunc(ArgServer))
+\end{lstlisting}
+
+誰かがページ \texttt{/args}
+を訪れたとき、そのページにインストールされているハンドラは値が
+\texttt{ArgServer} でタイプが \texttt{HandlerFunc}
+です。HTTPサーバは\texttt{ArgServer}をレシーバとして、そのタイプのメソッド\texttt{ServeHTTP}を呼び出し、\texttt{ArgServer}は（\texttt{HandlerFunc.ServeHTTP}内の呼び出し\texttt{f(w,\ req)}を介して）\texttt{ArgServer}を呼び出すことになります。そして、引数が表示されます。
+
+このセクションでは、構造体、整数、チャネル、そして関数からHTTPサーバを作りましたが、これらはすべて、インターフェースが単なるメソッドのセットであり、（ほとんど）あらゆるタイプに対して定義できるからです。
+
+\subsection{空白識別子}
+
+空白の識別子については、{\texttt{for}
+\texttt{range}
+\texttt{loops}}や{maps}の文脈で、これまでに何度か触れてきました。空白識別子は、任意の型の任意の値を割り当てたり、宣言したりすることができ、その値は無害に破棄されます。これは、Unix
+の \texttt{/dev/null}
+ファイルへの書き込みに似ています。これは、変数が必要だが実際の値は関係ない場合のプレースホルダーとして使用される、書き込み専用の値を表します。これまで見てきた用途以外にも使い道があります。
+
+\subsubsection{マルチプルアサインメントにおけるブランク識別子}
+
+ブランク識別子を \texttt{for} \texttt{range}
+ループで使用するのは、一般的な状況の特殊なケースです。これは、一般的な状況の特殊なケースで、多重割り当てです。
+
+代入の左辺に複数の値を必要とするが、そのうちの1つの値がプログラムで使用されない場合、代入の左辺に空白の識別子を使用することで、ダミー変数を作成する必要がなくなり、その値が廃棄されることが明確になる。例えば，値とエラーを返す関数を呼び出したが，重要なのはエラーの方だけだった場合，無関係な値を捨てるためにブランク識別子を使用する．
+
+\begin{lstlisting}[numbers=none]
+if _, err := os.Stat(path); os.IsNotExist(err) {
+        fmt.Printf("%s does not exist\n", path)
+}
+\end{lstlisting}
+
+たまに、エラーを無視するためにエラー値を捨てるコードを見かけますが、これはひどいやり方です。エラーリターンは必ず確認してください。エラーリターンが用意されているのには理由があります。
+
+\begin{lstlisting}[numbers=none]
+// Bad! This code will crash if path does not exist.
+fi, _ := os.Stat(path)
+if fi.IsDir() {
+    fmt.Printf("%s is a directory\n", path)
+}
+\end{lstlisting}
+
+\subsubsection{未使用のインポートおよび変数}
+
+パッケージをインポートしたり、使用しないで変数を宣言したりすることはエラーになります。未使用のインポートはプログラムを肥大化させ、コンパイルに時間がかかります。一方、初期化されているのに使用されていない変数は、少なくとも計算の無駄であり、より大きなバグを示している可能性があります。しかし、プログラムが活発に開発されていると、未使用のインポートや変数が発生することが多く、コンパイルを進めるためにそれらを削除しても、後で再び必要になることがあり、煩わしいものです。空白の識別子があれば、それを回避することができます。
+
+この中途半端なプログラムは、未使用のインポートが2つ（\texttt{fmt}と\texttt{io}）、未使用の変数が1つ（\texttt{fd}）あるので、コンパイルはできませんが、これまでのコードが正しいかどうかを確認するには良いでしょう。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "io"
+    "log"
+    "os"
+)
+
+func main() {
+    fd, err := os.Open("test.go")
+    if err != nil {
+        log.Fatal(err)
+    }
+    // TODO: use fd.
+}
+\end{lstlisting}
+
+未使用のインポートに対する苦情を黙らせるには、インポートされたパッケージのシンボルを参照するために空白の識別子を使用します。同様に、未使用の変数
+\texttt{fd}
+を空白の識別子に割り当てることで、未使用の変数に関するエラーを黙らせることができます。このバージョンのプログラムはコンパイルできます。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "io"
+    "log"
+    "os"
+)
+
+var _ = fmt.Printf // For debugging; delete when done.
+var _ io.Reader    // For debugging; delete when done.
+
+func main() {
+    fd, err := os.Open("test.go")
+    if err != nil {
+        log.Fatal(err)
+    }
+    // TODO: use fd.
+    _ = fd
+}
+\end{lstlisting}
+
+慣習的に、インポートエラーを防ぐためのグローバル宣言は、インポートの直後に記述し、コメントを付けるべきです。これは、見つけやすくするためでもあり、後の処理を忘れないようにするためでもあります。
+
+\subsubsection{副作用のためのインポート}
+
+前述の例で挙げた \texttt{fmt} や \texttt{io}
+のような未使用のインポートは、最終的には使用するか削除する必要があります。しかし、明示的な使用をせずに、副作用のためだけにパッケージをインポートすることが有用な場合もあります。たとえば、{\texttt{net/http/pprof}}パッケージは、その\texttt{init}関数の間に、デバッグ情報を提供するHTTPハンドラを登録します。このパッケージにはエクスポートされたAPIがありますが、ほとんどのクライアントが必要とするのはハンドラの登録だけで、データへのアクセスはWebページを介して行われます。副作用のためだけにパッケージをインポートするには、パッケージの名前を空白の識別子に変更します。
+
+\begin{lstlisting}[numbers=none]
+import _ "net/http/pprof"
+\end{lstlisting}
+
+この形式のインポートでは、パッケージがその副作用のためにインポートされていることが明確になります。というのも、このファイルでは、パッケージには名前がありません。(もし名前があって、その名前を使わなかったら、コンパイラはプログラムを拒絶するでしょう)。
+
+\subsubsection{インターフェースのチェック}
+
+上記の{interfaces}で見たように、型はインターフェイスを実装していることを明示的に宣言する必要はありません。その代わり、型はインターフェイスのメソッドを実装するだけで、インターフェイスを実装します。実際には，ほとんどのインタフェースの変換は静的であり，したがって，コンパイル時にチェックされる。例えば，\texttt{*os.File}を\texttt{io.Reader}を期待する関数に渡すと，\texttt{*os.File}が\texttt{io.Reader}インタフェースを実装していなければ，コンパイルできません．
+
+しかし、いくつかのインターフェイスのチェックは実行時に行われます。一つの例は{\texttt{encoding/json}}パッケージで、{\texttt{Marshaler}}インターフェイスを定義しています。JSONエンコーダーは、そのインターフェイスを実装した値を受け取ると、標準的な変換を行う代わりに、その値のマーシャリング・メソッドを呼び出してJSONに変換します。エンコーダーは実行時にこのプロパティを{type
+assertion}のような形でチェックします。
+
+\begin{lstlisting}[numbers=none]
+m, ok := val.(json.Marshaler)
+\end{lstlisting}
+
+ある型がインターフェイスを実装しているかどうかを尋ねるだけで、実際にはそのインターフェイス自体を使用しない場合、おそらくエラーチェックの一環として、空白の識別子を使用して、型が保証する値を無視します。
+
+\begin{lstlisting}[numbers=none]
+if _, ok := val.(json.Marshaler); ok {
+    fmt.Printf("value %v of type %T implements json.Marshaler\n", val, val)
+}
+\end{lstlisting}
+
+このような状況が発生するのは、型を実装しているパッケージの中で、その型が実際にインターフェイスを満たしていることを保証する必要がある場合です。例えば{\texttt{json.RawMessage}}のような型がカスタムのJSON表現を必要とする場合、\texttt{json.Marshaler}を実装する必要がありますが、コンパイラがこれを自動的に検証するような静的な変換はありません。型が誤ってインターフェースを満たさなかった場合、JSON
+エンコーダーはまだ動作しますが、カスタム実装は使用されません。実装が正しいことを保証するために、空白の識別子を使ったグローバル宣言をパッケージ内で使用することができます。
+
+\begin{lstlisting}[numbers=none]
+var _ json.Marshaler = (*RawMessage)(nil)
+\end{lstlisting}
+
+この宣言では、\texttt{*RawMessage}から\texttt{Marshaler}への変換を含む代入には、\texttt{*RawMessage}が\texttt{Marshaler}を実装していることが必要であり、そのプロパティはコンパイル時にチェックされます。\texttt{json.Marshaler}のインターフェイスが変更された場合、このパッケージはコンパイルされなくなり、更新が必要であることが通知されます。
+
+この構造での空の識別子の出現は、この宣言が変数を作成するためではなく、型のチェックのためだけに存在することを示しています。ただし、インターフェイスを満たすすべての型に対して、このような宣言をしてはいけません。慣習的に、このような宣言は、コード内に既に存在する静的変換がない場合にのみ使用されますが、これは稀なケースです。
+
+\subsection{埋め込み}
+
+Goには典型的な型駆動のサブクラス化の概念はありませんが、構造体やインターフェースに型を埋め込むことで、実装の一部を「借りる」ことができます。
+
+インターフェースの埋め込みはとても簡単です。以前、\texttt{io.Reader}と\texttt{io.Writer}のインターフェイスについて触れましたが、ここではその定義を示します。
+
+\begin{lstlisting}[numbers=none]
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+\end{lstlisting}
+
+また、\texttt{io}パッケージは、このようなメソッドをいくつか実装できるオブジェクトを指定するいくつかの他のインタフェースもエクスポートしています。例えば、\texttt{io.ReadWriter}があります。これは\texttt{Read}と\texttt{Write}の両方を含むインタフェースです。2つのメソッドを明示的に列挙して
+\texttt{io.ReadWriter}
+を指定することもできますが、次のように2つのインターフェイスを埋め込んで新しいインターフェイスを形成する方が、より簡単で連想しやすいでしょう。
+
+\begin{lstlisting}[numbers=none]
+// ReadWriterは、ReaderとWriterのインターフェース
+// を組み合わせたインターフェースです。
+type ReadWriter interface {
+    Reader
+    Writer
+}
+\end{lstlisting}
+
+これは見た目通りのことを言っています。\texttt{ReadWriter}は
+\texttt{Reader}がすることと
+\texttt{Writer}がすることを同時に行うことができます。これは埋め込まれたインターフェースの組合わせです。インターフェースの中に埋め込むことができるのは、インターフェースだけです。
+
+同じ基本的な考え方が構造体にも当てはまりますが、より広範な意味を持ちます。\texttt{bufio}パッケージには、\texttt{bufio.Reader}と\texttt{bufio.Writer}という2つの構造体があり、それぞれが
+\texttt{io}パッケージの類似したインタフェースを実装しています。また、\texttt{bufio}
+はバッファリングされたリーダ/ライタも実装していますが、これはエンベッディングを使ってリーダとライタを一つの構造体にまとめることで実現しています。
+
+\begin{lstlisting}[numbers=none]
+// ReadWriterには、ReaderとWriterへのポインタが格納されています。
+// io.ReadWriterを実装しています。
+type ReadWriter struct {
+    *Reader  // *bufio.Reader
+    *Writer  // *bufio.Writer
+}
+\end{lstlisting}
+
+埋め込まれた要素は構造体へのポインタで、もちろん使用する前に有効な構造体を指すように初期化する必要があります。\texttt{ReadWriter}構造体は次のように書くことができます。
+
+\begin{lstlisting}[numbers=none]
+type ReadWriter struct {
+    reader *Reader
+    writer *Writer
+}
+\end{lstlisting}
+
+しかし、フィールドのメソッドを促進し、\texttt{io}インターフェースを満たすためには、次のようなフォワーディング・メソッドも提供する必要があります。
+
+\begin{lstlisting}[numbers=none]
+func (rw *ReadWriter) Read(p []byte) (n int, err error) {
+    return rw.reader.Read(p)
+}
+\end{lstlisting}
+
+構造体を直接埋め込むことで、このようなブッキングを避けることができます。つまり、\texttt{bufio.ReadWriter}は\texttt{bufio.Reader}と\texttt{bufio.Writer}のメソッドを持っているだけでなく、\texttt{io.Reader}、\texttt{io.Writer}、\texttt{io.ReadWriter}の3つのインターフェースをすべて満たしていることになります。
+
+エンベッディングがサブクラス化と異なる重要な点があります。型を埋め込むと、その型のメソッドは外側の型のメソッドになりますが、メソッドが呼び出されると、そのメソッドのレシーバは外側の型ではなく内側の型になります。この例では、\texttt{bufio.ReadWriter}の\texttt{Read}メソッドが呼び出されると、上で書いたフォワーディング・メソッドとまったく同じ効果があります。レシーバは\texttt{ReadWriter}の\texttt{reader}フィールドで、\texttt{ReadWriter}自体ではありません。
+
+埋め込みは単なる利便性でもあります。この例では、埋め込みフィールドを通常の名前付きフィールドと並べて表示しています。
+
+\begin{lstlisting}[numbers=none]
+type Job struct {
+    Command string
+    *log.Logger
+}
+\end{lstlisting}
+
+\texttt{Job}型は \texttt{*log.Logger} の \texttt{Print},
+\texttt{Printf}, \texttt{Println}
+などのメソッドを持つようになりました。もちろん、\texttt{Logger}にフィールド名を与えることもできましたが、そうする必要はありません。そして今、初期化されると、\texttt{Job}にログを記録することができます。
+
+\begin{lstlisting}[numbers=none]
+job.Println("starting now...")
+\end{lstlisting}
+
+\texttt{Logger}は\texttt{Job}構造体の通常のフィールドなので、以下のように\texttt{Job}のコンストラクタ内で通常の方法で初期化することができます。
+
+\begin{lstlisting}[numbers=none]
+func NewJob(command string, logger *log.Logger) *Job {
+    return &Job{command, logger}
+}
+\end{lstlisting}
+
+または複合リテラルを使用します。
+
+\begin{lstlisting}[numbers=none]
+job := &Job{command, log.New(os.Stderr, "Job: ", log.Ldate)}
+\end{lstlisting}
+
+埋め込まれたフィールドを直接参照する必要がある場合には、フィールドの型名が、パッケージ修飾子を無視して、フィールド名の役割を果たします。ここで、\texttt{Job}変数の\texttt{*log.Logger}にアクセスする必要がある場合は、\texttt{job.Logger}と書きますが、これは\texttt{Logger}のメソッドを改良したい場合に便利です。
+
+\begin{lstlisting}[numbers=none]
+func (job *Job) Printf(format string, args ...interface{}) {
+    job.Logger.Printf("%q: %s", job.Command, fmt.Sprintf(format, args...))
+}
+\end{lstlisting}
+
+型を埋め込むことで名前の衝突という問題が発生しますが、それを解決するためのルールは簡単です。まず、フィールドやメソッド
+\texttt{X} は、型のより深い入れ子になった部分の他の項目 \texttt{X}
+を隠します。もし\texttt{log.Logger}が\texttt{Command}というフィールドやメソッドを含んでいたら、\texttt{Job}の\texttt{Command}フィールドがそれを支配するでしょう。
+
+次に、同じ名前が同じ入れ子のレベルで現れた場合、それは通常エラーです。\texttt{Job}構造体に\texttt{Logger}と呼ばれる別のフィールドやメソッドが含まれていた場合、\texttt{log.Logger}を埋め込むのはエラーになります。しかし、型定義の外でプログラム中に重複した名前が出てこない場合はOKです。この資格は、外部から埋め込まれた型に加えられた変更に対してある程度の保護を提供します。どちらのフィールドも使用されることがなければ、別のサブタイプの別のフィールドと衝突するフィールドが追加されても問題はありません。
+
+\subsection{並行処理}
+
+\subsubsection{通信による共有}
+
+並行プログラミングは大きなテーマであり、ここではGoに特化したハイライトを紹介するだけのスペースしかありません。
+
+多くの環境での同時進行プログラミングは、共有変数への正しいアクセスを実装するために必要な微妙な技術によって困難になっています。Goでは、共有された値がチャネルで渡され、実際には別々の実行スレッドで積極的に共有されることはないという、異なるアプローチを推奨しています。ある時点では、1つのゴルーチンだけが値にアクセスできます。データレースは起こらないように設計されています。このような考え方を推奨するために、私たちはスローガンを掲げました。
+
+\textbf{メモリを共有することで通信するのではなく、通信することでメモリを共有しましょう。}
+
+この考え方は行き過ぎかもしれません。例えば、整数型の変数の周りにミューテックスを置くことで、参照カウントを最適化することができます。しかし、ハイレベルなアプローチとして、チャンネルを使ってアクセスを制御することで、明確で正しいプログラムを書くことが容易になります。
+
+このモデルを考える一つの方法として、1つのCPU上で動作する典型的なシングルスレッドのプログラムを考えてみましょう。このプログラムには同期プリミティブは必要ありません。このようなプログラムをもう一つ走らせます。このプログラムも同期を必要としません。その通信がシンクロナイザーであれば、他の同期は必要ありません。例えば、Unix
+パイプラインはこのモデルにぴったりです。Go の並行性に対するアプローチは
+Hoare の Communicating Sequential Processes (CSP)
+に由来していますが、Unix
+のパイプを型安全に一般化したものと見ることもできます。
+
+\subsubsection{ゴルーチン}
+
+ゴルーチンと呼ばれるのは、スレッド、コルーチン、プロセスなどの既存の用語が不正確な意味合いを持っているからである。ゴルーチンのモデルはシンプルで、同じアドレス空間で他のゴルーチンと同時に実行される関数です。ゴルーチンは軽量で、スタックスペースの割り当て以上のコストはかかりません。また、スタックは小さいので安価であり、必要に応じてヒープストレージを割り当てたり、解放したりすることで大きくなります。
+
+ゴルーチンは複数のOSスレッドに多重化されており、I/Oの待ち時間などでブロックが発生しても、他のスレッドは継続して実行されます。このような設計により、スレッドの作成や管理の複雑さの多くが隠されています。
+
+関数やメソッドの呼び出しの前に \texttt{go}
+キーワードを付けると、その呼び出しが新しいゴルーチンで実行されます。呼び出しが完了すると、ゴアティンは静かに終了します。(この効果は、バックグラウンドでコマンドを実行するUnixシェルの
+\texttt{\&} 記法に似ています)。
+
+\begin{lstlisting}[numbers=none]
+go list.Sort()  // list.Sortの実行は同時進行で、待たされることはありません。
+\end{lstlisting}
+
+関数リテラルは、ゴルーチン呼び出しの際に便利です。
+
+\begin{lstlisting}[numbers=none]
+func Announce(message string, delay time.Duration) {
+    go func() {
+        time.Sleep(delay)
+        fmt.Println(message)
+    }()  // 括弧に注意してください - 関数を呼び出す必要があります。
+}
+\end{lstlisting}
+
+Goでは、関数リテラルはクロージャです。関数が参照する変数がアクティブである限り、実装はその変数が存続するようにします。
+
+これらの例はあまり実用的ではありません。なぜなら、関数には完了を知らせる手段がないからです。そのためにはチャネルが必要です。
+
+\subsubsection{チャネル}
+
+マップと同様に、チャネルは \texttt{make}
+で割り当てられ、その結果得られる値は、基礎となるデータ構造への参照として機能します。オプションの整数パラメータが指定された場合、チャネルのバッファサイズが設定されます。デフォルトはゼロで、バッファリングされていないチャネルや同期型チャネルの場合です。
+
+\begin{lstlisting}[numbers=none]
+ci := make(chan int)            // 整数のバッファなしチャネル
+cj := make(chan int, 0)         // 整数のバッファなしチャネル
+cs := make(chan *os.File, 100)  // Filesへのポインタのバッファされたチャンネル
+\end{lstlisting}
+
+バッファリングされていないチャンネルは、通信（値の交換）と、2つの計算（ゴルーチン）が既知の状態であることを保証する同期を組み合わせたものです。
+
+チャンネルを使ったすばらしいイディオムがたくさんあります。ここではその1つを紹介します。前のセクションでは、バックグラウンドでソートを起動しました。チャンネルを使うと、起動したゴルーチンがソートの完了を待つことができます。
+
+\begin{lstlisting}[numbers=none]
+c := make(chan int)  // チャネルを割り当てます。
+// goroutineでソートを開始し、完了したらチャンネルにシグナルを送ります。
+go func() {
+    list.Sort()
+    c <- 1  // シグナルを送る。価値は問わない。
+}()
+doSomethingForAWhile()
+<-c   // ソートの終了を待ち、送られてきた値を破棄します。
+\end{lstlisting}
+
+受信者は、受信するデータがあるまで常にブロックします。チャネルがバッファリングされていない場合、送信者は受信者が値を受け取るまでブロックします。チャネルにバッファがある場合、送信者は値がバッファにコピーされるまでブロックします。バッファがいっぱいになった場合、これはある受信者が値を取得するまで待つことを意味します。
+
+バッファ付きチャネルは、例えば、スループットを制限するためにセマフォのように使用することができます。この例では、入ってきたリクエストは
+\texttt{handle} に渡され、\texttt{handle}
+はチャンネルに値を送り、リクエストを処理した後、チャンネルから値を受け取り、次のコンシューマのために「セマフォ」を準備します。チャンネルバッファの容量によって、\texttt{process}の同時呼び出し数が制限されます。
+
+\begin{lstlisting}[numbers=none]
+var sem = make(chan int, MaxOutstanding)
+
+func handle(r *Request) {
+    sem <- 1    // アクティブなキューがなくなるのを待ちます。
+    process(r)  // 時間がかかる場合があります。
+    <-sem       // 次のリクエストを実行できるようにします。
+}
+
+func Serve(queue chan *Request) {
+    for {
+        req := <-queue
+        go handle(req)  // ハンドルが終わるのを待つ必要はありません。
+    }
+}
+\end{lstlisting}
+
+\texttt{MaxOutstanding} 個のハンドラが \texttt{process}
+を実行すると、それ以上のハンドラは、既存のハンドラの一つが終了してバッファから受信するまで、満たされたチャンネルバッファに送信しようとしてブロックされます。
+
+しかし、この設計には問題があります。\texttt{Serve}は、入ってくるリクエストごとに新しいゴルーチンを作成しますが、いつでも実行できるのは
+\texttt{MaxOutstanding}
+個のゴルーチンだけなのです。その結果、リクエストがあまりにも速く来ると、プログラムは無限のリソースを消費してしまいます。この問題を解決するには、\texttt{Serve}を変更して、ゴルーチンの生成をゲートするようにします。ここに明らかな解決策がありますが、後で修正するバグがありますのでご注意ください。
+
+\begin{lstlisting}[numbers=none]
+func Serve(queue chan *Request) {
+    for req := range queue {
+        sem <- 1
+        go func() {
+            process(req) // Buggy; see explanation below.
+            <-sem
+        }()
+    }
+}
+\end{lstlisting}
+
+このバグは、Go の \texttt{for}
+ループでは、ループ変数が反復ごとに再利用されるため、\texttt{req}
+変数がすべてのゴルーチンで共有されるというものです。これは私たちが望んでいることではありません。\texttt{req}が各goroutineに対して一意であることを確認する必要があります。ゴルーチン内のクロージャの引数として
+\texttt{req} の値を渡すという方法があります。
+
+\begin{lstlisting}[numbers=none]
+func Serve(queue chan *Request) {
+    for req := range queue {
+        sem <- 1
+        go func(req *Request) {
+            process(req)
+            <-sem
+        }(req)
+    }
+}
+\end{lstlisting}
+
+このバージョンと前のバージョンを比較すると、クロージャの宣言と実行方法の違いがわかります。別の解決策としては、この例のように同じ名前の新しい変数を作成するだけです。
+
+\begin{lstlisting}[numbers=none]
+func Serve(queue chan *Request) {
+    for req := range queue {
+        req := req // ゴルーチンのためにreqの新しいインスタンスを作成します。
+        sem <- 1
+        go func() {
+            process(req)
+            <-sem
+        }()
+    }
+}
+\end{lstlisting}
+
+と書くのはおかしいかもしれません。
+
+\begin{lstlisting}[numbers=none]
+req := req
+\end{lstlisting}
+
+しかし、これはGoでは合法的かつ慣用的に行われています。同じ名前の新しいバージョンの変数が得られ、ローカルにループ変数を意図的にシャドウイングしていますが、各ゴルーチンに固有のものとなっています。
+
+サーバーを書くという一般的な問題に戻りますが、リソースをうまく管理するもう一つのアプローチは、固定数の
+\texttt{handle}
+ゴルーチンを開始して、すべてリクエストチャネルから読み込むことです。ゴルーチンの数は、\texttt{process}の同時呼び出し数を制限します。この
+\texttt{Serve}
+関数は、終了するように指示されるチャネルも受け取ります。ゴルーチンを起動した後、そのチャネルからの受信をブロックします。
+
+\begin{lstlisting}[numbers=none]
+func handle(queue chan *Request) {
+    for r := range queue {
+        process(r)
+    }
+}
+
+func Serve(clientRequests chan *Request, quit chan bool) {
+    // Start handlers
+    for i := 0; i < MaxOutstanding; i++ {
+        go handle(clientRequests)
+    }
+    <-quit  // Wait to be told to exit.
+}
+\end{lstlisting}
+
+\subsubsection{チャネルのチャネル}
+
+Goの最も重要な特性の1つは、チャネルが他のものと同様に割り当てられたり渡されたりする第一級の値であることです。この特性の一般的な使い方は、安全で並列なデマルチプレクスを実装することです。
+
+前節の例では、\texttt{handle}
+はリクエストを処理する理想的なハンドラでしたが、処理するタイプは定義していませんでした。もしそのタイプが返信するためのチャンネルを含んでいれば、各クライアントは回答のための独自のパスを提供することができます。ここでは、\texttt{Request}というタイプの定義を模式的に示します。
+
+\begin{lstlisting}[numbers=none]
+type Request struct {
+    args        []int
+    f           func([]int) int
+    resultChan  chan int
+}
+\end{lstlisting}
+
+クライアントは、関数とその引数、およびリクエストオブジェクト内のチャネルを提供し、そのチャネルで回答を受け取ります。
+
+\begin{lstlisting}[numbers=none]
+func sum(a []int) (s int) {
+    for _, v := range a {
+        s += v
+    }
+    return
+}
+
+request := &Request{[]int{3, 4, 5}, sum, make(chan int)}
+// Send request
+clientRequests <- request
+// Wait for response.
+fmt.Printf("answer: %d\n", <-request.resultChan)
+\end{lstlisting}
+
+サーバー側では、ハンドラー関数が唯一の変更点です。
+
+\begin{lstlisting}[numbers=none]
+func handle(queue chan *Request) {
+    for req := range queue {
+        req.resultChan <- req.f(req.args)
+    }
+}
+\end{lstlisting}
+
+現実的なものにするためにはまだまだやるべきことがありますが、このコードはレート制限のある並列ノンブロッキングRPCシステムのフレームワークであり、ミューテックスは存在しません。
+
+\subsubsection{並列化}
+
+これらのアイデアのもう一つの応用例は、複数のCPUコアで計算を並列化することです。計算を独立して実行できるように分割できれば、並列化することができ、各計算が完了したときに信号を送るチャネルを設けることができます。
+
+理想的な例として、アイテムのベクトルに対して高価な演算を行い、各アイテムの演算値が独立しているとします。
+
+\begin{lstlisting}[numbers=none]
+type Vector []float64
+
+// Apply the operation to v[i], v[i+1] ... up to v[n-1].
+func (v Vector) DoSome(i, n int, u Vector, c chan int) {
+    for ; i < n; i++ {
+        v[i] += u.Op(v[i])
+    }
+    c <- 1    // signal that this piece is done
+}
+\end{lstlisting}
+
+CPUごとに1つずつ、ループで独立して起動します。すべてのゴルーチンを起動した後にチャネルを解放することで、完了信号をカウントします。
+
+\begin{lstlisting}[numbers=none]
+const numCPU = 4 // CPUコア数
+
+func (v Vector) DoAll(u Vector) {
+    c := make(chan int, numCPU)  // バッファリングは任意ですが、賢明な方法です。
+    for i := 0; i < numCPU; i++ {
+        go v.DoSome(i*len(v)/numCPU, (i+1)*len(v)/numCPU, u, c)
+    }
+    // チャネルの排水を行う。
+    for i := 0; i < numCPU; i++ {
+        <-c    // 待機中
+    }
+    // All done.
+}
+\end{lstlisting}
+
+numCPUの定数値を作るのではなく、どの値が適切かランタイムに尋ねることができます。関数{\texttt{runtime.NumCPU}}は、マシン内のハードウェアCPUコアの数を返すので、次のように書くことができます。
+
+\begin{lstlisting}[numbers=none]
+var numCPU = runtime.NumCPU()
+\end{lstlisting}
+
+また、関数{\texttt{runtime.GOMAXPROCS}}があり、Goプログラムが同時に実行できるコアの数をユーザーが指定した数だけ報告（または設定）します。デフォルトでは、\texttt{runtime.NumCPU}の値になりますが、同様の名前のシェル環境変数を設定するか、正の数でこの関数を呼び出すことでオーバーライドできます。ゼロで呼び出すと、単に値を照会します。したがって、ユーザーのリソース要求を尊重したい場合は、次のように記述します。
+
+\begin{lstlisting}[numbers=none]
+var numCPU = runtime.GOMAXPROCS(0)
+\end{lstlisting}
+
+独立して実行されるコンポーネントとしてプログラムを構成する「同時実行」と、複数のCPUで効率的に計算を行う「並列実行」の考え方を混同しないように注意してください。Goの同時実行機能により、一部の問題は並列計算として構成しやすくなりますが、Goは並列言語ではなく同時実行言語であり、すべての並列化問題がGoのモデルに適合するわけではありません。この違いについては、{このブログ記事}で引用されている講演を参照してください。
+
+\subsubsection{リーキーバッファ}
+
+並行プログラミングのツールを使えば、非並行のアイデアも簡単に表現できます。以下は、RPCパッケージから抽象化した例です。クライアントのゴルーチンは、何らかのソース（おそらくネットワーク）からデータを受信してループしています。バッファの割り当てと解放を避けるために、フリーリストを保持し、バッファありチャネルを使用してそれを表現します。チャネルが空になると、新しいバッファが割り当てられます。メッセージバッファの準備ができると、\texttt{serverChan}
+のサーバに送信されます。
+
+\begin{lstlisting}[numbers=none]
+var freeList = make(chan *Buffer, 100)
+var serverChan = make(chan *Buffer)
+
+func client() {
+    for {
+        var b *Buffer
+        // バッファがあれば取り込み、なければ確保します。
+        select {
+        case b = <-freeList:
+            // 1つ取得すれば、もう何もしない。
+        default:
+            // 空きがないので、新しいものを割り当てます。
+            b = new(Buffer)
+        }
+        load(b)              // 次のメッセージをネットから読む。
+        serverChan <- b      // サーバーに送信します。
+    }
+}
+\end{lstlisting}
+
+サーバーループは、クライアントから各メッセージを受け取り、処理し、バッファをフリーリストに戻します。
+
+\begin{lstlisting}[numbers=none]
+func server() {
+    for {
+        b := <-serverChan    // 仕事を待つ。
+        process(b)
+        // 余裕があればバッファを再利用する。
+        select {
+        case freeList <- b:
+            // Bufferはフリーリストに入っているので、これ以上することはありません。
+        default:
+            // フリーリストが一杯になったので、そのまま続けてください。
+        }
+    }
+}
+\end{lstlisting}
+
+クライアントは \texttt{freeList}
+からバッファを取得しようとします。利用可能なバッファがない場合は、新しいバッファを割り当てます。サーバが
+\texttt{freeList} に送信すると、\texttt{b}
+がフリーリストに戻されます。ただし、リストがいっぱいになった場合は、バッファが床に落とされ、ガベージコレクタによって回収されます。(\texttt{select}文の\texttt{default}句は、他のケースの準備ができていないときに実行されるので、\texttt{select}がブロックすることはありません)。この実装では、わずか数行でリーキーバケットのフリーリストを構築し、バッファリングされたチャンネルとガベージコレクタにブックキーピングを依存しています。
+
+\subsection{エラー}
+
+ライブラリルーチンは、しばしば何らかのエラー表示を呼び出し側に返さなければなりません。先に述べたように、Goの多値リターンでは、通常のリターン値と一緒に詳細なエラー説明を簡単に返すことができます。この機能を使って、詳細なエラー情報を提供するのが良いスタイルです。例えば、これから説明するように、\texttt{os.Open}
+は失敗すると \texttt{nil}
+ポインタを返すだけでなく、何が悪かったのかを説明するエラー値を返します。
+
+規約では，エラーは \texttt{error}
+型であり，これは単純な組み込みインタフェースです．
+
+\begin{lstlisting}[numbers=none]
+type error interface {
+    Error() string
+}
+\end{lstlisting}
+
+ライブラリ作成者は、このインターフェースを自由に実装して、よりリッチなモデルをカバーし、エラーを確認するだけでなく、何らかのコンテキストを提供することができます。前述のように、通常の
+\texttt{*os.File} の戻り値の他に、\texttt{os.Open}
+はエラー値も返します。ファイルが正常に開かれた場合、エラー値は
+\texttt{nil} となりますが、問題がある場合は \texttt{os.PathError}
+を保持します。
+
+\begin{lstlisting}[numbers=none]
+// PathError は，エラーとその原因となった操作と ファイルパスを記録します。
+type PathError struct {
+    Op string    // "open", "unlink", etc.
+    Path string  // 関連するファイル
+    Err error    // システムコールから返される。
+}
+
+func (e *PathError) Error() string {
+    return e.Op + " " + e.Path + ": " + e.Err.Error()
+}
+\end{lstlisting}
+
+PathErrorのErrorは次のような文字列を生成します。
+
+\begin{lstlisting}[numbers=none]
+open /etc/passwx: no such file or directory
+\end{lstlisting}
+
+このようなエラーには、問題のあるファイル名、操作内容、発生したオペレーティングシステムのエラーなどが含まれており、原因となったコールから離れた場所で出力されたとしても有用です。ただの「no
+such file or directory」よりもはるかに情報量が多くなります。
+
+可能であれば、エラー文字列は、エラーを発生させた操作やパッケージを示す接頭辞を付けるなどして、その発生源を明らかにすべきです。例えば、\texttt{image}パッケージでは、未知のフォーマットによるデコードエラーの文字列表現は、``image:
+unknown format''となります。
+
+エラーの詳細を知りたい呼び出し側は、タイプスイッチやタイプアサーションを使って特定のエラーを探し、詳細を抽出することができます。\texttt{PathErrors}の場合は、内部の\texttt{Err}フィールドを調べて、回復可能な失敗を探すこともできます。
+
+\begin{lstlisting}[numbers=none]
+for try := 0; try < 2; try++ {
+    file, err = os.Create(filename)
+    if err == nil {
+        return
+    }
+    if e, ok := err.(*os.PathError); ok && e.Err == syscall.ENOSPC {
+        deleteTempFiles()  // Recover some space.
+        continue
+    }
+    return
+}
+\end{lstlisting}
+
+ここでの2つ目の \texttt{if} 文は、もうひとつの
+{type assertion}です。失敗すれば \texttt{ok} は \texttt{false}
+となり、\texttt{e} は \texttt{nil} となります。これはエラーが
+\texttt{*os.PathError} 型であることを意味し、\texttt{e}
+も同様にエラーに関する詳細情報を調べることができます。
+
+\subsubsection{パニック}
+
+呼び出し元に対してエラーを報告する通常の方法は、特別な戻り値として
+\texttt{error} を返すことです。典型的な \texttt{Read}
+メソッドはよく知られた例で、バイトカウントと \texttt{error}
+を返します。しかし、もしエラーが回復不可能なものであったらどうでしょうか？時には、単にプログラムを続行できないこともあります。
+
+この目的のために、実質的にプログラムを停止させるランタイムエラーを生成する組み込み関数
+\texttt{panic} があります
+(ただし、次のセクションを参照してください)。この関数は任意の型の引数を1つ取り、多くの場合は文字列です。これはまた、無限ループを抜けるような、何か不可能なことが起こったことを示す方法でもあります。
+
+\begin{lstlisting}[numbers=none]
+// ニュートン法による立方根の実装をおもちゃで再現。
+func CubeRoot(x float64) float64 {
+    z := x/3   // 任意の初期値
+    for i := 0; i < 1e6; i++ {
+        prevz := z
+        z -= (z*z*z-x) / (3*z*z)
+        if veryClose(z, prevz) {
+            return z
+        }
+    }
+    // 100万回繰り返しても収束しない、何かが間違っている。
+    panic(fmt.Sprintf("CubeRoot(%g) did not converge", x))
+}
+\end{lstlisting}
+
+これはほんの一例ですが、実際のライブラリ関数は \texttt{panic}
+を避けるべきです。もし問題を隠したり回避したりできるのであれば、プログラム全体を停止させるよりも、実行を継続させる方が常に良いことです。もしライブラリが本当に自分自身をセットアップできないのであれば、いわばパニックを起こすのは合理的かもしれません。
+
+\begin{lstlisting}[numbers=none]
+var user = os.Getenv("USER")
+
+func init() {
+    if user == "" {
+        panic("no value for $USER")
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Recover}
+
+\texttt{panic}
+が呼ばれると、スライスのインデックスが境界外にある場合や型アサーションに失敗した場合などのランタイムエラーに対しても暗黙の了解で、現在の関数の実行を直ちに停止し、goroutine
+のスタックを巻き戻し始め、途中で遅延した関数をすべて実行するようになります。巻き戻しがゴルーチンのスタックの最上位に到達すると、プログラムは終了します。しかし、ビルトイン関数
+\texttt{recover} を使って、goroutine
+の制御を回復し、通常の実行を再開することが可能です。
+
+\texttt{recover} を呼び出すと巻き戻しが停止し、 \texttt{panic}
+に渡された引数が返されます。巻き戻し中に実行されるコードは遅延した関数の中だけなので、
+\texttt{recover} はディファード関数の中でしか役に立ちません。
+
+\texttt{recover}
+のアプリケーションの1つは、サーバー内で失敗したゴルーチンを、他の実行中のゴルーチンを殺すことなくシャットダウンすることです。
+
+\begin{lstlisting}[numbers=none]
+func server(workChan <-chan *Work) {
+    for work := range workChan {
+        go safelyDo(work)
+    }
+}
+
+func safelyDo(work *Work) {
+    defer func() {
+        if err := recover(); err != nil {
+            log.Println("work failed:", err)
+        }
+    }()
+    do(work)
+}
+\end{lstlisting}
+
+この例では、もし \texttt{do(work)}
+がパニックに陥った場合、その結果はログに記録され、他のゴルーチンを邪魔することなく、きれいに終了することができます。遅延されたクロージャの中で他に何かをする必要はありません。\texttt{recover}
+を呼び出すことで、その状態を完全に処理することができます。
+
+\texttt{recover} は遅延された関数から直接呼ばれない限り、常に
+\texttt{nil} を返すので、遅延されたコードは \texttt{panic} と
+\texttt{recover}
+を使用するライブラリルーチンを失敗することなく呼び出すことができます。例として、\texttt{safelyDo}
+の遅延された関数は \texttt{recover}
+を呼び出す前にロギング関数を呼び出すかもしれません。そして、ロギングコードはパニック状態の影響を受けずに実行されるでしょう。
+
+この回復パターンがあれば、 \texttt{do} 関数 (とそれが呼び出すもの) は
+\texttt{panic}
+を呼び出すことで、どんな悪い状況からもきれいに抜け出せるようになります。このアイデアを利用して、複雑なソフトウェアのエラー処理を単純化することができます。ここでは、理想化された
+\texttt{regexp}
+パッケージを見てみましょう。このパッケージは、ローカルなエラータイプで
+\texttt{panic} を呼び出すことで、パースエラーを報告します。ここでは、
+\texttt{Error} の定義、 \texttt{error} メソッド、そして \texttt{Compile}
+関数を定義しています。
+
+\begin{lstlisting}[numbers=none]
+// Error は解析エラーの型であり、エラーインターフェイスを満たす。
+type Error string
+func (e Error) Error() string {
+    return string(e)
+}
+
+// error は *Regexp のメソッドで、
+// パージングエラーを Error でパニックに陥れることで報告します。
+func (regexp *Regexp) error(err string) {
+    panic(Error(err))
+}
+
+// Compileは正規表現をパースしたものを返す。
+func Compile(str string) (regexp *Regexp, err error) {
+    regexp = new(Regexp)
+    // doParseはパースエラーが発生するとパニックになります。
+    defer func() {
+        if e := recover(); e != nil {
+            regexp = nil    // 戻り値をクリアする。
+            err = e.(Error) // パースエラーでなければ再パニックします。
+        }
+    }()
+    return regexp.doParse(str), nil
+}
+\end{lstlisting}
+
+もし \texttt{doParse} がパニックに陥った場合、リカバリブロックは戻り値を
+\texttt{nil} に設定します -
+遅延型関数は名前付き戻り値を変更することができます。そして、
+\texttt{err} への代入で、ローカルタイプ \texttt{Error}
+を持つことを表明して、問題がパースエラーであることをチェックします。もしそうでなければ、型のアサーションは失敗し、ランタイムエラーを引き起こし、何事もなかったかのようにスタックの巻き戻しを継続します。このチェックは、インデックスが範囲外であるなどの予期せぬことが起こった場合、
+\texttt{panic} と \texttt{recover}
+を使用してパースエラーを処理していても、コードが失敗してしまうことを意味します。
+
+エラー処理を行うことで、 \texttt{error} メソッド
+(これは型にバインドされたメソッドなので、組み込みの \texttt{error}
+型と同じ名前であっても問題ありません、むしろ自然です)
+は、手で解析スタックを展開することを気にせずに解析エラーを簡単に報告することができるようになりました。
+
+\begin{lstlisting}[numbers=none]
+if pos == 0 {
+    re.error("'*' illegal at start of expression")
+}
+\end{lstlisting}
+
+このパターンは便利ですが、パッケージ内でのみ使用する必要があります。\texttt{Parse}
+は内部の \texttt{panic} 呼び出しを \texttt{error}
+値に変換します。これは守るべき良いルールです。
+
+ところで、このre-panicイディオムは、実際にエラーが発生した場合にパニックの値を変更します。しかし、クラッシュレポートには元の失敗と新しい失敗の両方が表示されるので、問題の根本的な原因はまだ見えています。しかし、元の値だけを表示したい場合は、もう少しコードを書いて予期しない問題をフィルタリングし、元のエラーで再パニックさせることができます。これは読者のための練習として残しておきます。
+
+\subsection{A web server}
+
+最後に完全なGoプログラムであるWebサーバを紹介しましょう。こちらは実はWebのリサーバーのようなものです。Googleはchart.apis.google.comで、データを自動的にチャートやグラフに整形するサービスを提供しています。しかし、データをクエリとしてURLに入れる必要があるので、対話的に使うのは難しい。このプログラムは、ある形式のデータに対してよりよいインタフェースを提供します。短いテキストを与えると、チャートサーバーを呼び出してQRコード（テキストを符号化したボックスの行列）を生成します。その画像を携帯電話のカメラで撮影し、例えばURLとして解釈することができるので、携帯電話の小さなキーボードにURLを打ち込む手間が省けます。
+
+これがそのプログラムです。以下はその説明です。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "flag"
+    "html/template"
+    "log"
+    "net/http"
+)
+
+var addr = flag.String("addr", ":1718", "http service address") // Q=17, R=18
+
+var templ = template.Must(template.New("qr").Parse(templateStr))
+
+func main() {
+    flag.Parse()
+    http.Handle("/", http.HandlerFunc(QR))
+    err := http.ListenAndServe(*addr, nil)
+    if err != nil {
+        log.Fatal("ListenAndServe:", err)
+    }
+}
+
+func QR(w http.ResponseWriter, req *http.Request) {
+    templ.Execute(w, req.FormValue("s"))
+}
+
+const templateStr = `
+<html>
+<head>
+<title>QR Link Generator</title>
+</head>
+<body>
+{{if .}}
+<img src="http://chart.apis.google.com/chart?chs=300x300&cht=qr&choe=UTF-8&chl={{.}}" />
+<br>
+{{.}}
+<br>
+<br>
+{{end}}
+<form action="/" name=f method="GET">
+    <input maxLength=1024 size=70 name=s value="" title="Text to QR Encode">
+    <input type=submit value="Show QR" name=qr>
+</form>
+</body>
+</html>
+`
+\end{lstlisting}
+
+mainまでの部分は、簡単に説明できるはずです。one
+フラグは、サーバーのデフォルトの HTTP
+ポートを設定します。テンプレート変数templは面白いことが起こるところです。これはページを表示するためにサーバーによって実行されるHTMLテンプレートを構築します;
+これについては後で詳しく説明します。
+
+main関数はフラグを解析し、上で説明したメカニズムを使って、QR関数をサーバーのルートパスにバインドしています。そして、http.ListenAndServeが呼び出され、サーバーが起動します。
+
+QRはフォームデータを含むリクエストを受信し、sというフォームの値のデータに対してテンプレートを実行するだけです。
+
+html/templateというテンプレート・パッケージは強力なので、このプログラムはその機能に触れただけです。要するに、templ.Executeに渡されたデータ項目（この場合はフォームの値）に由来する要素を代入して、HTMLテキストの一部をその場で書き換えるのです。テンプレート・テキスト（templateStr）内では、二重括弧で区切られた部分がテンプレートのアクションを表します。\{\{if
+.\}\}から\{\{end\}\}までの部分は、現在のデータ項目である.(ドット)の値が空でない場合のみ実行されます。つまり、文字列が空の場合、テンプレートのこの部分は抑制されます。
+
+2つのスニペット\{\{.\}\}は、テンプレートに提示されたデータ（クエリー文字列）をWebページ上に表示することを言います。HTMLテンプレート・パッケージは自動的に適切なエスケープを行うので、テキストは安全に表示されます。
+
+テンプレート文字列の残りの部分は、ページが読み込まれたときに表示されるHTMLにすぎません。もしこれが簡単すぎる説明であれば、テンプレートパッケージの{ドキュメント}を参照して、より詳細な議論をしてください。
+
+数行のコードで便利なウェブサーバーと、データ駆動型のHTMLテキストが出来上がりました。Goは数行で多くのことを実現できるほど強力です。
+\end{document}
