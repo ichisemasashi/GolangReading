@@ -1,0 +1,122 @@
+\section{Get a database handle and connect}
+
+では、データベースハンドルでデータベースにアクセスするGoのコードを書いてみましょう。
+
+特定のデータベースへのアクセスを表す\texttt{sql.DB}構造体へのポインタを使用することになります。
+
+\subsection{Write the code}
+
+\begin{enumerate}
+\item main.goの、先ほど追加したimportコードの下に、以下のGoコードを貼り付けて、データベースハンドルを作成します。
+
+\begin{lstlisting}[numbers=none]
+var db *sql.DB
+
+func main() {
+    // Capture connection properties.
+    cfg := mysql.Config{
+        User:   os.Getenv("DBUSER"),
+        Passwd: os.Getenv("DBPASS"),
+        Net:    "tcp",
+        Addr:   "127.0.0.1:3306",
+        DBName: "recordings",
+    }
+    // Get a database handle.
+    var err error
+    db, err = sql.Open("mysql", cfg.FormatDSN())
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    pingErr := db.Ping()
+    if pingErr != nil {
+        log.Fatal(pingErr)
+    }
+    fmt.Println("Connected!")
+}
+\end{lstlisting}
+
+このコードでは
+\begin{itemize}
+\item db変数を\texttt{*sql.DB.DB}型で宣言しています。これはあなたのデータベースハンドルです。
+
+dbをグローバル変数にすることで、この例を単純化しています。実運用では、この変数を必要とする関数に渡すか、構造体でラップするなどして、グローバル変数を使用しないようにします。
+
+\item MySQL ドライバの \texttt{Config} - と型の \texttt{FormatDSN} - を使用して、接続プロパティを収集し、接続文字列の DSN にフォーマットします。
+
+\texttt{Config} 構造体は、接続文字列よりも読みやすいコードになります。
+
+\item \texttt{sql.Open}を呼び出してdb変数を初期化し、\texttt{FormatDSN}の戻り値を渡します。
+
+\item \texttt{sql.Open}でエラーが発生しないか確認します。例えば、データベース接続の仕様が整形されていない場合、失敗する可能性があります。
+
+コードを単純化するために、\texttt{log.Fatal}を呼び出して実行を終了し、コンソールにエラーを表示しています。実運用コードでは、もっと優雅な方法でエラーを処理したいと思うでしょう。
+
+\item \texttt{DB.Ping}を呼び出して、データベースへの接続がうまくいくことを確認します。実行時にsql.Openを実行しても、ドライバによってはすぐに接続されないかもしれません。ここでは、\texttt{database/sql}パッケージが必要なときに接続できることを確認するためにPingを使用しています。
+
+\item 接続に失敗した場合に備えて、\texttt{Ping} からエラーが出ないかどうかを確認します。
+
+\item \texttt{Ping} が接続に成功した場合、メッセージを表示します。
+\end{itemize}
+
+\item \texttt{main.go} ファイルの一番上、パッケージ宣言のすぐ下に、今書いたコードをサポートするために必要なパッケージをインポートしてください。
+
+これで、ファイルの先頭は次のようになります。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "database/sql"
+    "fmt"
+    "log"
+    "os"
+
+    "github.com/go-sql-driver/mysql"
+)
+\end{lstlisting}
+
+\item \texttt{main.go}を保存します。
+
+\end{enumerate}
+
+\subsection{Run the code}
+
+\begin{enumerate}
+\item MySQL ドライバモジュールを依存関係として追跡を開始します。
+
+\texttt{go get} を使って \texttt{github.com/go-sql-driver/mysql} モジュールを自分のモジュールの依存関係として追加してください。"カレントディレクトリのコードの依存関係を取得する "という意味で、ドット引数を使用します。
+
+\begin{lstlisting}[numbers=none]
+$ go get .
+go get: added github.com/go-sql-driver/mysql v1.6.0
+\end{lstlisting}
+
+前のステップで\texttt{import}宣言に追加したため、Goはこの依存関係をダウンロードしました。依存関係の追跡については、依存関係を追加するを参照してください。
+
+\item コマンドプロンプトから、Goプログラムが使用する\texttt{DBUSER}と\texttt{DBPASS}の環境変数を設定します。
+
+LinuxまたはMacの場合。
+
+\begin{lstlisting}[numbers=none]
+$ export DBUSER=username
+$ export DBPASS=password
+\end{lstlisting}
+
+Windowsの場合。
+
+\begin{lstlisting}[numbers=none]
+C:\Users\you\data-access> set DBUSER=username
+C:\Users\you\data-access> set DBPASS=password
+\end{lstlisting}
+
+\item main.goのあるディレクトリのコマンドラインから、"カレントディレクトリのパッケージを実行する "という意味のドット引数をつけてgo runと入力し、コードを実行します。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+Connected!
+\end{lstlisting}
+
+\end{enumerate}
+
+接続できます! 次に、いくつかのデータを問い合わせます。
