@@ -1,0 +1,99 @@
+\section{Add data}
+
+このセクションでは、Go を使って SQL の \texttt{INSERT}
+文を実行し、データベースに新しい行を追加します。
+
+データを返す SQL 文に対して \texttt{Query} と \texttt{QueryRow}
+を使用する方法を見ました。データを返さない SQL 文を実行するには、
+\texttt{Exec} を使用します。
+
+\textbf{コードを書く}
+
+
+
+\begin{enumerate}
+
+\item
+  \texttt{albumByID}
+  の下に、新しいアルバムをデータベースに挿入するための \texttt{addAlbum}
+  関数を貼り付けて、main.go を保存してください。
+
+\begin{lstlisting}[numbers=none]
+// addAlbum adds the specified album to the database,
+// returning the album ID of the new entry
+func addAlbum(alb Album) (int64, error) {
+    result, err := db.Exec("INSERT INTO album (title, artist, price) VALUES (?, ?, ?)", alb.Title, alb.Artist, alb.Price)
+    if err != nil {
+        return 0, fmt.Errorf("addAlbum: %v", err)
+    }
+    id, err := result.LastInsertId()
+    if err != nil {
+        return 0, fmt.Errorf("addAlbum: %v", err)
+    }
+    return id, nil
+}
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{DB.Exec} を使用して \texttt{INSERT} 文を実行します。
+
+    \texttt{Query} と同様に、\texttt{Exec} は SQL 文と、その SQL
+    文に対応するパラメータ値を受け取る。
+  \item
+    \texttt{INSERT} の試行でエラーが発生しないか確認する。
+  \item
+    \texttt{Result.LastInsertId} を使用して、挿入されたデータベース行の
+    ID を取得する。
+  \item
+    ID を取得しようとしたときにエラーが発生しないかどうか確認する。
+  \end{itemize}
+
+
+
+\item
+  新しい \texttt{addAlbum} 関数を呼び出すように \texttt{main}
+  を更新します。
+
+  \texttt{func\ main} の最後に、以下のコードを追加してください。
+
+\begin{lstlisting}[numbers=none]
+albID, err := addAlbum(Album{
+    Title:  "The Modern Sound of Betty Carter",
+    Artist: "Betty Carter",
+    Price:  49.99,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("ID of added album: %v\n", albID)
+\end{lstlisting}
+
+
+  新しいコードでは、次のようになります。
+
+  \begin{itemize}
+  \tightlist
+  \item
+    新しいアルバムで \texttt{addAlbum} を呼び出し、追加するアルバムの ID
+    を \texttt{albID} 変数に代入します。
+  \end{itemize}
+
+\end{enumerate}
+
+
+\textbf{コードの実行}
+
+main.goのあるディレクトリのコマンドラインから、このコードを実行します。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+Connected!
+Albums found: [{1 Blue Train John Coltrane 56.99} \\
+{2 Giant Steps John Coltrane 63.99}]
+Album found: {2 Giant Steps John Coltrane 63.99}
+ID of added album: 5
+\end{lstlisting}
+
