@@ -83,7 +83,8 @@ func albumsByArtist(name string) ([]Album, error) {
     // 行をループし、Scan を使って構造体フィールドに列データを割り当てます。
     for rows.Next() {
         var alb Album
-        if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+        if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price);\\
+           err != nil {
             return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
         }
         albums = append(albums, alb)
@@ -100,7 +101,8 @@ func albumByID(id int64) (Album, error) {
     var alb Album
 
     row := db.QueryRow("SELECT * FROM album WHERE id = ?", id)
-    if err := row.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+    if err := row.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price);\\
+       err != nil {
         if err == sql.ErrNoRows {
             return alb, fmt.Errorf("albumsById %d: no such album", id)
         }
@@ -112,7 +114,8 @@ func albumByID(id int64) (Album, error) {
 // addAlbum adds the specified album to the database,
 // returning the album ID of the new entry
 func addAlbum(alb Album) (int64, error) {
-    result, err := db.Exec("INSERT INTO album (title, artist, price) VALUES (?, ?, ?)", alb.Title, alb.Artist, alb.Price)
+    result, err := db.Exec("INSERT INTO album (title, artist, price)\\
+           VALUES (?, ?, ?)", alb.Title, alb.Artist, alb.Price)
     if err != nil {
         return 0, fmt.Errorf("addAlbum: %v", err)
     }

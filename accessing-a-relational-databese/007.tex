@@ -4,7 +4,7 @@
 
 複数行を返す可能性のある SQL 文では、\texttt{database/sql} パッケージの Query メソッドを使用し、それが返す行をループします。(単一の行に対する問い合わせは、後で「単一の行に対する問い合わせ」のセクションで学びます)。
 
-\subsection{コードを書いてください}
+\textbf{コードを書いてください}
 
 \begin{enumerate}
 
@@ -35,7 +35,8 @@ func albumsByArtist(name string) ([]Album, error) {
     // 行をループし、Scan を使って構造体フィールドに列データを割り当てます。
     for rows.Next() {
         var alb Album
-        if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+        if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price);\\
+           err != nil {
             return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
         }
         albums = append(albums, alb)

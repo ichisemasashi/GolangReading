@@ -22,7 +22,8 @@
 // addAlbum adds the specified album to the database,
 // returning the album ID of the new entry
 func addAlbum(alb Album) (int64, error) {
-    result, err := db.Exec("INSERT INTO album (title, artist, price) VALUES (?, ?, ?)", alb.Title, alb.Artist, alb.Price)
+    result, err := db.Exec("INSERT INTO album (title, artist, price)\\
+                VALUES (?, ?, ?)", alb.Title, alb.Artist, alb.Price)
     if err != nil {
         return 0, fmt.Errorf("addAlbum: %v", err)
     }
@@ -75,7 +76,6 @@ fmt.Printf("ID of added album: %v\n", albID)
   新しいコードでは、次のようになります。
 
   \begin{itemize}
-  \tightlist
   \item
     新しいアルバムで \texttt{addAlbum} を呼び出し、追加するアルバムの ID
     を \texttt{albID} 変数に代入します。
