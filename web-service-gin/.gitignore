@@ -1,0 +1,7 @@
+*.aux
+*.log
+*.gz
+._*
+*pdf
+*dvi
+tmp.*
