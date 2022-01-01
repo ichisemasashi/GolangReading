@@ -1,0 +1,125 @@
+\section{Query for multiple rows}
+
+このセクションでは、Goを使って複数行を返すように設計されたSQLクエリを実行します。
+
+複数行を返す可能性のある SQL 文では、\texttt{database/sql} パッケージの Query メソッドを使用し、それが返す行をループします。(単一の行に対する問い合わせは、後で「単一の行に対する問い合わせ」のセクションで学びます)。
+
+\subsection{コードを書いてください}
+
+\begin{enumerate}
+
+\item \texttt{main.go} の \texttt{func main} のすぐ上に、次のようなアルバム構造体の定義を貼り付けてください。これは、クエリから返される行のデータを保持するために使用します。
+
+\begin{lstlisting}[numbers=none]
+type Album struct {
+    ID     int64
+    Title  string
+    Artist string
+    Price  float32
+}
+\end{lstlisting}
+
+\item \texttt{func main}の下に、以下の\texttt{albumsByArtist}関数を貼り付けて、データベースに問い合わせをします。
+
+\begin{lstlisting}[numbers=none]
+// albumsByArtist queries for albums that have the specified artist name.
+func albumsByArtist(name string) ([]Album, error) {
+    // 返された行のデータを保持するためのalbumsスライスです。
+    var albums []Album
+
+    rows, err := db.Query("SELECT * FROM album WHERE artist = ?", name)
+    if err != nil {
+        return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
+    }
+    defer rows.Close()
+    // 行をループし、Scan を使って構造体フィールドに列データを割り当てます。
+    for rows.Next() {
+        var alb Album
+        if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+            return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
+        }
+        albums = append(albums, alb)
+    }
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("albumsByArtist %q: %v", name, err)
+    }
+    return albums, nil
+}
+\end{lstlisting}
+
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    定義した \texttt{Album} 型のスライスである \texttt{albums}
+    を宣言します。これは、返された行のデータを保持します。構造体のフィールド名と型は、データベースのカラム名と型に対応しています。
+  \item
+    \texttt{DB.Query} を使って \texttt{SELECT}
+    文を実行し、指定したアーティスト名を持つアルバムを検索します。
+
+    \texttt{Query} の最初のパラメータは SQL
+    文である。パラメータの後には、任意の型の 0
+    個以上のパラメータを渡すことができる。これらは、SQL
+    文の中でパラメータに値を指定するための場所となります。SQL
+    文とパラメータ値を分離することで (例えば \texttt{fmt.Sprintf}
+    で連結するのではなく)、 \texttt{database/sql} パッケージが SQL
+    文とは別の値を送信できるようになり、SQL
+    インジェクションのリスクが取り除かれます。
+  \item
+    \texttt{rows}
+    を閉じるのを延期し、保持しているすべてのリソースを関数が終了したときに解放します。
+  \item
+    返された行をループして、\texttt{Rows.Scan} を使用して各行の列の値を
+    \texttt{Album} 構造体フィールドに代入します。
+
+    \texttt{Scan}はGo値へのポインタのリストを受け取り、そこに列の値が書き込まれます。ここでは、\texttt{\&}
+    演算子を用いて作成した \texttt{alb}
+    変数のフィールドへのポインタを渡しています。\texttt{Scan}
+    はそのポインタを介して構造体のフィールドを更新します。
+  \item
+    ループの内部で、構造体フィールドにカラム値をスキャンしてエラーが発生しないかをチェックします。
+  \item
+    ループの内部で、新しい \texttt{alb} を \texttt{albums}
+    スライスに追加してください。
+  \item
+    ループの後、\texttt{rows.Err}を使用して、クエリ全体からエラーが発生していないかチェックします。もしクエリ自体が失敗した場合、ここでエラーをチェックすることが、結果が不完全であることを知る唯一の方法であることに注意してください。
+  \end{itemize}
+\item
+  \texttt{main} 関数を更新して、\texttt{albumsByArtist}
+  を呼び出すようにします。
+
+  \texttt{func\ main} の最後に、次のコードを追加します。
+
+\begin{lstlisting}[numbers=none]
+albums, err := albumsByArtist("John Coltrane")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Albums found: %v\n", albums)
+\end{lstlisting}
+
+  新しいコードでは、次のようになります。
+
+  \begin{itemize}
+  \item
+    追加した \texttt{albumsByArtist}
+    関数を呼び出して、その戻り値を新しい \texttt{albums}
+    変数に代入します。
+  \item
+    その結果を表示します。
+  \end{itemize}
+\end{enumerate}
+
+\textbf{コードの実行}
+
+main.goのあるディレクトリのコマンドラインから、このコードを実行します。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+Connected!
+Albums found: [{1 Blue Train John Coltrane 56.99} \\
+{2 Giant Steps John Coltrane 63.99}]
+\end{lstlisting}
+
+次に、1行のクエリを実行します。
