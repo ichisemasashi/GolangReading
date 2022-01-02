@@ -56,7 +56,7 @@ Goでファイルの読み書きに関する処理は`os`パッケージ中に�
 `os`パッケージには`os.File`型が存在し、Goでファイルを扱うときはこれが元となります。
 
 
-``` language-go
+``` go
 type File struct {
     *file // os specific
 }
@@ -80,7 +80,7 @@ Go言語でファイルを扱い読み書きするためには、まずはその
 `os.File`型を得るためには、`os.Open(ファイルパス)`関数を使います。
 
 
-``` language-go
+``` go
 f, err := os.Open("text.txt")
 ```
 
@@ -103,7 +103,7 @@ f, err := os.Open("text.txt")
 書き込み権限がついた状態のファイルが欲しい場合、`os.Create(ファイルパス)`関数を使います。
 
 
-``` language-go
+``` go
 f, err := os.Create("write.txt")
 ```
 
@@ -140,7 +140,7 @@ truncateは、直訳が「切り捨てる」という動詞です。Linuxの文�
 これをGoで行う場合、`os.File`型の`Read`メソッドを用いて以下のように実装できます。
 
 
-``` language-go
+``` go
 // os.FileオブジェクトをOpen関数か何かで事前に得ておくとする
 // 変数fがファイルオブジェクトとする
 
@@ -192,7 +192,7 @@ Hello, Golang!
 実際に`write.txt`というテキストファイルに文字列を書き込むコードを実装してみます。
 
 
-``` language-go
+``` go
 // fはos.Create()で得たファイルオブジェクトとします。
 
 str := "write this file by Golang!"
@@ -238,7 +238,7 @@ write 26 bytes
 ファイルを閉じるときは`os.File`型`Close`メソッドを用います。
 
 
-``` language-go
+``` go
 f, err := os.Open("text.txt")
 if err != nil {
     fmt.Println("cannot open the file")
@@ -257,7 +257,7 @@ defer f.Close()
 ところで、`Close`メソッドの定義をドキュメントで見てみると、以下のようになっています。
 
 
-``` language-go
+``` go
 func (f *File) Close() error
 ```
 
@@ -302,7 +302,7 @@ Goのコード上で`os.Open()`だったり`f.Read()`だったりを「おまじ
 `os.File`型の中身は以下のようになっています。
 
 
-``` language-go
+``` go
 type file struct {
     pfd         poll.FD
     name        string
@@ -331,7 +331,7 @@ Linuxカーネルプロセス内部では、openしたファイル1つに非負�
 `FD`型の定義は以下のようになっていて、この`Sysfd`という`int`型のフィールドがfdの数字そのものを表しています。
 
 
-``` language-go
+``` go
 type FD struct {
     // System file descriptor. Immutable until Close.
     Sysfd int
@@ -367,7 +367,7 @@ fdはそれとは区別された概念で、こちらは「プロセス中でope
 まず、`os.Open`自体は、同じ`os`パッケージの`OpenFile`関数を呼んでいるだけです。
 
 
-``` language-go
+``` go
 func Open(name string) (*File, error) {
     return OpenFile(name, O_RDONLY, 0)
 }
@@ -385,7 +385,7 @@ func Open(name string) (*File, error) {
 `os.OpenFile`関数の中身を見ると、非公開関数`openFileNolog`を呼んでいるのがわかります。
 
 
-``` language-go
+``` go
 func OpenFile(name string, flag int, perm FileMode) (*File, error) {
     // (略)
     f, err := openFileNolog(name, flag, perm)
@@ -399,7 +399,7 @@ func OpenFile(name string, flag int, perm FileMode) (*File, error) {
 この`openFileNoLog`関数をみると、内部では`syscall.Open()`という`syscall`パッケージの関数が呼ばれています。
 
 
-``` language-go
+``` go
 func openFileNolog(name string, flag int, perm FileMode) (*File, error) {
     // (略)
     var r int
@@ -457,7 +457,7 @@ int open(const char *pathname, int flags);
 そしてこの`os.file`型の`Read`メソッドは、非公開メソッド`read`メソッドを経由して、その構造体のフィールドの一つ`pfd`(`poll.FD`型)の`Read`メソッドを呼んでいます。
 
 
-``` language-go
+``` go
 // os.file型の公開Readメソッドの中身
 func (f *File) Read(b []byte) (n int, err error) {
     // (中略)
@@ -470,7 +470,7 @@ func (f *File) Read(b []byte) (n int, err error) {
 出典:<https://go.googlesource.com/go/+/go1.16.3/src/os/file.go#113>
 
 
-``` language-go
+``` go
 // os.file型の非公開readメソッドの中身
 func (f *File) read(b []byte) (n int, err error) {
     n, err = f.pfd.Read(b) // ここで読み込み
@@ -515,7 +515,7 @@ func (f *File) read(b []byte) (n int, err error) {
 これはなぜかというと、ファイルオープンの時点で「ファイルオープンしたプロセスが終了したら、自動的にファイルを閉じてください」という`O_CLOEXEC`フラグを立てているからなのです。
 
 
-``` language-go
+``` go
 // (再掲)
 func openFileNolog(name string, flag int, perm FileMode) (*File, error) {
     // (略)
@@ -579,7 +579,7 @@ func openFileNolog(name string, flag int, perm FileMode) (*File, error) {
 このコネクションパイプをGoで扱うインターフェースが`net.Conn`インターフェースです。
 
 
-``` language-go
+``` go
 type Conn interface {
     Read(b []byte) (n int, err error)
     Write(b []byte) (n int, err error)
@@ -608,7 +608,7 @@ type Conn interface {
 2.  `ln`の`Accept()`メソッドを実行する
 
 
-``` language-go
+``` go
 ln, err := net.Listen("tcp", ":8080")
 if err != nil {
     fmt.Println("cannot listen", err)
@@ -628,7 +628,7 @@ if err != nil {
 クライアント側から`net.Conn`インターフェースを取得するためには、`net.Dial(通信プロトコル, アドレス)`関数を実行します。
 
 
-``` language-go
+``` go
 conn, err := net.Dial("tcp", "localhost:8080")
 if err != nil {
     fmt.Println("error: ", err)
@@ -644,7 +644,7 @@ if err != nil {
 サーバー側から、TCPコネクションを使って文字列`"Hello, net pkg!"`を一回送信する処理は、`net.TCPConn`の`Write`メソッドを利用して以下のように実装されます。
 
 
-``` language-go
+``` go
 // コネクションを得る
 ln, err := net.Listen("tcp", ":8080")
 if err != nil {
@@ -674,7 +674,7 @@ if err != nil {
 クライアントがTCPコネクションから、文字列データを受け取るコードを`net.TCPConn`の`Read`メソッドを利用して書きます。
 
 
-``` language-go
+``` go
 // コネクションを得る
 conn, err := net.Dial("tcp", "localhost:8080")
 if err != nil {
@@ -705,7 +705,7 @@ fmt.Println(string(data[:count]))
 `net.TCPConn`構造体の正体は、非公開の構造体`net.conn`型です。
 
 
-``` language-go
+``` go
 type TCPConn struct {
     conn
 }
@@ -717,7 +717,7 @@ type TCPConn struct {
 そしてこの`net.conn`型の中身は、`netFD`型構造体そのものです。
 
 
-``` language-go
+``` go
 type conn struct {
     fd *netFD
 }
@@ -729,7 +729,7 @@ type conn struct {
 この`netFD`型は一体何なのでしょうか。これも定義を見てみましょう。
 
 
-``` language-go
+``` go
 type netFD struct {
     pfd poll.FD
     // immutable until Close
@@ -770,7 +770,7 @@ type netFD struct {
 すると、今私たちが欲しい「コネクションに割り当てられたfdをもつ`net.TCPConn`」を作っているのは、実質`net.Dialer`型の`DialContext`メソッドであることがわかります。
 
 
-``` language-go
+``` go
 func Dial(network, address string) (Conn, error) {
     var d Dialer
     return d.Dial(network, address)
@@ -781,7 +781,7 @@ func Dial(network, address string) (Conn, error) {
 出典:<https://go.googlesource.com/go/+/go1.16.3/src/net/dial.go#317>
 
 
-``` language-go
+``` go
 func (d *Dialer) Dial(network, address string) (Conn, error) {
     return d.DialContext(context.Background(), network, address) // net.TCPConnを作っているのはここ
 }
@@ -813,7 +813,7 @@ func (d *Dialer) Dial(network, address string) (Conn, error) {
 `net.Listen()`関数の実装を確認してみます。
 
 
-``` language-go
+``` go
 func Listen(network, address string) (Listener, error) {
     var lc ListenConfig
     return lc.Listen(context.Background(), network, address)
@@ -836,7 +836,7 @@ func Listen(network, address string) (Listener, error) {
 実は、この「リスナーからコネクションを得る」ためのメソッドが`Accept()`メソッドなのです。その中身をみてみます。
 
 
-``` language-go
+``` go
 func (l *TCPListener) Accept() (Conn, error) {
     // (略)
     c, err := l.accept()
@@ -851,7 +851,7 @@ func (l *TCPListener) Accept() (Conn, error) {
 内部では非公開メソッド`accept()`を呼んでいました。その中身は以下のようになっています。
 
 
-``` language-go
+``` go
 func (ln *TCPListener) accept() (*TCPConn, error) {
     // リスナー本体からfdを取得
     fd, err := ln.fd.accept()
@@ -885,7 +885,7 @@ func (ln *TCPListener) accept() (*TCPConn, error) {
 その`conn`型の`Read`メソッドは、内部ではフィールド`fd`(`netFD`型)の`Read`メソッドを呼んでいます。
 
 
-``` language-go
+``` go
 func (c *conn) Read(b []byte) (int, error) {
     // (略)
     n, err := c.fd.Read(b)
@@ -899,7 +899,7 @@ func (c *conn) Read(b []byte) (int, error) {
 `netFD`型の`Read()`メソッドの中身では、`pfd`フィールド(`poll.FD`型)の`Read`メソッドを呼んでいます。
 
 
-``` language-go
+``` go
 func (fd *netFD) Read(p []byte) (n int, err error) {
     n, err = fd.pfd.Read(p)
     // (略)
@@ -955,7 +955,7 @@ func (fd *netFD) Read(p []byte) (n int, err error) {
 今まで紹介してきたI/O読み書きメソッドは全て以下の形でした。
 
 
-``` language-go
+``` go
 // バイトスライスpを用意して、そこに読み込んだ内容をいれる
 Read(p []byte) (n int, err error)
 
@@ -977,7 +977,7 @@ Write(p []byte) (n int, err error)
 `io.Reader`が一体なんなんかというと、次のメソッドをもつ**インターフェース**として定義されています。
 
 
-``` language-go
+``` go
 type Reader interface {
     Read(p []byte) (n int, err error)
 }
@@ -994,7 +994,7 @@ type Reader interface {
 `io.Writer`は、以下の`Write`メソッドをもつ**インターフェース**として定義されています。
 
 
-``` language-go
+``` go
 type Writer interface {
     Write(p []byte) (n int, err error)
 }
@@ -1015,7 +1015,7 @@ type Writer interface {
 これを`io.Reader`を使わずに実装するとなると、「入力がファイルからの場合」と「入力がネットワークからの場合」という風に、具体型に沿って実装をいくつも用意しなくてはなりません。
 
 
-``` language-go
+``` go
 // ファイルの中身を読み込んで文字列置換する関数
 func FileTranslateIntoGerman(f *os.File) {
     data := make([]byte, 300)
@@ -1043,7 +1043,7 @@ func NetTranslateIntoGerman(conn net.Conn) {
 ここで、`io.Reader`インターフェースを使用することによって、2つの関数を1つにまとめることができます。
 
 
-``` language-go
+``` go
 func TranslateIntoGerman(r io.Reader) {
     data := make([]byte, 300)
     len, _ := r.Read(data)
@@ -1091,7 +1091,7 @@ I/Oをやるためのもの」\[1\]と書かれています。
 `NewReader`関数を用いることで、`io.Reader`型から`bufio.Reader`型を作ることができます。
 
 
-``` language-go
+``` go
 func NewReader(rd io.Reader) *Reader
 ```
 
@@ -1107,7 +1107,7 @@ I/Oにできる」のです。\
 作った`bufio.Reader`は、普通の`io.Reader`とは何が違うのでしょうか。中身を見てみましょう。
 
 
-``` language-go
+``` go
 type Reader struct {
     buf          []byte
     rd           io.Reader // reader provided by the client
@@ -1143,7 +1143,7 @@ type Reader struct {
 作り方も`bufio.Reader`と同様に、`io.Writer`型を`NewWriter`関数に渡すことで作ります。
 
 
-``` language-go
+``` go
 func NewWriter(w io.Writer) *Writer
 ```
 
@@ -1153,7 +1153,7 @@ func NewWriter(w io.Writer) *Writer
 こうして作った`bufio.Writer`にも、内部バッファ`buf`が存在します。
 
 
-``` language-go
+``` go
 type Writer struct {
     err error
     buf []byte
@@ -1214,7 +1214,7 @@ type Writer struct {
 以下のような関数を用意しました。
 
 
-``` language-go
+``` go
 // サイズがFsizeのファイルをnbyteごと読む関数
 func ReadOS(r io.Reader, n int) {
     data := make([]byte, n)
@@ -1230,7 +1230,7 @@ func ReadOS(r io.Reader, n int) {
 そして、ベンチマーク用のテストコードを以下のように書きました。
 
 
-``` language-go
+``` go
 // ただのio用
 func BenchmarkReadX(b *testing.B) {
     f, _ := os.Open("read.txt")
@@ -1286,7 +1286,7 @@ func BenchmarkBReadX(b *testing.B) {
 検証用として以下のような関数を用意しました。
 
 
-``` language-go
+``` go
 // サイズBsize分のデータを、nbyteごとに区切って書き込む
 func WriteOS(w io.Writer, n int) {
     data := []byte(strings.Repeat("a", n))
@@ -1302,7 +1302,7 @@ func WriteOS(w io.Writer, n int) {
 そして、ベンチマーク用のテストコードを以下のように書きました。
 
 
-``` language-go
+``` go
 // ただのio用
 func BenchmarkWriteX(b *testing.B) {
     f, _ := os.Create("write.txt")
@@ -1374,7 +1374,7 @@ func BenchmarkBWriteX(b *testing.B) {
 トークンの定義は、`bufio`パッケージ内の`SplitFunc`型で行います。
 
 
-``` language-go
+``` go
 type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err error)
 ```
 
@@ -1388,7 +1388,7 @@ type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err err
 この`SplitFunc`型に代入することができる関数が、`bufio`内では4つ定義されています。
 
 
-``` language-go
+``` go
 func ScanBytes(data []byte, atEOF bool) (advance int, token []byte, err error)
 func ScanLines(data []byte, atEOF bool) (advance int, token []byte, err error)
 func ScanRunes(data []byte, atEOF bool) (advance int, token []byte, err error)
@@ -1422,7 +1422,7 @@ Playgroundで挙動を試してみた結果がこちらです。
 `bufio.Scanner`の内部構造は以下のようになっています。
 
 
-``` language-go
+``` go
 type Scanner struct {
     r            io.Reader // The reader provided by the client.
     split        SplitFunc // The function to split the tokens.
@@ -1448,7 +1448,7 @@ scanner内では、tokenごとに区切る`SplitFunc`型の関数を内部に持
 `bufio.Scanner`の作成は、`bufio.Reader`の作成と同様に、`io.Reader`を引数に渡す`NewScanner`関数で行います。
 
 
-``` language-go
+``` go
 func NewScanner(r io.Reader) *Scanner
 ```
 
@@ -1460,7 +1460,7 @@ bufio#NewScanner
 変更したい場合は、`Split`メソッドを使います。
 
 
-``` language-go
+``` go
 // 引数で渡したSplitFuncでトークンを作る
 func (s *Scanner) Split(split SplitFunc)
 ```
@@ -1485,7 +1485,7 @@ bufio#Scanner.Split
 これを行ごとに読み取る処理を実装するには、例えば以下のようになります。
 
 
-``` language-go
+``` go
 func main() {
     // ファイル(io.Reader)を用意
     f, _ := os.Open("text.txt")
@@ -1532,7 +1532,7 @@ E問題は、`2*N+2`個ものの数字が以下のように与えられます。
 そのため、`fmt.Scan`を使うとTLE(時間切れによる不正解)判定が出てしまいます。
 
 
-``` language-go
+``` go
 // TLEになったコードの断片
 var N, K int
 fmt.Scan(&N, &K)
@@ -1554,7 +1554,7 @@ for i := 0; i < N; i++ {
 以下のようなコードはGoで競プロやるかたにとってはテンプレなのではないでしょうか。
 
 
-``` language-go
+``` go
 var sc = bufio.NewScanner(os.Stdin)
 
 func scanInt() int {
@@ -1576,7 +1576,7 @@ func main() {
 これをファイル冒頭に入れておくことで、この問題での入力処理は以下のように書き換えられます。
 
 
-``` language-go
+``` go
 N, K := scanInt(), scanInt()
  
 A, F := make([]int, N), make([]int, N)
@@ -1632,7 +1632,7 @@ for i := 0; i < N; i++ {
 いきなり答えを言ってしまうと、標準入力・標準出力自体は`os`パッケージで以下のように定義されています。
 
 
-``` language-go
+``` go
 var (
     Stdin  = NewFile(uintptr(syscall.Stdin), "/dev/stdin")
     Stdout = NewFile(uintptr(syscall.Stdout), "/dev/stdout")
@@ -1668,7 +1668,7 @@ var (
 それでは「ターミナルに標準出力する」という処理がどのように実装されているのか、`fmt.Println`を一例にとってみていきましょう。
 
 
-``` language-go
+``` go
 func Println(a ...interface{}) (n int, err error) {
     return Fprintln(os.Stdout, a...)
 }
@@ -1681,7 +1681,7 @@ func Println(a ...interface{}) (n int, err error) {
 その`fmt.Fprintln`は「第一引数にとった`io.Writer`に第二引数の値を書き込む」という関数です。
 
 
-``` language-go
+``` go
 func Fprintln(w io.Writer, a ...interface{}) (n int, err error) {
     p := newPrinter()
     p.doPrintln(a)
@@ -1708,7 +1708,7 @@ func Fprintln(w io.Writer, a ...interface{}) (n int, err error) {
 今回掘り下げるのは`fmt.Scan`関数です。内部的にはこれは`fmt.Fscan`を呼んでいるだけです。
 
 
-``` language-go
+``` go
 func Scan(a ...interface{}) (n int, err error) {
     return Fscan(os.Stdin, a...)
 }
@@ -1721,7 +1721,7 @@ func Scan(a ...interface{}) (n int, err error) {
 内部実装は以下のようになっています。
 
 
-``` language-go
+``` go
 func Fscan(r io.Reader, a ...interface{}) (n int, err error) {
     s, old := newScanState(r, true, false)  // newScanState allocates a new ss struct or grab a cached one.
     n, err = s.doScan(a)
@@ -1763,7 +1763,7 @@ func Fscan(r io.Reader, a ...interface{}) (n int, err error) {
 まずは、`bytes.Buffer`型の構造体の中身を確認してみましょう。
 
 
-``` language-go
+``` go
 type Buffer struct {
     buf      []byte
     // (略)
@@ -1786,7 +1786,7 @@ type Buffer struct {
 使用例を以下に示します。
 
 
-``` language-go
+``` go
 // bytes.Bufferを用意
 // (bytes.Bufferは初期化の必要がありません)
 var b bytes.Buffer
@@ -1808,7 +1808,7 @@ bytes#Buffer-Example
 `Read`メソッドは、レシーバーバッファから「中を」読み取るためのメソッドです。
 
 
-``` language-go
+``` go
 // 中にデータを入れたバッファを用意
 var b bytes.Buffer
 b.Write([]byte("World"))
@@ -1836,7 +1836,7 @@ fmt.Println("output:", string(plain))
 そんな独自型`strings.Reader`型は、構造体内部に文字列を内包しています。
 
 
-``` language-go
+``` go
 type Reader struct {
     s        string
     // (略)
@@ -1858,7 +1858,7 @@ type Reader struct {
 使用例を示します。
 
 
-``` language-go
+``` go
 // NewReader関数から
 // strings.Reader型のrdを作る
 str := "Hellooooooooooooooooooooooooooo!"
@@ -1883,7 +1883,7 @@ fmt.Println(string(row)) // Helloooooo
 `io`の章で書いた`TranslateIntoGerman`関数を思い出してください。
 
 
-``` language-go
+``` go
 // 引数rで受け取った中身を読み込んで
 // Hello → Guten Tagに置換する関数
 func TranslateIntoGerman(r io.Reader) string {
@@ -1903,7 +1903,7 @@ func TranslateIntoGerman(r io.Reader) string {
 ですが「ファイルを1個1個用意する」とかいう面倒な方法をせずとも、`strings.Reader`型を使うことで、テスト内容をコード内で用意することができるのです。
 
 
-``` language-go
+``` go
 func Test_Translate(t *testing.T) {
     // テストしたい内容を文字列ベースで用意
     tests := []struct {
