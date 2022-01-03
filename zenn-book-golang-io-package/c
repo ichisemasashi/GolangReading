@@ -1,0 +1,9 @@
+pandoc -f html -t markdown -o 000-ck.md https://zenn.dev/hsaki/books/golang-io-package
+pandoc -f html -t markdown -o 001-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/intro
+pandoc -f html -t markdown -o 002-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/file
+pandoc -f html -t markdown -o 003-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/netconn
+pandoc -f html -t markdown -o 004-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/io
+pandoc -f html -t markdown -o 005-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/bufio
+pandoc -f html -t markdown -o 006-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/fmt
+pandoc -f html -t markdown -o 007-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/bytestring
+pandoc -f html -t markdown -o 008-ck.md https://zenn.dev/hsaki/books/golang-io-package/viewer/appendix
