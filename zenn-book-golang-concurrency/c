@@ -1,0 +1,14 @@
+pandoc -f html -t markdown -o 000-ck.md https://zenn.dev/hsaki/books/golang-concurrency
+pandoc -f html -t markdown -o 001-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/intro
+pandoc -f html -t markdown -o 002-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/term
+pandoc -f html -t markdown -o 003-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/goelement
+pandoc -f html -t markdown -o 004-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/basicusage
+pandoc -f html -t markdown -o 005-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/appliedusage
+pandoc -f html -t markdown -o 006-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/gointernal
+pandoc -f html -t markdown -o 007-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/internalcase
+pandoc -f html -t markdown -o 008-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/chaninternal
+pandoc -f html -t markdown -o 009-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/binary
+pandoc -f html -t markdown -o 010-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/analysis
+pandoc -f html -t markdown -o 011-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/kernel
+pandoc -f html -t markdown -o 012-ck.md https://zenn.dev/hsaki/books/golang-concurrency/viewer/appendix
+
