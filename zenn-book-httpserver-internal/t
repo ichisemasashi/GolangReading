@@ -1,0 +1,8 @@
+pandoc -f html -t markdown -o 000.md https://zenn.dev/hsaki/books/golang-httpserver-internal
+pandoc -f html -t markdown -o 001.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/intro
+pandoc -f html -t markdown -o 002.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/helloserver
+pandoc -f html -t markdown -o 003.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/serverstart
+pandoc -f html -t markdown -o 004.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/httpmux
+pandoc -f html -t markdown -o 005.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/httphandler
+pandoc -f html -t markdown -o 006.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/httpoverview
+pandoc -f html -t markdown -o 007.md https://zenn.dev/hsaki/books/golang-httpserver-internal/viewer/appendix
