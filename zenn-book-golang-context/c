@@ -1,0 +1,13 @@
+pandoc -f html -t markdown -o 000-ck.md https://zenn.dev/hsaki/books/golang-context
+pandoc -f html -t markdown -o 001-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/intro
+pandoc -f html -t markdown -o 002-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/definition
+pandoc -f html -t markdown -o 003-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/done
+pandoc -f html -t markdown -o 004-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/cancelchain
+pandoc -f html -t markdown -o 005-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/deadline
+pandoc -f html -t markdown -o 006-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/err
+pandoc -f html -t markdown -o 007-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/value
+pandoc -f html -t markdown -o 008-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/appliedvalue
+pandoc -f html -t markdown -o 009-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/usage
+pandoc -f html -t markdown -o 010-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/pkgdesign
+pandoc -f html -t markdown -o 011-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/internal
+pandoc -f html -t markdown -o 012-ck.md https://zenn.dev/hsaki/books/golang-context/viewer/appendix
