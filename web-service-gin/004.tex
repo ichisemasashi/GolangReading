@@ -1,0 +1,45 @@
+\subsection{コード用のフォルダを作成する}
+
+はじめに、これから書くコードのためのプロジェクトを作成します。
+
+\begin{enumerate}
+\item
+  コマンドプロンプトを開き、自分のホームディレクトリに移動します。
+
+  LinuxやMacの場合。
+
+
+
+\begin{lstlisting}[numbers=none]
+$ cd
+\end{lstlisting}
+
+  Windowsの場合。
+
+
+\begin{lstlisting}[numbers=none]
+C:\> cd %HOMEPATH%
+\end{lstlisting}
+
+\item
+  コマンドプロンプトを使用して、web-service-ginというコード用のディレクトリを作成します。
+
+\begin{lstlisting}[numbers=none]
+$ mkdir web-service-gin
+$ cd web-service-gin
+\end{lstlisting}
+\item
+  依存関係を管理するためのモジュールを作成します。
+
+  \texttt{go\ mod\ init}
+  コマンドを実行し、あなたのコードが入るモジュールのパスを指定します。
+
+\begin{lstlisting}[numbers=none]
+$ go mod init example/web-service-gin
+go: creating new go.mod: module example/web-service-gin
+\end{lstlisting}
+
+  このコマンドはgo.modファイルを作成し、そこにあなたが追加した依存関係をトラッキングするためにリストアップします。モジュールパスによるモジュールの命名の詳細については、依存関係の管理を参照してください。
+\end{enumerate}
+
+次に、データを処理するためのデータ構造を設計します。
