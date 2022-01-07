@@ -1,0 +1,171 @@
+
+
+\subsection{全項目を返すハンドラを書く}
+
+クライアントが \texttt{GET\ /albums}
+でリクエストを行ったとき、すべてのアルバムをJSONで返したい。
+
+これを実現するために、以下のように書きます。
+
+\begin{itemize}
+\item
+  レスポンスを準備するためのロジック
+\item
+  リクエストパスをロジックにマッピングするコード
+\end{itemize}
+
+これは、実行時に実行される方法とは逆で、最初に依存関係を追加し、次にそれに依存するコードを追加することになることに注意してください。
+
+
+\paragraph{コードを書く}
+
+\begin{enumerate}
+\item
+  前項で追加した構造体のコードの下に、アルバムリストを取得するための以下のコードを貼り付けます。
+
+  この \texttt{getAlbums} 関数は、\texttt{album} 構造体のスライスから
+  JSON を作成し、その JSON をレスポンスに書き込みます。
+
+\begin{lstlisting}[numbers=none]
+// getAlbums responds with the list of all albums as JSON.
+func getAlbums(c *gin.Context) {
+    c.IndentedJSON(http.StatusOK, albums)
+}
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{gin.Context}パラメータを受け取る \texttt{getAlbums}
+    関数を作成します。GinもGoも特定の関数名の形式を要求しているわけではありません。
+
+    \texttt{gin.Context}はGinの最も重要な部分です。リクエストの詳細、JSONのバリデーションとシリアライズなどを行います。(似たような名前ですが、これはGoのビルトイン
+    \texttt{context} とは異なります。
+  \item
+    \texttt{Context.IndentedJSON} を呼び出して、構造体を JSON
+    にシリアライズし、レスポンスに追加します。
+
+    この関数の最初の引数は、クライアントに送信したい HTTP
+    ステータスコードです。ここでは、\texttt{net/http}
+    パッケージに含まれる定数 \texttt{StatusOK}
+    を渡して、\texttt{200\ OK} を示しています。
+
+    なお、 \texttt{Context.IndentedJSON} を \texttt{Context.JSON}
+    の呼び出しに置き換えることで、よりコンパクトな JSON
+    を送信することができる。実際には、インデントされた形式の方がデバッグの際に作業しやすく、サイズの差も通常は小さくなります。
+  \end{itemize}
+\item
+  main.go の先頭、\texttt{albums}
+  スライス宣言のすぐ下に、以下のコードを貼り付けて、ハンドラ関数をエンドポイントパスに割り当ててください。
+
+  これにより、 \texttt{getAlbums} が \texttt{/albums}
+  というエンドポイントパスへのリクエストを処理するような関連付けが設定されます。
+
+\begin{lstlisting}[numbers=none]
+func main() {
+    router := gin.Default()
+    router.GET("/albums", getAlbums)
+
+    router.Run("localhost:8080")
+}
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{Default}を使用してGinルータを初期化する。
+  \item
+    \texttt{GET} HTTP メソッドと \texttt{/albums}
+    パスをハンドラ関数に関連付けるために、 \texttt{GET}
+    関数を使用します。
+
+    \texttt{getAlbums} 関数の \emph{名前}
+    を渡していることに注意してください。 これは、関数の \emph{result}
+    を渡すのとは異なります。つまり、 \texttt{getAlbums()}
+    を渡すことになります (括弧に注目してください)。
+  \item
+    \texttt{Run} 関数を使用して、ルータを \texttt{http.Server}
+    にアタッチし、サーバを起動します。
+  \end{itemize}
+\item
+  main.go
+  の先頭、パッケージ宣言のすぐ下に、今書いたコードをサポートするために必要なパッケージをインポートしてください。
+
+  コードの最初の行は次のようになります。
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "net/http"
+
+    "github.com/gin-gonic/gin"
+)
+\end{lstlisting}
+\item
+  main.goを保存します。
+\end{enumerate}
+
+\paragraph{コードの実行}
+
+\begin{enumerate}
+\item
+  依存関係としてGinモジュールの追跡を開始する。
+
+  コマンドラインで、\texttt{go\ get} を使って github.com/gin-gonic/gin
+  モジュールをあなたのモジュールの依存関係として追加してください。ドット引数は、``カレントディレクトリのコードの依存関係を取得する''という意味で使用します。
+
+\begin{lstlisting}[numbers=none]
+$ go get .
+go get: added github.com/gin-gonic/gin v1.7.2
+\end{lstlisting}
+
+  前のステップで追加した \texttt{import}
+  宣言を満足させるために、この依存関係を解決してダウンロードしに行きます。
+\item
+  main.goのあるディレクトリのコマンドラインから、このコードを実行します。ドット引数は、``カレントディレクトリでコードを実行する''という意味で使用します。
+
+\begin{lstlisting}[numbers=none]
+$ go run .
+\end{lstlisting}
+
+  コードが実行されると、リクエストを送ることができるHTTPサーバーが実行されます。
+\item
+  新しいコマンドラインウィンドウから、\texttt{curl}を使用して、実行中のウェブサービスにリクエストを送信します。
+
+\begin{lstlisting}[numbers=none]
+$ curl http://localhost:8080/albums
+\end{lstlisting}
+
+  コマンドを実行すると、サービスにシードしたデータが表示されるはずです。
+
+\begin{lstlisting}[numbers=none]
+[
+        {
+                "id": "1",
+                "title": "Blue Train",
+                "artist": "John Coltrane",
+                "price": 56.99
+        },
+        {
+                "id": "2",
+                "title": "Jeru",
+                "artist": "Gerry Mulligan",
+                "price": 17.99
+        },
+        {
+                "id": "3",
+                "title": "Sarah Vaughan and Clifford Brown",
+                "artist": "Sarah Vaughan",
+                "price": 39.99
+        }
+]
+```
+\end{lstlisting}
+\end{enumerate}
+
+これでAPIが開始されましたね。次のセクションでは、アイテムを追加するための
+\texttt{POST}
+リクエストを処理するコードで、別のエンドポイントを作成します。
