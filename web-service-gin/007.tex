@@ -1,0 +1,169 @@
+
+
+
+\subsection{新しいアイテムを追加するハンドラを作成する}
+
+クライアントが \texttt{/albums} に対して \texttt{POST}
+リクエストを行ったとき、リクエストボディに記述されたアルバムを既存のアルバムデータに追加したいとします。
+
+これを行うには、以下のように書きます。
+
+\begin{itemize}
+\item
+  新しいアルバムを既存のリストに追加するためのロジック。
+\item
+  \texttt{POST}
+  リクエストをあなたのロジックにルーティングするためのちょっとしたコード。
+\end{itemize}
+
+
+\paragraph{コードを書く}
+
+\begin{enumerate}
+\item
+  アルバムデータをアルバムリストに追加するコードを追加します。
+
+  \texttt{import}文の後のどこかに、以下のコードを貼り付けます。
+  (このコードはファイルの最後が良いのですが、Goは関数を宣言する順番を強制しません)。
+
+
+\begin{lstlisting}[numbers=none]
+// postAlbums adds an album from JSON received in the request body.
+func postAlbums(c *gin.Context) {
+    var newAlbum album
+
+    // BindJSON を呼び出して、受信した JSON を newAlbum にバインドします。
+    if err := c.BindJSON(&newAlbum); err != nil {
+        return
+    }
+
+    // 新しいアルバムをスライスに追加します。
+    albums = append(albums, newAlbum)
+    c.IndentedJSON(http.StatusCreated, newAlbum)
+}
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{Context.BindJSON} を使用して、リクエストボディを
+    \texttt{newAlbum} にバインドします。
+  \item
+    JSON から初期化された \texttt{album} 構造体を \texttt{albums}
+    スライスに追加します。
+  \item
+    追加したアルバムを表す JSON と共に、レスポンスに \texttt{201}
+    ステータスコードを追加します。
+  \end{itemize}
+\item
+  \texttt{main} 関数を変更して、以下のように \texttt{router.POST}
+  関数を含むようにします。
+
+\begin{lstlisting}[numbers=none]
+ func main() {
+     router := gin.Default()
+     router.GET("/albums", getAlbums)
+     router.POST("/albums", postAlbums)
+
+     router.Run("localhost:8080")
+ }
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{/albums} パスの \texttt{POST} メソッドと \texttt{postAlbums}
+    関数を関連付けます。
+
+    Gin を使用すると、HTTP
+    メソッドとパスの組み合わせにハンドラを関連付けることができます。このように、クライアントが使用しているメソッドに基づいて、単一のパスに送信されたリクエストを個別にルーティングすることができます。
+  \end{itemize}
+\end{enumerate}
+
+\paragraph{コードの実行}
+
+\begin{enumerate}
+\item
+  前節からまだサーバーが動いている場合は、サーバーを停止してください。
+\item
+  main.go のあるディレクトリのコマンドラインから、このコードを実行する。
+
+
+
+
+
+\begin{lstlisting}[numbers=none]
+ $ go run .
+\end{lstlisting}
+\item
+  別のコマンドラインウィンドウから、\texttt{curl}
+  を使用して、実行中のウェブサービスにリクエストを行います。
+
+\begin{lstlisting}[numbers=none]
+$ curl http://localhost:8080/albums \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "POST" \
+    --data '{"id": "4","title": "The Modern Sound of Betty Carter","artist": "Betty Carter","price": 49.99}'
+\end{lstlisting}
+
+  コマンドは、追加されたアルバムのヘッダーとJSONを表示する必要があります。
+
+\begin{lstlisting}[numbers=none]
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Date: Wed, 02 Jun 2021 00:34:12 GMT
+Content-Length: 116
+
+{
+    "id": "4",
+    "title": "The Modern Sound of Betty Carter",
+    "artist": "Betty Carter",
+    "price": 49.99
+}
+\end{lstlisting}
+\item
+  前のセクションと同様に、 \texttt{curl}
+  を使ってアルバムの全リストを取得し、それを使って新しいアルバムが追加されたことを確認します。
+
+\begin{lstlisting}[numbers=none]
+$ curl http://localhost:8080/albums \
+    --header "Content-Type: application/json" \
+\end{lstlisting}
+
+  コマンドを実行すると、アルバムリストが表示されるはずです。
+
+\begin{lstlisting}[numbers=none]
+[
+        {
+                "id": "1",
+                "title": "Blue Train",
+                "artist": "John Coltrane",
+                "price": 56.99
+        },
+        {
+                "id": "2",
+                "title": "Jeru",
+                "artist": "Gerry Mulligan",
+                "price": 17.99
+        },
+        {
+                "id": "3",
+                "title": "Sarah Vaughan and Clifford Brown",
+                "artist": "Sarah Vaughan",
+                "price": 39.99
+        },
+        {
+                "id": "4",
+                "title": "The Modern Sound of Betty Carter",
+                "artist": "Betty Carter",
+                "price": 49.99
+        }
+]
+\end{lstlisting}
+\end{enumerate}
+
+次のセクションでは、特定の項目に対する \texttt{GET}
+を処理するためのコードを追加します。
