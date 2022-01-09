@@ -1,0 +1,120 @@
+
+\subsection{特定の項目を返すハンドラを書く}
+
+クライアントが \texttt{GET\ /albums/{[}id{]}}
+にリクエストをしたとき、パスパラメータ \texttt{id} に一致する ID
+を持つアルバムを返したいですよね。
+
+これを行うには、以下のようになります。
+
+\begin{itemize}
+
+\item
+  リクエストされたアルバムを取得するためのロジックを追加します。
+\item
+  パスをロジックにマップします。
+\end{itemize}
+
+\paragraph{コードを書く}
+
+\begin{enumerate}
+\item
+  前のセクションで追加した \texttt{postAlbums}
+  関数の下に、特定のアルバムを取得するための以下のコードを貼り付けます。
+
+  この \texttt{getAlbumByID} 関数は、リクエストパスの ID
+  を抽出して、それにマッチするアルバムを探します。
+
+\begin{lstlisting}[numbers=none]
+// getAlbumByID locates the album whose ID value matches the id
+// parameter sent by the client, then returns that album as a response.
+func getAlbumByID(c *gin.Context) {
+    id := c.Param("id")
+
+    // アルバムのリストをループして、ID値がパラメータに一致するアルバムを探す。
+    for _, a := range albums {
+        if a.ID == id {
+            c.IndentedJSON(http.StatusOK, a)
+            return
+        }
+    }
+    c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  \item
+    \texttt{Context.Param} を使用して、URL から \texttt{id}
+    パスパラメータを取得します。このハンドラをパスにマップするとき、パスにはパラメータのプレースホルダが含まれます。
+  \item
+    スライス内の \texttt{album} 構造体をループして、 \texttt{ID}
+    フィールドの値が \texttt{id}
+    パラメータの値に一致するものを探します。見つかったら、その
+    \texttt{album} 構造体を JSON にシリアライズして、HTTP コードの
+    \texttt{200\ OK} とともにレスポンスとして返します。
+
+    上記のように、実際のサービスでは、この検索を実行するためにデータベースクエリを使用することが多いでしょう。
+  \item
+    アルバムが見つからない場合は、HTTP の \texttt{404} エラーを
+    \texttt{http.StatusNotFound} で返します。
+  \end{itemize}
+\item
+  最後に、\texttt{main} を変更して、\texttt{router.GET}
+  を新たに呼び出すようにします。このとき、次の例のようにパスは
+  \texttt{/albums/:id} になります。
+
+\begin{lstlisting}[numbers=none]
+ func main() {
+     router := gin.Default()
+     router.GET("/albums", getAlbums)
+     router.GET("/albums/:id", getAlbumByID)
+     router.POST("/albums", postAlbums)
+
+     router.Run("localhost:8080")
+ }
+\end{lstlisting}
+
+  このコードでは
+
+  \begin{itemize}
+  
+  \item
+    \texttt{/albums/:id} パスと \texttt{getAlbumByID}
+    関数を関連付けます。Gin
+    では、パスの項目の前にあるコロンは、その項目がパスのパラメータであることを意味します。
+  \end{itemize}
+\end{enumerate}
+
+\paragraph{コードの実行}
+
+\begin{enumerate}
+\item
+  前節からまだサーバーが動いている場合は、サーバーを停止してください。
+\item
+  main.go
+  のあるディレクトリのコマンドラインから、サーバーを起動するコードを実行する。
+
+\begin{lstlisting}[numbers=none]
+ $ go run .
+\end{lstlisting}
+\item
+  別のコマンドラインウィンドウから、\texttt{curl}
+  を使用して、実行中のウェブサービスにリクエストを行います。
+
+\begin{lstlisting}[numbers=none]
+$ curl http://localhost:8080/albums/2
+\end{lstlisting}
+
+  このコマンドは、使用したIDのアルバムのJSONを表示するはずです。もし、そのアルバムが見つからなかった場合は、エラーメッセージとともにJSONが表示されます。
+
+\begin{lstlisting}[numbers=none]
+{
+        "id": "2",
+        "title": "Jeru",
+        "artist": "Gerry Mulligan",
+        "price": 17.99
+}
+\end{lstlisting}
+\end{enumerate}
