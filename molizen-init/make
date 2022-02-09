@@ -1,0 +1,2 @@
+platex molizen-init.tex
+dvipdfmx molizen-init

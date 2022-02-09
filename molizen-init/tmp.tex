@@ -1,7 +1,6 @@
 さんぽしの散歩記
 
-\hypertarget{goux306bux304aux3044ux3066ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux3092ux5b9fux73feux3059ux308bux30e9ux30a4ux30d6ux30e9ux30eamolizenux3068ux305dux306eux672aux6765}{%
-\section{Goにおいてアクターモデルを実現するライブラリ"Molizen"とその未来}\label{goux306bux304aux3044ux3066ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux3092ux5b9fux73feux3059ux308bux30e9ux30a4ux30d6ux30e9ux30eamolizenux3068ux305dux306eux672aux6765}}
+\section{Goにおいてアクターモデルを実現するライブラリ"Molizen"とその未来}
 
 February 03, 2022
 
@@ -16,13 +15,11 @@ Twitter(@sanpo\_shiho)に投げていただいても、雑にGitHubのissueを�
 
 sanposhiho/molizen: Molizen is a typed actor framework for Go.
 
-\hypertarget{ux76eeux6b21}{%
-\section{目次}\label{ux76eeux6b21}}
+\section{目次}
 
 (卒業論文を元に記述を色々変更したり、追記したり、削除したりしたものになので''はじめに''以降は急に「だ。である。」調になります。)
 
 \begin{itemize}
-\tightlist
 \item
   目次
 \item
@@ -31,7 +28,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
   アクターモデルに関する概要と先行研究、種類
 
   \begin{itemize}
-  \tightlist
   \item
     Actor model の概要と起源
   \item
@@ -40,7 +36,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     Swift
 
     \begin{itemize}
-    \tightlist
     \item
       Sendable プロトコルに関して
     \item
@@ -50,7 +45,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     Go における既存のアクターモデルのライブラリ
 
     \begin{itemize}
-    \tightlist
     \item
       asynkron/protoactor-go
     \item
@@ -62,7 +56,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     その他言語におけるアクターモデル
 
     \begin{itemize}
-    \tightlist
     \item
       Akka
     \end{itemize}
@@ -71,12 +64,10 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
   ライブラリの設計
 
   \begin{itemize}
-  \tightlist
   \item
     使用方法
 
     \begin{itemize}
-    \tightlist
     \item
       コードの生成を行う
     \item
@@ -88,7 +79,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     実装の詳細
 
     \begin{itemize}
-    \tightlist
     \item
       interface の静的解析
     \item
@@ -103,7 +93,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
       Future について
 
       \begin{itemize}
-      \tightlist
       \item
         FutureGroup について
       \end{itemize}
@@ -112,7 +101,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     既存のアクターモデルのライブラリとの比較
 
     \begin{itemize}
-    \tightlist
     \item
       デザインの方向性について
     \item
@@ -125,7 +113,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
   今後の展望
 
   \begin{itemize}
-  \tightlist
   \item
     Non-reentrant アクター
   \item
@@ -136,7 +123,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     ActorRepo と ActorLet
 
     \begin{itemize}
-    \tightlist
     \item
       ActorRepo を用いた複数ホスト上のアクターの管理
     \item
@@ -150,7 +136,6 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
     上におけるアクターの状態表現とそれによる外部からのアクターの宣言的管理
 
     \begin{itemize}
-    \tightlist
     \item
       Kubernetes におけるカスタムリソース
     \item
@@ -165,8 +150,7 @@ sanposhiho/molizen: Molizen is a typed actor framework for Go.
   参考文献
 \end{itemize}
 
-\hypertarget{ux306fux3058ux3081ux306b}{%
-\section{はじめに}\label{ux306fux3058ux3081ux306b}}
+\section{はじめに}
 
 本論文では、プログラミング言語 Go
 {[}1{]}に向けたアクターモデルを実現するためのライブラリを提案する。
@@ -200,8 +184,7 @@ Go においてもユーザーが負担なくアクターモデルを使用で�
 
 また、ランタイムで生成されたアクターをデータベース等を通してランタイムの外から管理できるように拡張することで、アクターの宣言的な管理を実現し、その応用としてアクターレベルでのリリースなどの可能性を示す。
 
-\hypertarget{ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306bux95a2ux3059ux308bux6982ux8981ux3068ux5148ux884cux7814ux7a76ux7a2eux985e}{%
-\section{アクターモデルに関する概要と先行研究、種類}\label{ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306bux95a2ux3059ux308bux6982ux8981ux3068ux5148ux884cux7814ux7a76ux7a2eux985e}}
+\section{アクターモデルに関する概要と先行研究、種類}
 
 この章ではまずアクターモデルに関する概要と先行研究について触れ、その後、広く使われているアクターモデルの実装例である
 Erlang と Swift
@@ -209,9 +192,7 @@ Erlang と Swift
 にすでに存在するアクターモデルのライブラリである protoactor-go
 {[}10{]}、ergo {[}11{]}や gosiris {[}12{]}について概要を説明する。
 
-\hypertarget{actor-model-ux306eux6982ux8981ux3068ux8d77ux6e90}{%
-\subsection{Actor model
-の概要と起源}\label{actor-model-ux306eux6982ux8981ux3068ux8d77ux6e90}}
+\subsection{Actor model の概要と起源}
 
 アクターモデルとは 1973 年に C.Hewitt らによって書かれた論文''A
 Universal Modular ACTOR Formalism for Artificial
@@ -279,8 +260,7 @@ IncrementAge
 
 アクターモデルはライブラリとして提供されている場合や言語自体に実装されている場合などがあり、それらにおいても、コンパイルや静的解析ツールなどによって、静的に開発者が正しいプログラミングをしていることを保証することで、上記の問題が発生しないことを保証することができる。
 
-\hypertarget{erlang}{%
-\subsection{Erlang}\label{erlang}}
+\subsection{Erlang}
 
 この章では Erlang {[}15{]}
 がどのようにアクターモデルの考え方を導入しているのかを説明する。
@@ -379,8 +359,7 @@ finished を出力し、終了する
 
 となる。
 
-\hypertarget{swift}{%
-\subsection{Swift}\label{swift}}
+\subsection{Swift}
 
 ここでは Swiftに導入されたアクター{[}17{]}に関して紹介する。
 
@@ -453,9 +432,7 @@ deposit
 これは Swift
 のアクターの仕様が単一のスレッドのみが一つのアクターに同時にアクセスすることを保証しているためであり、呼び出した瞬間に同期的に処理できるとは限らないためである。
 
-\hypertarget{sendable-ux30d7ux30edux30c8ux30b3ux30ebux306bux95a2ux3057ux3066}{%
-\subsubsection{Sendable
-プロトコルに関して}\label{sendable-ux30d7ux30edux30c8ux30b3ux30ebux306bux95a2ux3057ux3066}}
+\subsubsection{Sendable プロトコルに関して}
 
 Swift
 にはプロトコルと言う形で型のインターフェースを定義することができる機能が存在する。また、プロトコルの定義に沿ったインターフェースを型が満たすことを''準拠''という。以下に公式ドキュメント
@@ -504,7 +481,8 @@ actor BankAccount {
 
 \begin{verbatim}
 if let primary = await account.primaryOwner() {
-  primary.name = "The Honorable " + primary.name // problem: concurrent mutation of actor-isolated state
+  primary.name = "The Honorable " + primary.name // problem:
+  // concurrent mutation of actor-isolated state
 }
 \end{verbatim}
 
@@ -515,9 +493,7 @@ primariOwner
 アクターのメソッドの引数と結果の型が Sendable
 である必要があるという規定により、上記のような外部から直接アクターの内部の値の変更をすることなどを防ぐことが出来る。
 
-\hypertarget{swift-ux306bux304aux3051ux308bux30eaux30a8ux30f3ux30c8ux30e9ux30f3ux30b7ux30fcux306bux95a2ux3057ux3066}{%
-\subsubsection{Swift
-におけるリエントランシーに関して}\label{swift-ux306bux304aux3051ux308bux30eaux30a8ux30f3ux30c8ux30e9ux30f3ux30b7ux30fcux306bux95a2ux3057ux3066}}
+\subsubsection{Swift におけるリエントランシーに関して}
 
 また、Swift のアクターにはリエントランシーという性質がある。
 
@@ -525,15 +501,12 @@ primariOwner
 関数が他のアクターへのアクセスなどで、その返り値を待っている間は、他のメッセージの処理をアクター上で実行することができるという性質である。アクターとしてとしてはサスペンドせずに次のメッセージ処理を行う。
 これにより、複数のアクターがメッセージを送り合うようなプログラムにおけるデッドロックを防いでいる。
 
-\hypertarget{go-ux306bux304aux3051ux308bux65e2ux5b58ux306eux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306eux30e9ux30a4ux30d6ux30e9ux30ea}{%
-\subsection{Go
-における既存のアクターモデルのライブラリ}\label{go-ux306bux304aux3051ux308bux65e2ux5b58ux306eux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306eux30e9ux30a4ux30d6ux30e9ux30ea}}
+\subsection{Go における既存のアクターモデルのライブラリ}
 
 ここでは Go
 における既存のアクターモデルのライブラリを紹介する。どれもアクターのメッセージを受信した際に型がついておらず、リエントランシーにも対応していないものである。
 
-\hypertarget{asynkronprotoactor-go}{%
-\subsubsection{asynkron/protoactor-go}\label{asynkronprotoactor-go}}
+\subsubsection{asynkron/protoactor-go}
 
 asynkron/protoactor-go{[}10{]} と呼ばれるアクターモデルを実現するための
 Go
@@ -592,8 +565,7 @@ Taro''という風な文章を標準出力し、このプログラムは実行�
 また、ライブラリの特徴として、C\# や Java/Kotlin
 などの実装があり、異なる言語間で実装されたアクターの通信も行うことができる。
 
-\hypertarget{ergo-servicesergo}{%
-\subsubsection{ergo-services/ergo}\label{ergo-servicesergo}}
+\subsubsection{ergo-services/ergo}
 
 ergo-services/ergo{[}11{]} は Erlang/OTP のデザインパターンを Go
 の上で再現するためのライブラリである。
@@ -655,8 +627,7 @@ ergo.StartNode で node を作成しており、その node から Spawn
 
 また、特徴として Erlang の node に直接接続できるという機能がある
 
-\hypertarget{teivahgosiris}{%
-\subsubsection{teivah/gosiris}\label{teivahgosiris}}
+\subsubsection{teivah/gosiris}
 
 teivah/gosiris{[}12{]}
 はとても基本的なアクターモデルのライブラリである。
@@ -712,13 +683,11 @@ protoactor-go や ergo
 しかし最後のコミットが 2018
 年であり、リポジトリがアーカイブされているため、これ以上の開発が積極的になされる可能性は低いと見られる。
 
-\hypertarget{ux305dux306eux4ed6ux8a00ux8a9eux306bux304aux3051ux308bux30a2ux30afux30bfux30fcux30e2ux30c7ux30eb}{%
-\subsection{その他言語におけるアクターモデル}\label{ux305dux306eux4ed6ux8a00ux8a9eux306bux304aux3051ux308bux30a2ux30afux30bfux30fcux30e2ux30c7ux30eb}}
+\subsection{その他言語におけるアクターモデル}
 
 ここでは、紹介しなかったその他の言語におけるアクターモデルに関して簡潔に説明する。
 
-\hypertarget{akka}{%
-\subsubsection{Akka}\label{akka}}
+\subsubsection{Akka}
 
 Akka{[}21{]}と呼ばれる Java、Scala
 向けのアクターモデルのライブラリが存在する。以下の公式ドキュメント{[}22{]}より引用した下の例のように型付きでメッセージパッシングを行うことができる点が特徴である。
@@ -757,8 +726,7 @@ method1 と method2
 method2
 は同時に実行される可能性があるため、アクター的な動作を実現できるとは言えない。
 
-\hypertarget{ux30e9ux30a4ux30d6ux30e9ux30eaux306eux8a2dux8a08}{%
-\section{ライブラリの設計}\label{ux30e9ux30a4ux30d6ux30e9ux30eaux306eux8a2dux8a08}}
+\section{ライブラリの設計}
 
 本論文が提案するライブラリ Molizen は GitHub 上でオープンソースとして
 Apache License 2.0 の元で公開されている{[}23{]}。 本論文では v0.1.5
@@ -772,7 +740,6 @@ Go のライブラリには、ツールを通してユーザーに Go
 のコード生成を要求するものが幾つか存在している。これによってライブラリはユーザーごとに最適な機能を柔軟に提供することが出来る。以下にその例を示す。
 
 \begin{itemize}
-\tightlist
 \item
   golang/mock{[}25{]}: モックのためのフレームワーク
 \item
@@ -822,8 +789,7 @@ GetAge(ctx context.Context) *future.Future[GetAgeResult]
 
 この章ではここから具体的な使用方法や既存のライブラリとの比較を行っていく。
 
-\hypertarget{ux4f7fux7528ux65b9ux6cd5}{%
-\subsection{使用方法}\label{ux4f7fux7528ux65b9ux6cd5}}
+\subsection{使用方法}
 
 Molizen は Go1.18
 の新しい機能として追加されたジェネリクス{[}28{]}を使用しているため、Go
@@ -834,8 +800,7 @@ Molizen は Go1.18
 Go は各バージョンを公式の Downloads
 のページ{[}30{]}からインストールを行うことができる。
 
-\hypertarget{ux30b3ux30fcux30c9ux306eux751fux6210ux3092ux884cux3046}{%
-\subsubsection{コードの生成を行う}\label{ux30b3ux30fcux30c9ux306eux751fux6210ux3092ux884cux3046}}
+\subsubsection{コードの生成を行う}
 
 まず、ユーザーはコード生成のためのコマンドをインストールする必要がある。Go
 がインストールされていれば、コマンドラインから以下を実行することでインストールすることができる。
@@ -955,9 +920,7 @@ func (a *UserActor) SetAge(ctx context.Context, age int) *future.Future[SetAgeRe
 }
 \end{verbatim}
 
-\hypertarget{ux751fux6210ux524dux306e-interface-ux306bux95a2ux3059ux308bux5236ux7d04}{%
-\subsubsection{生成前の interface
-に関する制約}\label{ux751fux6210ux524dux306e-interface-ux306bux95a2ux3059ux308bux5236ux7d04}}
+\subsubsection{生成前の interface に関する制約}
 
 生成前の interface には アクター 同士の情報の伝達を行うために本論文の
 context パッケージ{[}11{]}の Context
@@ -969,8 +932,7 @@ context パッケージ{[}11{]}の Context
 
 node に関しては第５章 今後の展望で紹介する。
 
-\hypertarget{ux751fux6210ux3055ux308cux305fux30a2ux30afux30bfux30fcux3092ux4f7fux7528ux3059ux308b}{%
-\subsubsection{生成されたアクターを使用する}\label{ux751fux6210ux3055ux308cux305fux30a2ux30afux30bfux30fcux3092ux4f7fux7528ux3059ux308b}}
+\subsubsection{生成されたアクターを使用する}
 
 まず、interface
 を満たす構造体を定義し、アクターを生成する。(著者書き下し)
@@ -1037,21 +999,17 @@ func (u *User) GetAge(ctx context.Context) int {
 Result:  1
 \end{verbatim}
 
-\hypertarget{ux5b9fux88c5ux306eux8a73ux7d30}{%
-\subsection{実装の詳細}\label{ux5b9fux88c5ux306eux8a73ux7d30}}
+\subsection{実装の詳細}
 
 ここではライブラリの要点の実装の詳細について紹介する。
 
-\hypertarget{interface-ux306eux9759ux7684ux89e3ux6790}{%
-\subsubsection{interface
-の静的解析}\label{interface-ux306eux9759ux7684ux89e3ux6790}}
+\subsubsection{interface の静的解析}
 
 先程も登場した Go の公式のモックの生成ライブラリである
 golang/mock{[}25{]} の内部のパッケージを使用することで、ユーザーの
 interface から必要な情報を抽出する。
 
-\hypertarget{ux751fux6210ux3055ux308cux308bux30a2ux30afux30bfux30fcux306eux5185ux90e8ux69cbux9020}{%
-\subsubsection{生成されるアクターの内部構造}\label{ux751fux6210ux3055ux308cux308bux30a2ux30afux30bfux30fcux306eux5185ux90e8ux69cbux9020}}
+\subsubsection{生成されるアクターの内部構造}
 
 アクターは以下のような内部構造を持つ構造体になっている。
 
@@ -1070,8 +1028,7 @@ type User interface {
 lock に排他制御のためのロック、internal にユーザーが定義した interface
 を満たすオブジェクトを格納している。
 
-\hypertarget{ux30a2ux30afux30bfux30fcux306eux751fux6210ux306eux305fux3081ux306eux95a2ux6570}{%
-\subsubsection{アクターの生成のための関数}\label{ux30a2ux30afux30bfux30fcux306eux751fux6210ux306eux305fux3081ux306eux95a2ux6570}}
+\subsubsection{アクターの生成のための関数}
 
 以下のように New
 関数が生成されているのでそれを用いてアクターを生成する。前述のように
@@ -1085,8 +1042,7 @@ func New(internal User) *UserActor {
 }
 \end{verbatim}
 
-\hypertarget{ux751fux6210ux3055ux308cux308bux30a2ux30afux30bfux30fcux306eux30e1ux30bdux30c3ux30c9ux306eux5b9fux88c5ux306bux3064ux3044ux3066}{%
-\subsubsection{生成されるアクターのメソッドの実装について}\label{ux751fux6210ux3055ux308cux308bux30a2ux30afux30bfux30fcux306eux30e1ux30bdux30c3ux30c9ux306eux5b9fux88c5ux306bux3064ux3044ux3066}}
+\subsubsection{生成されるアクターのメソッドの実装について}
 
 interface
 のメソッド一つにつき、アクターのメソッドと結果が格納される構造体が生成される。
@@ -1122,7 +1078,6 @@ func (a *UserActor) GetAge(ctx context.Context) *future.Future[GetAgeResult] {
 メソッドは以下の処理を同期的に行う。
 
 \begin{itemize}
-\tightlist
 \item
   自身の情報を格納した本論文の context パッケージ{[}11{]}の Context
   を新たに生成する。
@@ -1133,7 +1088,6 @@ func (a *UserActor) GetAge(ctx context.Context) *future.Future[GetAgeResult] {
 そして、以下の処理は Goroutine を用いて非同期的に行う。
 
 \begin{itemize}
-\tightlist
 \item
   自身の他のメソッドが同時に実行されないようにロックをする。
 \item
@@ -1147,8 +1101,7 @@ func (a *UserActor) GetAge(ctx context.Context) *future.Future[GetAgeResult] {
 
 アクターは自身のメソッドが同時に実行されることをロックによる排他制御で防いでいる。
 
-\hypertarget{ux30eaux30a8ux30f3ux30c8ux30e9ux30f3ux30b7ux30fcux306bux3064ux3044ux3066}{%
-\subsubsection{リエントランシーについて}\label{ux30eaux30a8ux30f3ux30c8ux30e9ux30f3ux30b7ux30fcux306bux3064ux3044ux3066}}
+\subsubsection{リエントランシーについて}
 
 Swift
 と同様に本論文のライブラリでもリエントランシーを採用している。3.3.2
@@ -1198,7 +1151,6 @@ func main() {
 これは以下のように実行されることを期待している。
 
 \begin{itemize}
-\tightlist
 \item
   SendPing のメッセージを受け取った actor1 は actor2 に対して Ping
   を送る。
@@ -1236,8 +1188,7 @@ func main() {
 このリエントランシーの実現には Future
 という構造体が大きな役割を果たしている。次節で説明を行う。
 
-\hypertarget{future-ux306bux3064ux3044ux3066}{%
-\subsubsection{Future について}\label{future-ux306bux3064ux3044ux3066}}
+\subsubsection{Future について}
 
 Future は以下のような構造体として定義されている。
 
@@ -1394,9 +1345,8 @@ future の Get
 はチャネルによって処理の結果が来るのを待っている間、その待ちの間送信者のロックを解除することで送信者に他の処理をすることを許可し、処理の結果が来た際に、再度送信者のロックをすることで、``処理の結果待ちの間だけ送信者に別の処理を行うことを許可する''Actor
 リエントランシーを実現しているのである。
 
-\hypertarget{futuregroup-ux306bux3064ux3044ux3066}{%
 \paragraph{FutureGroup
-について}\label{futuregroup-ux306bux3064ux3044ux3066}}
+について}
 
 FutureGroup という Future をまとめて扱うためのものを提供している。
 これによって、以下の例(著者書き下し)のようにユーザーは全ての future
@@ -1418,18 +1368,13 @@ g.Wait()
 g.Get("1")
 \end{verbatim}
 
-\hypertarget{ux65e2ux5b58ux306eux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306eux30e9ux30a4ux30d6ux30e9ux30eaux3068ux306eux6bd4ux8f03}{%
-\subsection{既存のアクターモデルのライブラリとの比較}\label{ux65e2ux5b58ux306eux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux306eux30e9ux30a4ux30d6ux30e9ux30eaux3068ux306eux6bd4ux8f03}}
+\subsection{既存のアクターモデルのライブラリとの比較}
 
-\protect\hyperlink{go-ux5cux25E3ux5cux2581ux5cux25ABux5cux25E3ux5cux2581ux5cux258Aux5cux25E3ux5cux2581ux5cux2591ux5cux25E3ux5cux2582ux5cux258Bux5cux25E6ux5cux2597ux5cux25A2ux5cux25E5ux5cux25ADux5cux2598ux5cux25E3ux5cux2581ux5cux25AEux5cux25E3ux5cux2582ux5cux25A2ux5cux25E3ux5cux2582ux5cux25AFux5cux25E3ux5cux2582ux5cux25BFux5cux25E3ux5cux2583ux5cux25BCux5cux25E3ux5cux2583ux5cux25A2ux5cux25E3ux5cux2583ux5cux2587ux5cux25E3ux5cux2583ux5cux25ABux5cux25E3ux5cux2581ux5cux25AEux5cux25E3ux5cux2583ux5cux25A9ux5cux25E3ux5cux2582ux5cux25A4ux5cux25E3ux5cux2583ux5cux2596ux5cux25E3ux5cux2583ux5cux25A9ux5cux25E3ux5cux2583ux5cux25AA}{3.4
-Go における既存のアクターモデルのライブラリ}
-で紹介した、protoactor-go{[}10{]} や
-ergo{[}11{]}、gosiris{[}12{]}との比較を行う。
+3.4 Go における既存のアクターモデルのライブラリ で紹介した、protoactor-go{[}10{]} や ergo{[}11{]}、gosiris{[}12{]}との比較を行う。
 
 ここではそのライブラリと本論文のライブラリの設計や思想の違いを比較し、どのような点が異なり、どのような点で本論文のライブラリが強みを取れるかを述べる。
 
-\hypertarget{ux30c7ux30b6ux30a4ux30f3ux306eux65b9ux5411ux6027ux306bux3064ux3044ux3066}{%
-\subsubsection{デザインの方向性について}\label{ux30c7ux30b6ux30a4ux30f3ux306eux65b9ux5411ux6027ux306bux3064ux3044ux3066}}
+\subsubsection{デザインの方向性について}
 
 本論文のライブラリは前の章で挙げた幾つかのアクターモデルの例でいくと
 Swift に近く、Active Object 指向といえる。
@@ -1458,8 +1403,7 @@ interface
 を使用することができることで、同じメソッドを持つアクターを用途に応じて入れ替えることが可能になるなど、interface
 による恩恵を最大限に受けることができることは、大きな利点となる。
 
-\hypertarget{ux578bux306bux3064ux3044ux3066}{%
-\subsubsection{型について}\label{ux578bux306bux3064ux3044ux3066}}
+\subsubsection{型について}
 
 protoactor-go などではメッセージに型がつかないというデメリットがある。
 以下は protoactor-go を使用したアクターの実装例(著者書き下し)である。
@@ -1511,8 +1455,7 @@ HelloV2 型を送っていることにユーザーは気がつくことができ
 本論文のライブラリはファイルの生成を行うことで、ユーザーの使用する関数に適したアクターを生成する。
 この手法の大きなメリットは型を含む静的型付けの恩恵を受けることができる点である。その点で、本論文のライブラリは優位であると考えることができる。
 
-\hypertarget{ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux3092ux7528ux3044ux305aux306bux8a18ux8ff0ux3057ux305fux5834ux5408ux3068ux306eux6bd4ux8f03}{%
-\subsection{アクターモデルを用いずに記述した場合との比較}\label{ux30a2ux30afux30bfux30fcux30e2ux30c7ux30ebux3092ux7528ux3044ux305aux306bux8a18ux8ff0ux3057ux305fux5834ux5408ux3068ux306eux6bd4ux8f03}}
+\subsection{アクターモデルを用いずに記述した場合との比較}
 
 ここではアクターモデルを使用せず、ユーザーが自身で排他制御を行う場合と、本論文のライブラリを使用する場合の並行処理の実装の比較を行う。
 
@@ -1650,7 +1593,6 @@ IncrementAge
 本論文のライブラリを使用する場合は、ライブラリを正しく使用してさえすれば、このような排他制御をユーザーに任せる必要がなく、プログラムがユーザーが期待する通りに、デッドロックやレースコンディションなく動作することが保証される。
 
 \begin{itemize}
-\tightlist
 \item
   排他制御が必要な箇所で排他制御を行っているか
 \item
@@ -1662,22 +1604,18 @@ IncrementAge
 は静的に判断することができないため、この並行プログラミングの一般的なミスを人の手以外で発見することは難しいが、
 
 \begin{itemize}
-\tightlist
 \item
   本論文のライブラリを正しく使用しているかどうか
 \end{itemize}
 
 は静的に判断できることから、本論文のライブラリはユーザーの並行プログラミングの正しい記述に貢献すると言える。
 
-\hypertarget{ux4ecaux5f8cux306eux5c55ux671b}{%
-\section{今後の展望}\label{ux4ecaux5f8cux306eux5c55ux671b}}
+\section{今後の展望}
 
 v0.1.5
 時点でサポートしている機能はアクターの基本的な機能ばかりである。この章では今後に追加すべき機能や考えられる展望について述べる。
 
-\hypertarget{non-reentrant-ux30a2ux30afux30bfux30fc}{%
-\subsection{Non-reentrant
-アクター}\label{non-reentrant-ux30a2ux30afux30bfux30fc}}
+\subsection{Non-reentrant アクター}
 
 4.2.5
 リエントランシーについてで述べたように現状本論文のライブラリではリエントランシーが有効なアクターが生成される。
@@ -1701,8 +1639,7 @@ Non-reentrant
 アクターであることが原因のデッドロック'が起こった際に呼び出す関数などを設定させておくことで、ユーザーはデットロックが発生した場合の動作を自由に設定できるようになり、一つの助けになると考えられる。
 例えば、ログを記録している外部のサービスにエラーログを送信する、プログラム全体を終了する、アクターを再起動させるなどの動作をさせることが考えられる。
 
-\hypertarget{ux969cux5bb3ux306eux4f1dux642c}{%
-\subsection{障害の伝搬}\label{ux969cux5bb3ux306eux4f1dux642c}}
+\subsection{障害の伝搬}
 
 現状本論文のライブラリにおけるアクターにおいて、例外が発生すると通常の
 Go アプリケーションと同様に Go
@@ -1715,8 +1652,7 @@ Go アプリケーションと同様に Go
 しかし、Go
 ではエラーは例外としてではなく関数の返り値として返されることが多く、公式でも多くの場合ではそちらの方法でエラーを伝えることが良いとしているため{[}32{]}、例外による障害の監視は難しいと考える。そのため、特定の返り値をエラーとして関数から返すことで、障害が発生したことをライブラリ側から検知できるような仕組みの実装も考えられる。
 
-\hypertarget{ux5185ux90e8ux72b6ux614bux3078ux306eux30a2ux30afux30bbux30b9ux306eux6d41ux51faux3092ux9632ux3050ux9759ux7684ux89e3ux6790ux30c4ux30fcux30eb}{%
-\subsection{内部状態へのアクセスの流出を防ぐ静的解析ツール}\label{ux5185ux90e8ux72b6ux614bux3078ux306eux30a2ux30afux30bbux30b9ux306eux6d41ux51faux3092ux9632ux3050ux9759ux7684ux89e3ux6790ux30c4ux30fcux30eb}}
+\subsection{内部状態へのアクセスの流出を防ぐ静的解析ツール}
 
 現状ではもしユーザーがアクター内部の状態にアクセスできるポインターを返却するメソッドを定義していた場合、それを用いてユーザーはアクターの内部の状態に同期的にアクセスできてしまう。
 
@@ -1740,8 +1676,7 @@ func (u *userImpl) FetchNamePointer() *string {
 Name フィールドへのポインターを得ることができてしまう。
 このようなコードは静的解析によって発見することが可能であるため、そのような静的解析ツールを提供することで、ユーザーに注意を促すことができる。
 
-\hypertarget{actorrepo-ux3068-actorlet}{%
-\subsection{ActorRepo と ActorLet}\label{actorrepo-ux3068-actorlet}}
+\subsection{ActorRepo と ActorLet}
 
 本論文の context パッケージ{[}11{]}の Context
 はアクターにメッセージを送信するために必要な構造体である。
@@ -1756,9 +1691,7 @@ Go アプリケーションにつき node は一つ生成されるというこ�
 と、全てのアクターの情報を管理する ActorRepo
 を内部に持っている。現状では二つとも空の構造体として実装されているため、何も働きはしないが、ここでは将来的にどのような働きを持つのかを説明する。
 
-\hypertarget{actorrepo-ux3092ux7528ux3044ux305fux8907ux6570ux30dbux30b9ux30c8ux4e0aux306eux30a2ux30afux30bfux30fcux306eux7ba1ux7406}{%
-\subsubsection{ActorRepo
-を用いた複数ホスト上のアクターの管理}\label{actorrepo-ux3092ux7528ux3044ux305fux8907ux6570ux30dbux30b9ux30c8ux4e0aux306eux30a2ux30afux30bfux30fcux306eux7ba1ux7406}}
+\subsubsection{ActorRepo を用いた複数ホスト上のアクターの管理}
 
 まず、将来的にアクターは生成される際に Context を通して、ActorRepo
 へ登録されるようになる。 この ActorRepo
@@ -1774,9 +1707,7 @@ ActorRepo
 のデータベースに関しては多くの種類をサポートすることでユーザーが自身のニーズやシステム要件にあった
 ActorRepo を使用できるようになると期待される。
 
-\hypertarget{actorlet-ux306bux3088ux308bux5ba3ux8a00ux7684ux30a2ux30afux30bfux30fcux7ba1ux7406ux3068ux4ed6ux306eux30dbux30b9ux30c8ux306bux5b58ux5728ux3059ux308bux30a2ux30afux30bfux30fcux306eux4f5cux6210}{%
-\subsubsection{ActorLet
-による宣言的アクター管理と他のホストに存在するアクターの作成}\label{actorlet-ux306bux3088ux308bux5ba3ux8a00ux7684ux30a2ux30afux30bfux30fcux7ba1ux7406ux3068ux4ed6ux306eux30dbux30b9ux30c8ux306bux5b58ux5728ux3059ux308bux30a2ux30afux30bfux30fcux306eux4f5cux6210}}
+\subsubsection{ActorLet による宣言的アクター管理と他のホストに存在するアクターの作成}
 
 ActorRepo
 に登録されるアクターの情報というのはアクターの''理想の状態''を示しており、将来的に
@@ -1818,8 +1749,7 @@ ActorLet
 へ直接アクターの作成をリクエストする方法と比較して、Reconciliation loop
 を用いた宣言的な状態管理は障害やその復旧に強いことがわかる。
 
-\hypertarget{ux4ed6ux306eux30dbux30b9ux30c8ux306bux5b58ux5728ux3059ux308bux30a2ux30afux30bfux30fcux3078ux306eux30e1ux30c3ux30bbux30fcux30b8ux30f3ux30b0}{%
-\subsection{他のホストに存在するアクターへのメッセージング}\label{ux4ed6ux306eux30dbux30b9ux30c8ux306bux5b58ux5728ux3059ux308bux30a2ux30afux30bfux30fcux3078ux306eux30e1ux30c3ux30bbux30fcux30b8ux30f3ux30b0}}
+\subsection{他のホストに存在するアクターへのメッセージング}
 
 Erlang
 は他のホストなどに存在するアクターとの通信をサポートしている。ユーザーはどのホストにアクターが存在しているのかを意識せずに、プログラミングをすることができる。
@@ -1847,9 +1777,7 @@ ActorRepo を通して通信したい Actor
 Buffers{[}34{]} を採用する。Protocol Buffers
 は一般的なシリアライズフォーマットであるため、多くの言語ですでにサポートされており、これを使用することで将来的に異なる言語で実装されたアクター間での通信を行う際にシリアライズの部分の実装を行う必要がなくなるメリットがある。
 
-\hypertarget{kubernetes-ux4e0aux306bux304aux3051ux308bux30a2ux30afux30bfux30fcux306eux72b6ux614bux8868ux73feux3068ux305dux308cux306bux3088ux308bux5916ux90e8ux304bux3089ux306eux30a2ux30afux30bfux30fcux306eux5ba3ux8a00ux7684ux7ba1ux7406}{%
-\subsection{Kubernetes
-上におけるアクターの状態表現とそれによる外部からのアクターの宣言的管理}\label{kubernetes-ux4e0aux306bux304aux3051ux308bux30a2ux30afux30bfux30fcux306eux72b6ux614bux8868ux73feux3068ux305dux308cux306bux3088ux308bux5916ux90e8ux304bux3089ux306eux30a2ux30afux30bfux30fcux306eux5ba3ux8a00ux7684ux7ba1ux7406}}
+\subsection{Kubernetes 上におけるアクターの状態表現とそれによる外部からのアクターの宣言的管理}
 
 ここでは Kubernetes を利用している Go
 のアプリケーションに本論文のライブラリを使用した場合に、アクターを管理する方法に関して構想を述べる。
@@ -1869,9 +1797,7 @@ Kubernetes では多くのインフラリソースが抽象化されている。
 ``ホスト上でコンテナを動作させる''ことは、Kubernetes 上で''Node 上で Pod
 を動作させる''という風に表現される。
 
-\hypertarget{kubernetes-ux306bux304aux3051ux308bux30abux30b9ux30bfux30e0ux30eaux30bdux30fcux30b9}{%
-\subsubsection{Kubernetes
-におけるカスタムリソース}\label{kubernetes-ux306bux304aux3051ux308bux30abux30b9ux30bfux30e0ux30eaux30bdux30fcux30b9}}
+\subsubsection{Kubernetes におけるカスタムリソース}
 
 Kubernetes
 には前述のように標準で多くのリソースが登録されている。それに加えて、ユーザーが自身のニーズにあったリソースを登録できる(カスタムリソースと呼ばれる)機能{[}38{]}が存在する。
@@ -1937,8 +1863,7 @@ ActorRepo
 の上でアプリケーションが動作している場合、アクターの新規作成が行われた場合には
 ActorRepo が Kubernetes 上のリソースとしてアクターを登録することとなる。
 
-\hypertarget{ux30a2ux30afux30bfux30fcux306eux64ecux4f3cux7684ux306aux30dbux30c3ux30c8ux30b9ux30efux30c3ux30d7}{%
-\subsubsection{アクターの擬似的なホットスワップ}\label{ux30a2ux30afux30bfux30fcux306eux64ecux4f3cux7684ux306aux30dbux30c3ux30c8ux30b9ux30efux30c3ux30d7}}
+\subsubsection{アクターの擬似的なホットスワップ}
 
 前述のように Kubernetes
 のリソースとしてアクターを定義することで、Kubernetes
@@ -2097,8 +2022,7 @@ ActorRepo
 へライブラリ以外から直接アクセスしやすいようなツールを作成することで、Kubernetes
 を使用せずとも似たような動作が実現できる可能性がある。
 
-\hypertarget{ux307eux3068ux3081}{%
-\section{まとめ}\label{ux307eux3068ux3081}}
+\section{まとめ}
 
 本論文ではアクターモデルをベースとしたライブラリの提案とそのベースとなる実装を行い、実現の可能性を実証した。
 
@@ -2118,27 +2042,24 @@ ActorRepo
 本論文で提案したライブラリ Molizen
 は、今後さらに実装を改善していき、ユーザーにこれらの価値を提供できるようにすることを考えている。
 
-\hypertarget{ux8b1dux8f9e}{%
-\section{謝辞}\label{ux8b1dux8f9e}}
+\section{謝辞}
 
 本プロジェクトに関して指導をいただいた指導教員の櫻川貴司准教授をはじめ、有益なコメントをいただいた京都大学
 総合人間学部認知情報学系の全ての方に感謝いたします。
 
-\hypertarget{ux53c2ux8003ux6587ux732e}{%
-\section{参考文献}\label{ux53c2ux8003ux6587ux732e}}
+\section{参考文献}
 
-{[}1{]} The go programming language, (\url{https://go.dev/}), (Accessed
+{[}1{]} The go programming language, (Accessed
 on 2022-01-02).
 
 {[}2{]} Swift - apple developer,
-(\url{https://developer.apple.com/swift/}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}3{]} golang/go: The go programming language,
-(\url{https://github.com/golang/go}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}4{]} kubernetes/kubernetes: Production-grade container scheduling and
-management, (\url{https://github.com/kubernetes/kubernetes}), (Accessed
-on 2022-01-02).
+management, (Accessed on 2022-01-02).
 
 {[}5{]} Frank De Boer, Vlad Serbanescu, ReinerH¨ahnle, Ludovic Henrio,
 Justine Rochas, Crystal Chang Din, Einar Broch Johnsen, Marjan Sirjani,
@@ -2146,28 +2067,27 @@ Ehsan Khamespanah, Kiko Fernandez-Reyes, Albert Mingkun Yang, A survey
 of active object languages, ACM Computing Surveys, (2018).
 
 {[}6{]} A tour of go; goroutines,
-(\url{https://go.dev/tour/concurrency/1}), (Accessed on 2022-01-02).
-
-{[}7{]} A tour of go; methods, (\url{https://go.dev/tour/methods/1}),
 (Accessed on 2022-01-02).
 
-{[}8{]} A tour of go; interfaces, (\url{https://go.dev/tour/methods/9}),
+{[}7{]} A tour of go; methods, 
+(Accessed on 2022-01-02).
+
+{[}8{]} A tour of go; interfaces, 
 (Accessed on 2022-01-02).
 
 {[}9{]} A tour of go; channels,
-(\url{https://go.dev/tour/concurrency/2}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}10{]} asynkron/protoactor-go: Proto actor - ultra fast distributed
 actors for go, c and java/kotlin,
-(\url{https://github.com/asynkron/protoactor-go}), (Accessed on
-2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}11{]} ergo-services/ergo: a framework for creating microservices
 using technologies and design patterns of erlang/otp in golang,
-(\url{https://github.com/ergo-services/ergo}), (Accessed on 2022-01-13).
+(Accessed on 2022-01-13).
 
 {[}12{]} teivah/gosiris: An actor framework for go,
-(\url{https://github.com/teivah/gosiris}), (Accessed on 2022-01-13).
+(Accessed on 2022-01-13).
 
 {[}13{]} R. Steiger C. Hewitt, P. Bishop, A universal modular actor
 formalism for artificial intelligence, IJCAI 20 , (1973).
@@ -2176,94 +2096,80 @@ formalism for artificial intelligence, IJCAI 20 , (1973).
 相互排除問題――「際どい資源」をいかにプログラムで利用するか, (岩波書店,
 2011).
 
-{[}15{]} Index - erlang/otp, (\url{https://www.erlang.org/}), (Accessed
+{[}15{]} Index - erlang/otp, 
+(Accessed
 on 2022-01-02).
 
 {[}16{]} Erlang -- concurrent programming,
-(\url{https://www.erlang.org/doc/getting_started/conc_prog.html}),
 (Accessed on 2022-01-02).
 
 {[}17{]} swift-evolution/0306-actors.md at
 23405a18e3ebbe69fcb37b0d316aa4ec5a7b6c46· apple/swift-evolution,
-(\url{https://github.com/apple/swift-evolution/blob/23405a18e3ebbe69fcb37b0d316aa4ec5a7b6c46/proposals/0306-actors.md}),
 (Accessed on 2022-01-02).
 
 {[}18{]} Concurrency the swift programming language (swift 5.5),
-(\url{https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html}),
 (Accessed on 2022-01-02).
 
 {[}20{]} Protocols the swift programming language (swift 5.5),
-(\url{https://docs.swift.org/swift-book/LanguageGuide/Protocols.html}),
 (Accessed on 2022-01-02).
 
 {[}20{]}
 swift-evolution/0302-concurrent-value-and-concurrent-closures.md at
 23405a18e3ebbe69fcb37b0d316aa4ec5a7b6c46 · apple/swiftevolution,
-(\url{https://github.com/apple/swift-evolution/blob/23405a18e3ebbe69fcb37b0d316aa4ec5a7b6c46/proposals/0302-concurrent-value-and-concurrent-closures.md}),
 (Accessed on 2022-01-02).
 
 {[}21{]} Akka; build concurrent, distributed, and resilient
 message-driven applications for java and scala --- akka,
-(\url{https://akka.io/}), (Accessed on 2022-01-13).
+(Accessed on 2022-01-13).
 
 {[}22{]} Introduction to actors; akka documentation,
-(\url{https://doc.akka.io/docs/akka/current/typed/actors.html}),
 (Accessed on 2022-01-13).
 
 {[}23{]} sanposhiho/molizen: Molizen is a typed actor framework for go,
-(\url{https://github.com/sanposhiho/molizen}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}24{]} セマンティック バージョニング 2.0.0 --- semantic versioning,
-(\url{https://semver.org/lang/ja/}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}25{]} golang/mock: Gomock is a mocking framework for the go
-programming language, (\url{https://github.com/golang/mock}), (Accessed
-on 2022-01-02).
+programming language, (Accessed on 2022-01-02).
 
 {[}26{]} ent/ent: An entity framework for go,
-(\url{https://github.com/ent/ent}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}27{]} google/wire: Compile-time dependency injection for go,
-(\url{https://github.com/google/wire}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}28{]} Robert Griesemer Ian Lance Taylor, Type parameters proposal,
-(\url{https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md},
-2022), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}29{]} Russ Cox, Go 1.18 beta 1 is available, with generics - the go
-programming language, (\url{https://go.dev/blog/go1.18beta1}, 2022),
+programming language, 
 (Accessed on 2022-01-02).
 
 {[}30{]} Downloads go1.18beta1 - the go programming language,
-(\url{https://go.dev/dl/\#go1.18beta1}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}31{]} Erlang -- processes 12.8 error handling,
-(\url{https://www.erlang.org/doc/reference_manual/processes.html\#error-handling}),
 (Accessed on 2022-01-02).
 
 {[}32{]} Effective go panic - the go programming language,
-(\url{https://go.dev/doc/effective_go\#panic}), (Accessed on
-2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}33{]} Controllers --- kubernetes,
-(\url{https://kubernetes.io/docs/concepts/architecture/controller/}),
 (Accessed on 2022-01-02).
 
 {[}34{]} Protocol buffers --- google developers,
-(\url{https://developers.google.com/protocol-buffers}), (Accessed on
-2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}35{]} Kubernetes - google kubernetes engine（gke）--- google cloud,
-(\url{https://cloud.google.com/kubernetes-engine}), (Accessed on
-2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}36{]} Managed kubernetes service ‒ amazon eks ‒ amazon web services,
-(\url{https://aws.amazon.com/eks/}), (Accessed on 2022-01-02).
+(Accessed on 2022-01-02).
 
 {[}37{]} Viewing pods and nodes --- kubernetes,
-(\url{https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/}),
 (Accessed on 2022-01-02).
 
 {[}38{]} Custom resources --- kubernetes,
-(\url{https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/}),
 (Accessed on 2022-01-02).
