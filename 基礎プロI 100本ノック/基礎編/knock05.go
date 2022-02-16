@@ -5,14 +5,21 @@ package main
 import "fmt"
 
 func main() {
-	var x, y int
-	fmt.Print("input 1st number: ")
-	fmt.Scan(&x)
-	fmt.Print("input 2nd number: ")
-	fmt.Scan(&y)
+	x := readNumber("input 1st number: ")
+	y := readNumber("input 2nd number: ")
+	printAns(x, y)
+}
 
+func readNumber(prom string) int {
+	fmt.Print(prom)
+	var n int
+	fmt.Scan(&n)
+	return n
+}
+
+func printAns(x, y int) {
 	fmt.Println("和:", x+y)
 	fmt.Println("差:", x-y)
 	fmt.Println("積:", x*y)
-	fmt.Println("商:", x/y, "余り:", x%y)
+	fmt.Printf("商: %v, 余り: %v\n", x/y, x%y)
 }
