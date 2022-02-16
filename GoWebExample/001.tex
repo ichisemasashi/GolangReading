@@ -1,0 +1,58 @@
+\section{Hello World}
+
+\subsection{はじめに}
+
+Goはバッテリー内蔵のプログラミング言語で、すでにウェブサーバーが組み込まれています。標準ライブラリの\texttt{net/http}パッケージには、HTTPプロトコルに関するすべての機能が含まれています。これには、HTTP クライアントと HTTP サーバーが含まれます（他にもいろいろあります）。ここの例では、ブラウザで見ることのできるウェブサーバを作ることがいかに簡単であるかを理解することができます。
+
+\subsection{リクエストハンドラの登録}
+
+まず、ブラウザ、HTTPクライアント、APIリクエストから来るすべてのHTTPコネクションを受け取るHandlerを作成します。Go におけるハンドラとは、このようなシグネチャを持つ関数のことです。
+
+
+\begin{lstlisting}[numbers=none]
+func (w http.ResponseWriter, r *http.Request)
+\end{lstlisting}
+
+この関数は2つのパラメータを受け取ります。
+
+\texttt{http.ResponseWriter}は、\texttt{text/html}のレスポンスを書き込む場所です。
+\texttt{http.Request}。URLやヘッダーフィールドなど、HTTPリクエストに関するすべての情報が含まれています。
+デフォルトのHTTPサーバーへのリクエストハンドラの登録は、次のように簡単です。
+
+\begin{lstlisting}[numbers=none]
+http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, you've requested: %s\n", r.URL.Path)
+})
+\end{lstlisting}
+
+\subsection{HTTP接続をリッスンする}
+
+リクエストハンドラだけでは、外部からのHTTP接続を一切受け付けない。HTTPサーバーは、リクエストハンドラへの接続を受け渡すために、あるポートでリッスンする必要があります。80 番ポートはほとんどの場合、HTTP トラフィックのデフォルトポートなので、このサーバーも 80 番ポートで待ち受けます。
+
+次のコードは、Go のデフォルト HTTP サーバーを起動し、ポート 80 で接続を待ち受けます。ブラウザを \texttt{http://localhost/} に移動して、サーバーがリクエストを処理するのを見ることができます。
+
+\begin{lstlisting}[numbers=none]
+http.ListenAndServe(":80", nil)
+\end{lstlisting}
+
+\subsection{The Code (for copy/paste)}
+
+これは、この例で学んだことを試すために使用できる完全なコードです。
+
+\begin{lstlisting}[numbers=none]
+package main
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Hello, you've requested: %s\n", r.URL.Path)
+    })
+
+    http.ListenAndServe(":80", nil)
+}
+\end{lstlisting}
+
+
