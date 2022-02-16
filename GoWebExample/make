@@ -1,0 +1,2 @@
+platex GoWebExample.tex
+dvipdfmx GoWebExample
