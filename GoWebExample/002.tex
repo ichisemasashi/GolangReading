@@ -10,6 +10,67 @@
 
 接続を受け入れる：HTTPサーバーは、インターネットからの接続を受け入れることができるように、特定のポートでリッスンする必要があります。
 
-\subsection{Process dynamic requests}
+\subsection{動的なリクエストを処理する}
+
+\texttt{net/http} パッケージには、リクエストを受け付け、それを動的に処理するために必要なすべてのユーティリティが含まれています。新しいハンドラを登録するには \texttt{http.HandleFunc} 関数を使用します。この関数の最初のパラメータにはマッチするパスが、2 番目のパラメータには実行する関数が渡されます。この例では 誰かがあなたのウェブサイト(\texttt{http://example.com/})を閲覧したとき、その人は素敵なメッセージで迎えられるでしょう。
+
+
+\begin{lstlisting}[numbers=none]
+http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "Welcome to my website!")
+})
+\end{lstlisting}
+
+動的な側面では、\texttt{http.Request}にリクエストとそのパラメータに関するすべての情報が含まれています。GETパラメータは \texttt{r.URL.Query().Get("token")} で、POSTパラメータ（HTMLフォームのフィールド）は \texttt{r.FormValue("email")} で読み取ることができます。
+
+\subsection{静的アセットを配信する}
+
+JavaScript、CSS、画像などの静的アセットを提供するには、内蔵の \texttt{http.FileServer} を使って、URLのパスを指定します。ファイルサーバーが正しく動作するためには、どこからファイルを提供すればよいかを知る必要があります。これは次のように行います。
+
+\begin{lstlisting}[numbers=none]
+fs := http.FileServer(http.Dir("static/"))
+\end{lstlisting}
+
+ファイルサーバーを設置したら、ダイナミックリクエストのときと同じように、URLパスを指定するだけでよいのです。注意点: 正しくファイルを提供するために、URL パスの一部を削除する必要があります。通常、これはファイルが存在するディレクトリの名前です。
+
+
+\begin{lstlisting}[numbers=none]
+http.Handle("/static/", http.StripPrefix("/static/", fs))
+\end{lstlisting}
+
+\subsection{コネクションを受け付ける}
+
+基本的なHTTPサーバーの最後の仕上げは、インターネットからの接続を受け入れるためにポートをリッスンすることです。推測できるように、Go には HTTP サーバーが内蔵されているので、すぐに始めることができます。一度起動すれば、ブラウザでHTTPサーバーを見ることができます。
+
+\begin{lstlisting}[numbers=none]
+http.ListenAndServe(":80", nil)
+\end{lstlisting}
+
+\subsection{The Code (for copy/paste)}
+
+This is the complete code that you can use to try out the things you’ve learned in this example.
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Welcome to my website!")
+    })
+
+    fs := http.FileServer(http.Dir("static/"))
+    http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+    http.ListenAndServe(":80", nil)
+}
+\end{lstlisting}
+
+
+
 
 
