@@ -10,7 +10,7 @@ func main() {
 	fmt.Scan(&n)
 
 	a := [10]int{}
-	for i := 0; i < 10; i++ {
+	for i, _ := range a {
 		a[i] = n
 	}
 
