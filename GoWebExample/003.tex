@@ -1,28 +1,153 @@
 \section{Routing (using gorilla/mux)}
 
-\subsection{Introduction}
+\subsection{はじめに}
 
-Go’s net/http package provides a lot of functionalities for the HTTP protocol. One thing it doesn’t do very well is complex request routing like segmenting a request url into single parameters. Fortunately there is a very popular package for this, which is well known for the good code quality in the Go community. In this example you will see how to use the gorilla/mux package to create routes with named parameters, GET/POST handlers and domain restrictions.
+Goの\texttt{net/http}パッケージはHTTPプロトコルのための多くの機能を提供します。このパッケージがあまり得意でないことのひとつに、リクエストURLを単一のパラメータに分割するような複雑なリクエストルーティングがあります。幸い、これには非常に人気のあるパッケージがあり、Go コミュニティではコードの品質が良いことで知られています。この例では、\texttt{gorilla/mux} パッケージを使用して、名前付きパラメータ、GET/POST ハンドラ、ドメイン制限を持つルートを作成する方法を紹介します。
 
-\subsection{Installing the gorilla/mux package}
+\subsection{gorilla/muxパッケージのインストール}
 
-gorilla/mux is a package which adapts to Go’s default HTTP router. It comes with a lot of features to increase the productivity when writing web applications. It is also compliant to Go’s default request handler signature func (w http.ResponseWriter, r *http.Request), so the package can be mixed and machted with other HTTP libraries like middleware or exisiting applications. Use the go get command to install the package from GitHub like so:
+\texttt{gorilla/mux} は、GoのデフォルトのHTTPルーターに適応するパッケージです。Webアプリケーションを書くときの生産性を上げるための機能がたくさん付いています。また、Goのデフォルトのリクエストハンドラである \texttt{func (w http.ResponseWriter, r *http.Request)} に準拠しているので、ミドルウェアなどの他のHTTPライブラリや既存のアプリケーションと混在させることが可能です。このようにGitHubから \texttt{go get} コマンドでパッケージをインストールします。
 
 \begin{lstlisting}[numbers=none]
 go get -u github.com/gorilla/mux
 \end{lstlisting}
 
-\subsection{Creating a new Router}
+\subsection{ルーターの新規作成}
 
-First create a new request router. The router is the main router for your web application and will later be passed as parameter to the server. It will receive all HTTP connections and pass it on to the request handlers you will register on it. You can create a new router like so:
+まず、新しいリクエストルータを作成します。このルーターはウェブアプリケーションのメインルーターであり、後にサーバーにパラメータとして渡されます。すべての HTTP 接続を受け取り、その接続を登録するリクエストハンドラに渡します。新しいルーターはこのように作成します。
 
 \begin{lstlisting}[numbers=none]
 r := mux.NewRouter()
 \end{lstlisting}
 
-\subsection{Registering a Request Handler}
+\subsection{リクエストハンドラの登録}
 
-Once you have a new router you can register request handlers like usual. The only difference is, that instead of calling http.HandleFunc(...), you call HandleFunc on your router like this: r.HandleFunc(...).
+新しいルーターを手に入れたら、いつものようにリクエストハンドラを登録することができます。唯一の違いは、\texttt{http.HandleFunc(...)} を呼ぶ代わりに、ルータ上で以下のように \texttt{HandleFunc} を呼ぶことです: \texttt{r.HandleFunc(...)}.
+
+\subsection{URL パラメータ}
+
+\texttt{gorilla/mux} Routerの最大の強みは、リクエストURLからセグメントを抽出する機能です。例として、あなたのアプリケーションのURLです。
+
+\begin{lstlisting}[numbers=none]
+/books/go-programming-blueprint/page/10
+\end{lstlisting}
+
+このURLには2つのダイナミックセグメントがあります。
+
+Book title slug (go-programming-blueprint)
+
+Page (10)
+
+リクエストハンドラが上記のURLにマッチするようにするには、URLパターンのダイナミックセグメントをプレースホルダーに次のように置き換えます。
+
+
+\begin{lstlisting}[numbers=none]
+r.HandleFunc("/books/{title}/page/{page}",
+             func(w http.ResponseWriter,
+             r *http.Request) {
+    // 本を手に入れる
+    // ページに移動する
+})
+\end{lstlisting}
+
+最後に、これらのセグメントからデータを取得することです。パッケージには \texttt{mux.Vars(r)} という関数が付属しています。これは \texttt{http.Request} をパラメータとして受け取り、セグメントのマップを返します。
+
+\begin{lstlisting}[numbers=none]
+func(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    vars["title"] // the book title slug
+    vars["page"] // the page
+}
+\end{lstlisting}
+
+\subsection{HTTPサーバーのルーター設定}
+
+\texttt{http.ListenAndServe(":80", nil)}の\texttt{nil}は何を意味しているのか不思議に思ったことはありませんか？これは、HTTPサーバーのメインルーターのパラメーターです。デフォルトでは、これは\texttt{nil}で、\texttt{net/http}パッケージのデフォルトルータを使用することを意味します。独自のルータを使用するには、\texttt{nil} をルータ \texttt{r} の変数に置き換えてください。
+
+\begin{lstlisting}[numbers=none]
+http.ListenAndServe(":80", r)
+\end{lstlisting}
+
+\subsection{The Code (for copy/paste)}
+
+これは、この例で学んだことを試すために使用できる完全なコードです。
+
+
+\begin{lstlisting}[numbers=none]
+package main
+
+import (
+    "fmt"
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+func main() {
+    r := mux.NewRouter()
+
+    r.HandleFunc("/books/{title}/page/{page}",
+                 func(w http.ResponseWriter,
+                 r *http.Request) {
+        vars := mux.Vars(r)
+        title := vars["title"]
+        page := vars["page"]
+
+        fmt.Fprintf(w,
+        "You've requested the book: %s on page %s\n",
+        title, page)
+    })
+
+    http.ListenAndServe(":80", r)
+}
+\end{lstlisting}
+
+\subsection{gorilla/mux Routerの特徴}
+
+\textbf{Methods}
+
+リクエストハンドラを特定のHTTPメソッドに制限する。
+
+
+\begin{lstlisting}[numbers=none]
+r.HandleFunc("/books/{title}", CreateBook).Methods("POST")
+r.HandleFunc("/books/{title}", ReadBook).Methods("GET")
+r.HandleFunc("/books/{title}", UpdateBook).Methods("PUT")
+r.HandleFunc("/books/{title}", DeleteBook).Methods("DELETE")
+\end{lstlisting}
+
+\subsection{ホスト名とサブドメイン}
+
+リクエストハンドラを特定のホスト名またはサブドメインに制限する。
+
+\begin{lstlisting}[numbers=none]
+r.HandleFunc("/books/{title}", BookHandler).Host("www.mybookstore.com")
+\end{lstlisting}
+
+\subsection{スキーム}
+
+リクエストハンドラをhttp/httpsに制限する。
+
+\begin{lstlisting}[numbers=none]
+r.HandleFunc("/secure", SecureHandler).Schemes("https")
+r.HandleFunc("/insecure", InsecureHandler).Schemes("http")
+\end{lstlisting}
+
+\subsection{パスのプレフィックスとサブルーター}
+
+リクエストハンドラを特定のパスプレフィックスに制限する。
+
+\begin{lstlisting}[numbers=none]
+bookrouter := r.PathPrefix("/books").Subrouter()
+bookrouter.HandleFunc("/", AllBooks)
+bookrouter.HandleFunc("/{title}", GetBook)
+\end{lstlisting}
+
+
+
+
+
+
 
 
 
