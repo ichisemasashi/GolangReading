@@ -11,13 +11,15 @@ func main() {
 	fmt.Scan(&n)
 
 	pay := 0
+	pay_base := 610
+	pay_add := 80
 	hatunori := 1700
 	if n <= hatunori {
-		pay = 610
+		pay = pay_base
 	} else if ((n - hatunori) % 313) == 0 {
-		pay = 610 + int((n-hatunori)/313)*80
+		pay = pay_base + int((n-hatunori)/313)*pay_add
 	} else {
-		pay = 610 + int((n-hatunori)/313)*80 + 80
+		pay = pay_base + int((n-hatunori)/313)*pay_add + pay_add
 	}
 	fmt.Println("金額", pay)
 }
