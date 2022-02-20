@@ -19,5 +19,68 @@ MySQLデータベースドライバをインストールするには、任意の
 go get -u github.com/go-sql-driver/mysql
 \end{lstlisting}
 
+\subsection{MySQLデータベースへの接続}
 
+必要なパッケージをインストールした後、最初に確認することは、MySQLデータベースに正常に接続できるかということです。もし、MySQLデータベースサーバがまだ稼働していない場合は、Dockerで簡単に新しいインスタンスを立ち上げることができます。DockerのMySQLイメージの公式ドキュメントはこちらです： https://hub.docker.com/\_/mysql
+
+データベースに接続できるかどうかを確認するために、database/sql と go-sql-driver/mysql パッケージをインポートして、以下のように接続を開きます。
+
+
+\begin{lstlisting}[numbers=none]
+import "database/sql"
+import _ "go-sql-driver/mysql"
+
+
+// データベース接続の設定（常にエラーチェックを行う）
+db, err := sql.Open("mysql", \\
+"username:password@(127.0.0.1:3306)/dbname?parseTime=true")
+
+
+
+// データベースへの最初の接続を初期化し、
+// すべてが正しく動作するかどうかを確認します。
+// 必ずエラーを確認してください。
+err := db.Ping()
+\end{lstlisting}
+
+
+\subsection{最初のデータベーステーブルを作成する}
+
+データベース内のすべてのデータ項目は、特定のテーブルに保存されます。データベースのテーブルは、列と行で構成されています。列は各データエントリにラベルを与え、その種類を指定します。行は、挿入されたデータ値です。最初の例では、このようなテーブルを作成したいと思います。
+
+\begin{tabular}{|c|c|c|c|}\hline
+    id & username & password & created\_at\\ \hline
+    1 & johndoe & secret & 2019-08-10 12:30:00\\ \hline
+\end{tabular}
+
+SQLに置き換えると、テーブルを作成するコマンドは次のようになります。
+
+
+\begin{lstlisting}[numbers=none]
+CREATE TABLE users (
+    id INT AUTO_INCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME,
+    PRIMARY KEY (id)
+);
+\end{lstlisting}
+
+SQLコマンドができたので、\texttt{database/sql}パッケージを使用して、MySQLデータベースにテーブルを作成することができます。
+
+
+\begin{lstlisting}[numbers=none]
+    query := `
+    CREATE TABLE users (
+        id INT AUTO_INCREMENT,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        created_at DATETIME,
+        PRIMARY KEY (id)
+    );`
+
+// データベース内のSQLクエリを実行します。
+// err をチェックして、エラーがないことを確認します。
+_, err := db.Exec(query)
+\end{lstlisting}
 
