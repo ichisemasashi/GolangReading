@@ -84,3 +84,138 @@ SQLコマンドができたので、\texttt{database/sql}パッケージを使�
 _, err := db.Exec(query)
 \end{lstlisting}
 
+
+
+\subsection{最初のユーザーを挿入する}
+
+SQLに慣れている人なら、テーブルへの新しいデータの挿入は、テーブルを作成するのと同じくらい簡単です。一つ注意すべきことがあります。デフォルトでは、Go は SQL クエリに動的なデータを挿入するためにプリペアド ステートメントを使用します。これは、ユーザーが提供したデータを破損するリスクなしに安全にデータベースに渡すための方法です。ウェブプログラミングの初期には、プログラマがクエリで直接データをデータベースに渡していましたが、これは巨大な脆弱性を引き起こし、ウェブアプリケーション全体を破壊する可能性がありました。そのようなことはしないでください。正しく理解するのは簡単です。
+
+最初のユーザーをデータベースのテーブルに挿入するために、次のような SQL クエリーを作成します。ご覧のとおり、id カラムは MySQL によって自動的に設定されるため、省略しました。クエスチョンマークは、SQLドライバに実際のデータに対するプレースホルダであることを伝えます。ここで、先ほど説明したプリペアドステートメントを見ることができます。
+
+
+
+\begin{lstlisting}[numbers=none]
+INSERT INTO users (username, password, created_at) VALUES (?, ?, ?)
+\end{lstlisting}
+
+この SQL クエリを Go で使用し、テーブルに新しい行を挿入することができます。
+
+
+\begin{lstlisting}[numbers=none]
+import "time"
+
+username := "johndoe"
+password := "secret"
+createdAt := time.Now()
+
+// データをusersテーブルに挿入し、その結果と考えられるエラーを返します。
+// 結果には、最後に挿入された ID (自動生成されたもの) と、
+// このクエリが影響を与えた行数に関する情報が含まれています。
+result, err := db.Exec(`INSERT INTO users (username, password,\\
+created_at) VALUES (?, ?, ?)`, username, password, createdAt)
+\end{lstlisting}
+
+新しく作成されたユーザーのIDを取得するには、次のようにします。
+
+
+\begin{lstlisting}[numbers=none]
+userID, err := result.LastInsertId()
+\end{lstlisting}
+
+
+\subsection{ユーザーテーブルの問い合わせ}
+
+さて、テーブルの中にユーザーがいるわけですから、そのユーザーに問い合わせをして、すべての情報を取り戻したいと思います。Go では、テーブルへの問い合わせに 2 つの方法を用意しています。\texttt{db.Query}は複数行の問い合わせが可能です。また、特定の行だけを問い合わせたい場合は、\texttt{db.QueryRow}を使用します。
+
+特定の行への問い合わせは、基本的にこれまで説明した他のSQLコマンドと同じように動作します。
+IDで一人のユーザーを検索するSQLコマンドは次のようになります。
+
+
+\begin{lstlisting}[numbers=none]
+SELECT id, username, password, created_at FROM users WHERE id = ?
+\end{lstlisting}
+
+Goでは、まずデータを格納するための変数を宣言し、次のようにデータベースの1行に問い合わせを行います。
+
+
+\begin{lstlisting}[numbers=none]
+var (
+    id        int
+    username  string
+    password  string
+    createdAt time.Time
+)
+
+// データベースに問い合わせを行い、値を変数にスキャンします。
+// エラーをチェックするのを忘れないでください。
+query := `SELECT id, username, password, \\
+          created_at FROM users WHERE id = ?`
+err := db.QueryRow(query, 1).Scan(&id, &username,\\
+                          &password, &createdAt)
+\end{lstlisting}
+
+
+
+\subsection{全ユーザーを問い合わせる}
+
+前のセクションでは、単一のユーザー行を照会する方法について説明しました。多くのアプリケーションでは、既存のすべてのユーザーに問い合わせを行いたい場合があります。これは、上の例と同じように動作しますが、もう少しコーディングが必要です。
+
+上の例の SQL コマンドを使用して、WHERE 句を切り落とします。この方法では、既存のすべてのユーザーを照会することができます。
+
+\begin{lstlisting}[numbers=none]
+SELECT id, username, password, created_at FROM users
+\end{lstlisting}
+
+Goでは、まずデータを格納するための変数を宣言し、次のようにデータベースの1行に問い合わせを行います。
+
+\begin{lstlisting}[numbers=none]
+type user struct {
+    id        int
+    username  string
+    password  string
+    createdAt time.Time
+}
+
+rows, err := db.Query(`SELECT id, username,\\
+    password, created_at FROM users`) // check err
+defer rows.Close()
+
+var users []user
+for rows.Next() {
+    var u user
+    err := rows.Scan(&u.id, &u.username, \\
+        &u.password, &u.createdAt) // check err
+    users = append(users, u)
+}
+err := rows.Err() // check err
+\end{lstlisting}
+
+今のusersスライスには、次のようなものが含まれているかもしれません。
+
+\begin{lstlisting}[numbers=none]
+users {
+    user {
+        id:        1,
+        username:  "johndoe",
+        password:  "secret",
+        createdAt: time.Time{wall: 0x0,
+                              ext: 63701044325,
+                              loc: (*time.Location)(nil)},
+    },
+    user {
+        id:        2,
+        username:  "alice",
+        password:  "bob",
+        createdAt: time.Time{wall: 0x0,
+                              ext: 63701044622,
+                              loc: (*time.Location)(nil)},
+    },
+}
+\end{lstlisting}
+
+
+
+
+
+
+
