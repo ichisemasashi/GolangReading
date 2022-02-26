@@ -1,0 +1,86 @@
+// No. 66 ×型
+// 中心座標を入力させ、横600縦400のウィンドウを開き、半径10の円を中心座標とその斜め方向に5つずつ、中心の間隔を縦方向および横方向それぞれ30（中心の距離が30ではない）として描くプログラムを繰り返しを使って作成せよ（具体的な位置関係は下の実行結果例を見よ）。
+// * 注：同じ位置に2つ円を重ねて描くと他の円に比べて色が濃くなるが（実行例を参照）本課題では気にしなくてもよい。重ねて描かない方法でプログラミングしてもよい。
+package main
+
+import (
+	"fmt"
+	"image"
+	"image/color"
+	"log"
+
+	"github.com/fogleman/gg"
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
+const (
+	win_Width       = 600
+	win_Hight       = 400
+	circle_r        = 10
+	circle_distance = 30
+)
+
+var (
+	circle_x int
+	circle_y int
+)
+
+func calcData() {
+	fmt.Print("円の中心座標を入力: ")
+	fmt.Scanf("%d %d", &circle_x, &circle_y)
+}
+
+func myImage() image.Image {
+	// 指定された幅と高さの新しい image.RGBA を作成し、その画像にレンダリングするためのコンテキストを準備します。
+	dc := gg.NewContext(win_Width, win_Hight)
+
+	// 現在の色を設定します。r、g、bの値は0から1の間でなければなりません。
+	dc.SetRGB(0, 0, 0)
+
+	for i := 0; i < 5; i++ {
+		x := circle_x + circle_distance*(i-2)
+		y1 := circle_y + circle_distance*(i-2)
+		y2 := circle_y + circle_distance*(2-i)
+		dc.DrawCircle(float64(x), float64(y1), float64(circle_r))
+		dc.DrawCircle(float64(x), float64(y2), float64(circle_r))
+	}
+
+	// 現在のパスを、現在の色、線幅、ラインキャップ、ラインジョイン、ダッシュの設定でストロークします。この操作の後、パスはクリアされます。
+	dc.Stroke()
+	return dc.Image()
+}
+
+// Game は ebiten.Game インターフェースを実装しています。
+type Game struct{}
+
+// Updateはゲーム状態を進行させる。
+// Updateはtick毎（デフォルトでは1/60 [s]）に呼ばれる。
+func (g *Game) Update() error {
+	return nil
+}
+
+// Drawはゲーム画面を描画します。
+// Drawはフレーム毎（60Hz表示の場合は通常1/60[s]）に呼び出されます。
+func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(color.White) // 背景色：白
+	m := myImage()
+	em := ebiten.NewImageFromImage(m)
+	screen.DrawImage(em, &ebiten.DrawImageOptions{})
+}
+
+// Layoutは外部サイズ（ウィンドウサイズなど）を受け取り、（論理的な）画面サイズを返します。
+// 外側のサイズで画面サイズを調整する必要がない場合は、固定サイズを返せばよい。
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return win_Width, win_Hight
+}
+
+func main() {
+	calcData()
+	// ウィンドウサイズを任意に指定します。
+	ebiten.SetWindowSize(win_Width, win_Hight)
+	ebiten.SetWindowTitle("Hello, World!")
+	// ebiten.RunGameを呼び出して、ゲームループを開始します。
+	if err := ebiten.RunGame(&Game{}); err != nil {
+		log.Fatal(err)
+	}
+}
