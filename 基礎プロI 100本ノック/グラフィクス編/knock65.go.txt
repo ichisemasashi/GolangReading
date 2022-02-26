@@ -38,12 +38,11 @@ func myImage() image.Image {
 	dc.SetRGB(0, 0, 0)
 	for i := 0; i < 5; i++ {
 		x := circle_x + circle_distance*(i-2)
-		dc.DrawCircle(float64(x), float64(circle_y), float64(circle_r))
-	}
-	for i := 0; i < 5; i++ {
 		y := circle_y + circle_distance*(i-2)
+		dc.DrawCircle(float64(x), float64(circle_y), float64(circle_r))
 		dc.DrawCircle(float64(circle_x), float64(y), float64(circle_r))
 	}
+
 	// 現在のパスを、現在の色、線幅、ラインキャップ、ラインジョイン、ダッシュの設定でストロークします。この操作の後、パスはクリアされます。
 	dc.Stroke()
 	return dc.Image()
